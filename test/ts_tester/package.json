@@ -35,6 +35,6 @@
     "webpack-dev-server": "^3.10.1"
   },
   "dependencies": {
-    "ginkgo": "file:../.."
+    "ginkgoes": "file:../.."
   }
 }

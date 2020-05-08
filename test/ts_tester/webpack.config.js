@@ -93,7 +93,7 @@ module.exports = function (webpackEnv) {
                                         "pragmaFrag": "Ginkgo.Fragment"
                                     }
                                 ],
-                                //"../../packages/babel-plugin-import-ginkgo",
+                                "../../packages/babel-plugin-import-ginkgo",
                             ]
                         }
                     }

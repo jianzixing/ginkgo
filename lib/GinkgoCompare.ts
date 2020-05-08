@@ -397,18 +397,22 @@ export class GinkgoCompare {
 
                         let compareChildLinks = compareLink.children;
                         let aligns = this.alignNewOldPropsChildren(compareChildLinks, childProps);
+
+                        // 先删除不需要的组件，如果后删除的话会导致组件新建后又被删除
+                        // 比如 A->{B->{C,D}} 变为 A->{E->{C,D}} 会新建E后删除B及其子组件
+                        // 导致C和D本不该删除结果被删除
+                        if (aligns.del) {
+                            for (let del of aligns.del) {
+                                GinkgoContainer.unmountComponentByLink(del);
+                            }
+                        }
+
                         for (let align of aligns.news) {
                             let cp = align.child;
                             let compareChildLink = align.old;
                             let childLink = this.mountDiffFragment(compareLink, cp, compareChildLink);
                             children.push(childLink);
                             if (childLink.component) childComponents.push(childLink.component);
-                        }
-
-                        if (aligns.del) {
-                            for (let del of aligns.del) {
-                                GinkgoContainer.unmountComponentByLink(del);
-                            }
                         }
 
                         compareLink.children = children;

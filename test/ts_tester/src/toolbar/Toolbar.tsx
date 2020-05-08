@@ -390,6 +390,7 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
         }
 
         if (this.scrollerShow != oldScrollerShow) {
+            debugger
             this.redrawing();
         }
     }
