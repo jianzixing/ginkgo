@@ -1,0 +1,14 @@
+发布
+1.允许npm run build
+2.将dist中的所有 *.d.ts 重组到build的ginkgoes.d.ts中去
+3.将dist中的 ginkgo.js 拷贝到build中并更名为ginkgoes.js
+4.根据需要是否修改build中的package.js
+5.在build文件夹中运行 npm publish
+
+当前框架只能使用babel7以上编译
+
+插件babel-plugin-import-ginkgo
+这个插件只有typescript时需要，用来修改babel的typescript解析jsx时出现的问题。
+
+插件babel-plugin-transform-ginkgo-jsx
+这个插件是用来解析jsx文件使用，在babel-plugin-transform-react-jsx基础上修改
