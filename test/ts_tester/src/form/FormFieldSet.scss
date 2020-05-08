@@ -1,0 +1,20 @@
+.x-fieldset {
+  display: block;
+  position: relative;
+  border: 1px solid #d0d0d0;
+  border-top: 1px solid #bbb !important;
+  padding: 5px 15px 10px 15px;
+  overflow: hidden;
+  background-color: #f6f6f6;
+
+  .x-fieldset-body {
+    display: block;
+    padding: 10px 0px;
+  }
+
+  .x-fieldset-header-text {
+    font: 400 16px/20px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+    color: #919191;
+    float: left;
+  }
+}

@@ -1,0 +1,59 @@
+.x-table-cell {
+  display: table-cell;
+  vertical-align: middle;
+  position: relative;
+  font: 300 13px/19px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+  box-sizing: border-box;
+
+  .x-table-cell-body-el {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &.x-table-cell-body-el-padding {
+      padding: 7px 10px 6px;
+    }
+  }
+
+  &.x-table-cell-rownumber {
+    border-style: solid;
+    border-color: #e9e9e9;
+    border-width: 0 1px 0 0;
+    background-color: #fff;
+    box-sizing: border-box;
+    text-align: right;
+
+    .x-table-cell-body-el-padding {
+      padding: 7px 5px 6px 3px;
+    }
+  }
+
+  &.x-table-cell-checkbox {
+    text-align: center;
+    font-size: 18px;
+    color: #919191;
+
+    .x-table-cell-body-el-padding {
+      padding: 7px 4px 7px 4px;
+      text-overflow: clip;
+    }
+  }
+
+  &.x-table-cell-line {
+    border-style: solid;
+    border-color: #e9e9e9;
+    border-width: 0 1px 0 0;
+  }
+
+  .x-table-cell-modify {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 0;
+    left: 0;
+    color: #cf4c35;
+    font-size: 14px;
+    margin-top: -2px;
+    overflow: hidden;
+  }
+}

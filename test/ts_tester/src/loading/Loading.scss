@@ -1,0 +1,21 @@
+.x-loading {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-image: none;
+  background-color: rgba(208, 208, 208, 0.5);
+  cursor: default;
+  z-index: 100;
+
+  .x-loading-msg {
+    position: absolute;
+    padding: 35px 10px 10px 10px;
+    background-color: #d0d0d0;
+    background-image: url(../assests/loading.gif);
+    background-repeat: no-repeat;
+    background-position: center 10px;
+    border-radius: 3px;
+  }
+}

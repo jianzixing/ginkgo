@@ -1,0 +1,49 @@
+input {
+  outline: none
+}
+
+.x-component {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  border: 0px;
+  padding: 0px;
+  margin: 0px;
+  box-sizing: border-box;
+  font: 300 13px/1.25 'Open Sans', 'Helvetica Neue', helvetica, arial, sans-serif;
+  vertical-align: top;
+  
+  &.x-hidden {
+    display: none;
+  }
+}
+
+.x-disabled-select-text {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -khtml-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.x-enabled-select-text {
+  -moz-user-select: text;
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  -khtml-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: unset;
+}
+
+.x-hovered {
+
+}
+
+.x-pressing {
+
+}
+
+.x-selected {
+
+}

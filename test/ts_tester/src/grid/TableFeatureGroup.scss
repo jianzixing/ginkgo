@@ -1,0 +1,20 @@
+.x-table-feature-group {
+  border-width: 1px 0 1px 0;
+  border-style: solid;
+  border-color: #d0d0d0;
+  padding: 8px 10px;
+  background: #fff;
+  cursor: pointer;
+
+  color: #606060;
+  font: 400 13px/15px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+
+  .x-table-feature-group-icon {
+    font-size: 14px;
+    color: #919191;
+  }
+
+  .x-table-feature-group-text {
+    padding: 0 0 0 10px;
+  }
+}

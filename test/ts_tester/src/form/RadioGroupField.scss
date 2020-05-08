@@ -1,0 +1,17 @@
+.x-radiogroup-body {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+
+  .x-radiogroup-item {
+    display: table;
+    float: left;
+    height: 32px;
+
+    .x-radiogroup-item-body {
+      display: table-cell;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+  }
+}

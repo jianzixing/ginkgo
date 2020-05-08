@@ -1,0 +1,45 @@
+@import "../ThemeVars";
+
+.x-tree-cell {
+  padding: 7px 10px 6px 6px;
+
+  .x-tree-cell-icon {
+    display: inline-block;
+    text-align: center;
+    width: 18px;
+    height: 32px;
+    line-height: 32px;
+    color: #5fa2dd;
+    font-size: 16px;
+
+    margin-top: -7px;
+    margin-bottom: -6px;
+
+    img {
+      width: 18px;
+    }
+  }
+
+  .x-tree-cell-text {
+    padding-left: 6px;
+  }
+
+  .x-tree-cell-elbow {
+    display: inline-block;
+    width: 18px;
+    height: 32px;
+    line-height: 32px;
+    margin-right: 4px;
+    color: $theme-color;
+    text-align: center;
+    vertical-align: top;
+
+    margin-top: -7px;
+    margin-bottom: -6px;
+
+    &.x-tree-cell-expander {
+      font-size: 16px;
+      cursor: pointer;
+    }
+  }
+}

@@ -1,0 +1,42 @@
+.x-grid {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  .x-grid-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+  }
+
+  .x-column-resize-line {
+    display: none;
+    width: 1px;
+    background-color: #000000;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    cursor: col-resize;
+    height: 100%;
+    z-index: 5;
+  }
+
+  &.x-grid-resize {
+    cursor: col-resize;
+
+    .x-column-header-trigger {
+      cursor: col-resize;
+    }
+  }
+
+  .x-grid-table {
+    position: relative;
+    flex: 1;
+    overflow: auto;
+    box-sizing: border-box;
+    border-top: 1px solid #d0d0d0;
+  }
+}

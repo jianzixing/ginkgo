@@ -1,0 +1,17 @@
+.x-checkboxgroup-body {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+
+  .x-checkboxgroup-item {
+    display: table;
+    float: left;
+    height: 32px;
+
+    .x-checkboxgroup-item-body {
+      display: table-cell;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+  }
+}

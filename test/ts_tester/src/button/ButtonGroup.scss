@@ -1,0 +1,17 @@
+.x-button-group {
+  display: flex;
+  flex-direction: row;
+
+  &.x-button-group-vertical {
+    flex-direction: column;
+  }
+
+  &.x-button-group-wrap {
+    flex-wrap: wrap;
+  }
+
+  .x-button-group-item {
+    display: flex;
+    overflow: hidden;
+  }
+}

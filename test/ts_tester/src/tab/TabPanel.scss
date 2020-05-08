@@ -1,0 +1,171 @@
+@import "../ThemeVars";
+
+.x-tabpanel {
+  display: flex;
+
+  &.x-tabpanel-border {
+    border-color: $theme-color;
+    border-width: 2px;
+    border-style: solid;
+    box-sizing: border-box;
+  }
+
+  .x-tabpanel-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+
+    .x-tabpanel-header {
+      display: flex;
+      min-height: 44px;
+      padding: 8px 4px 0 8px;
+      overflow: hidden;
+      box-sizing: border-box;
+      background-color: $theme-color;
+
+      .x-tabpanel-header-body {
+        position: relative;
+        flex: 1;
+
+        .x-tabpanel-header-item {
+          position: absolute;
+          padding: 8px 10px 8px 10px;
+          cursor: pointer;
+          white-space: nowrap;
+          color: #f0f0f0;
+
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+          }
+
+          &:active {
+            background-color: rgba(0, 0, 0, 0.1);
+          }
+
+          &.x-tabpanel-header-item-90deg {
+            transform: rotate(90deg);
+            transform-origin: 0 0;
+          }
+
+          &.x-tabpanel-header-item-270deg {
+            transform: rotate(270deg);
+            transform-origin: 0 0;
+          }
+
+          .x-tabpanel-header-item-inner {
+            display: flex;
+            justify-content: center;
+            flex-direction: row;
+            height: 20px;
+            max-width: 300px;
+            padding-right: 16px;
+            font: 400 13px/20px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+
+            .x-tabpanel-header-icon {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-right: 6px;
+              width: 20px;
+              height: 20px;
+              font-size: 16px;
+
+              .x-tabpanel-header-icon img {
+                width: 16px;
+                height: 16px;
+              }
+            }
+
+            .x-tabpanel-header-text {
+              flex: 1;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: inline-block;
+              vertical-align: middle;
+            }
+          }
+
+          .x-tabpanel-header-item-close {
+            position: absolute;
+            overflow: hidden;
+            width: 16px;
+            height: 16px;
+            top: 0px;
+            right: 0px;
+            color: #ffffff;
+            font-size: 12px;
+            text-align: center;
+          }
+
+          &.x-tabpanel-header-item-active {
+            background-color: #ffffff;
+            color: #4c82b1;
+
+            .x-tabpanel-header-item-close {
+              color: #919191;
+            }
+          }
+        }
+      }
+    }
+
+    .x-tabpanel-inner {
+      display: flex;
+      overflow: hidden;
+      background-color: #ffffff;
+      flex: 1;
+
+      .x-tabpanel-inner-content {
+        display: block;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+
+        &.x-tabpanel-hidden {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &.x-tabpanel-right {
+
+    .x-tabpanel-body {
+      flex-direction: row;
+
+      .x-tabpanel-header {
+        min-width: 44px;
+        padding: 8px 8px 4px 0;
+      }
+    }
+  }
+
+  &.x-tabpanel-bottom {
+
+    .x-tabpanel-body {
+
+      .x-tabpanel-header {
+        padding: 0 4px 8px 8px;
+      }
+    }
+  }
+
+  &.x-tabpanel-left {
+
+    .x-tabpanel-body {
+      flex-direction: row;
+
+      .x-tabpanel-header {
+        min-width: 44px;
+        padding: 4px 0 8px 8px;
+      }
+    }
+  }
+}
+
+
+.x-tabpanel-item {
+  width: 100%;
+  height: 100%;
+}

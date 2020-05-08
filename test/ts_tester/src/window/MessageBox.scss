@@ -1,0 +1,56 @@
+.x-message-box {
+  position: relative;
+  display: table;
+  width: 100%;
+  height: 100%;
+
+  .x-message-box-body {
+    display: table-row;
+    overflow: hidden;
+
+    .x-message-box-inner {
+      display: block;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .x-message-box-content {
+      .x-message-box-icon {
+        display: block;
+        float: left;
+        font-size: 44px;
+        margin-right: 10px;
+        color: gray;
+      }
+
+      .x-message-box-text {
+        display: block;
+        float: left;
+      }
+    }
+
+    .x-message-box-prompt-text {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .x-message-box-prompt-input {
+      width: 100%;
+    }
+
+    .x-message-box-progress-text {
+      display: block;
+      padding-bottom: 10px;
+    }
+  }
+
+  .x-message-box-toolbar {
+    display: table-cell;
+    padding: 6px 0 6px 6px;
+    border-color: #d0d0d0;
+    background-image: none;
+    background-color: #ececec;
+    box-sizing: border-box;
+    text-align: center;
+  }
+}

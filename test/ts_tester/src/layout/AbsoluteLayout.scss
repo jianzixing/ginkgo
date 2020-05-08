@@ -1,0 +1,16 @@
+.x-abs-layout {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+
+  .x-abs-layout-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .x-abs-layout-item {
+      position: absolute !important;
+      overflow: hidden;
+    }
+  }
+}

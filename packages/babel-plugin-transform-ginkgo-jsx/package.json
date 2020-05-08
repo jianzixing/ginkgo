@@ -1,0 +1,35 @@
+{
+  "name": "plugin-transform-ginkgo-jsx",
+  "version": "0.0.1",
+  "description": "Turn JSX into Ginkgo function calls",
+  "repository": "",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "src/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "scripts": {
+    "test": "mocha --require @babel/register",
+    "build": "webpack -d"
+  },
+  "dependencies": {
+    "@babel/helper-plugin-utils": "^7.0.0",
+    "@babel/plugin-syntax-jsx": "^7.7.4",
+    "esutils": "^2.0.3"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.0-0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/register": "^7.7.4",
+    "mocha": "^6.2.2",
+    "webpack": "^4.41.3",
+    "webpack-cli": "^3.3.10"
+  }
+}

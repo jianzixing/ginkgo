@@ -1,0 +1,144 @@
+.x-toolbar {
+  padding: 6px 8px 6px 8px;
+  background-image: none;
+  background-color: #fff;
+  box-sizing: border-box;
+
+  &.x-toolbar-border {
+    border: 1px solid #d0d0d0;
+  }
+
+  &.x-toolbar-border-left {
+    border-left: 1px solid #d0d0d0;
+  }
+
+  &.x-toolbar-border-top {
+    border-top: 1px solid #d0d0d0;
+  }
+
+  &.x-toolbar-border-right {
+    border-right: 1px solid #d0d0d0;
+  }
+
+  &.x-toolbar-border-bottom {
+    border-bottom: 1px solid #d0d0d0;
+  }
+
+  .x-toolbar-inner {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    align-items: center;
+
+    .x-toolbar-body {
+      display: block;
+      position: relative;
+      flex: 1;
+
+      .x-toolbar-body-container {
+        display: block;
+        position: absolute;
+        vertical-align: top;
+      }
+
+      .x-toolbar-body-split {
+        display: block;
+        position: absolute;
+        width: 1px;
+        height: 14px;
+        background-color: #d0d0d0;
+      }
+    }
+
+    &.x-toolbar-inner-vertical {
+      flex-direction: column;
+
+      .x-toolbar-body-split {
+        width: 22px;
+        height: 1px;
+        background-color: #d0d0d0;
+      }
+    }
+  }
+
+  .x-toolbar-scroller {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    color: #919191;
+    cursor: pointer;
+    margin: 0px 4px;
+
+    &.x-toolbar-scroller-disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  .x-toolbar-scroller-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  &.x-toolbar-border {
+    border: 1px solid #d0d0d0;
+    padding: 5px 8px 5px 8px;
+  }
+
+  &.x-toolbar-border-top {
+    border-top: 1px solid #d0d0d0;
+    padding: 5px 8px 6px 8px;
+  }
+
+  &.x-toolbar-border-left {
+    border-left: 1px solid #d0d0d0;
+    padding: 6px 8px 6px 8px;
+  }
+
+  &.x-toolbar-border-bottom {
+    border-bottom: 1px solid #d0d0d0;
+    padding: 6px 8px 5px 8px;
+  }
+
+  &.x-toolbar-border-right {
+    border-right: 1px solid #d0d0d0;
+    padding: 6px 8px 6px 8px;
+  }
+
+
+  &.x-toolbar-vertical {
+    padding: 6px 8px 6px 8px;
+
+    .x-toolbar-scroller {
+      margin: 4px 0px;
+    }
+
+    .x-toolbar-inner {
+      flex-direction: column;
+      align-items: center;
+
+      .x-toolbar-body {
+        flex-direction: column;
+
+        .x-toolbar-body-container {
+          flex-direction: column;
+        }
+
+        .x-toolbar-item {
+          margin-right: auto;
+          margin-bottom: 10px;
+
+          &:last-child {
+            margin-right: auto;
+            margin-bottom: 0px;
+          }
+        }
+      }
+    }
+  }
+}

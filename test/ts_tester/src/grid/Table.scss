@@ -1,0 +1,10 @@
+.x-table {
+  display: block;
+  position: relative;
+  min-height: 1px;
+
+  .x-table-body-el {
+    flex: 1;
+    overflow: hidden;
+  }
+}

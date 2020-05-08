@@ -1,0 +1,79 @@
+@import "../ThemeVars";
+
+.x-menu {
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d0d0d0;
+  overflow: hidden;
+  box-shadow: rgb(136, 136, 136) 0px 2px 6px;
+  border-radius: 0px;
+  background-color: #ffffff;
+
+  .x-menu-body {
+    overflow: hidden;
+
+    .x-menu-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      min-width: 120px;
+      cursor: pointer;
+      white-space: nowrap;
+
+      .x-menu-icon {
+        width: 24px;
+        height: 24px;
+        margin: 4px 6px;
+        font-size: 16px;
+        text-align: center;
+        line-height: 24px;
+        color: #919191;
+      }
+
+      .x-menu-text {
+        flex: 1;
+        font: 300 13px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+        line-height: 31px;
+        padding-top: 1px;
+        color: #000;
+        cursor: pointer;
+        margin: 0 8px 0 0px;
+      }
+
+      .x-menu-more {
+        width: 16px;
+        height: 16px;
+        margin: auto 4px;
+        font-size: 16px;
+        color: #919191;
+        text-align: center;
+        line-height: 16px;
+      }
+
+      &.x-menu-selected {
+        background-color: $menu-select-color;
+
+        .x-menu-icon {
+          color: #ffffff;
+        }
+
+        .x-menu-text {
+          color: #ffffff;
+        }
+
+        .x-menu-more {
+          color: #ffffff;
+        }
+      }
+
+      &.x-menu-item-disabled {
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+        opacity: 0.5;
+      }
+    }
+  }
+}

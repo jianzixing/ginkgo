@@ -1,0 +1,20 @@
+.x-radio-item {
+  display: table;
+
+  .x-radio-icon {
+    display: table-cell;
+    font-size: 17px;
+    vertical-align: middle;
+    color: #919191;
+    font-weight: 100;
+  }
+
+  .x-radio-text {
+    display: table-cell;
+    font: 300 13px/17px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+    color: #404040;
+    vertical-align: middle;
+    padding-left: 5px;
+    padding-top: 1px;
+  }
+}

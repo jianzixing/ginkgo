@@ -1,0 +1,22 @@
+.x-datefield-spinner {
+  display: table-cell;
+  width: 32px;
+  text-align: center;
+  font-size: 16px;
+  background-color: #ffffff;
+  color: #919191;
+  vertical-align: top;
+
+  .x-datefield-spinner-item {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 18px;
+    overflow: hidden;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #F0F0F0;
+    }
+  }
+}

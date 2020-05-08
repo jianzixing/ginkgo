@@ -1,0 +1,15 @@
+.x-app-panel {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  .x-app-panel-item {
+    display: none;
+    width: 100%;
+    height: 100%;
+
+    &.x-app-panel-show {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,170 @@
+@import "../ThemeVars";
+
+.x-datepicker {
+  width: 100%;
+
+  .x-datepicker-border {
+    border: 1px solid #d0d0d0;
+  }
+
+  .x-datepicker-inner {
+    display: block;
+    position: relative;
+    width: 100%;
+
+    .x-datepicker-header {
+      position: relative;
+      text-align: center;
+      background-color: #ececec;
+      width: 100%;
+
+      .x-datepicker-switch {
+        position: absolute;
+        width: 32px;
+        height: 44px;
+        color: #919191;
+        cursor: pointer;
+        font-size: 16px;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+        opacity: 0.7;
+        text-align: center;
+        line-height: 44px;
+
+        &:hover {
+          -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+          opacity: 1;
+        }
+      }
+
+      .x-datepicker-pre {
+        left: 0;
+        top: 0;
+      }
+
+      .x-datepicker-month {
+        height: 44px;
+        width: 100%;
+        text-align: center;
+
+        .x-datepicker-month-btn {
+          display: inline-block;
+          padding: 14px;
+          color: #404040;
+          font-size: 15px;
+          font-weight: 400;
+
+          span {
+            padding: 0px 5px;
+          }
+
+          i {
+            width: 18px;
+            height: 16px;
+            color: #f0f0f0;;
+          }
+
+          &:hover {
+            background-color: #dfdfdf;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .x-datepicker-next {
+        right: 0;
+        top: 0;
+      }
+    }
+
+    .x-datepicker-body {
+      table-layout: fixed;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0px 0px;
+
+      .x-datepicker-th {
+        .x-datepicker-td {
+          padding: 0px;
+          width: 44px;
+          font-size: 13px;
+          font-weight: 400;
+          text-align: right;
+          box-sizing: border-box;
+
+          .x-datepicker-td-inner {
+            line-height: 36px;
+            padding: 0 15px 0 0;
+          }
+
+          &.x-datepicker-active {
+            background-color: #ececec;
+          }
+
+          &.x-datepicker-today {
+            background-color: #bfdaf1;
+          }
+
+          &:hover {
+            background-color: #ececec;
+            cursor: pointer;
+          }
+
+          &.x-datepicker-disabled {
+            color: #d0d0d0;
+            background-color: #ffffff;
+          }
+
+          &.x-datepicker-select {
+            background-color: $theme-color;
+            color: #ffffff;
+          }
+        }
+      }
+
+      .x-datepicker-thead {
+        .x-datepicker-td {
+          color: #404040;
+          background-color: #ececec;
+
+          &:hover {
+            cursor: default;
+          }
+        }
+      }
+
+      .x-datepicker-tbody {
+        .x-datepicker-td-inner {
+          font-size: 13px;
+          font-weight: 300;
+        }
+      }
+    }
+
+    .x-datepicker-time {
+      display: table;
+      border-collapse: separate;
+      border-spacing: 10px 0px;
+
+      .x-datepicker-time-item {
+        display: table-cell;
+
+      }
+    }
+
+    .x-datepicker-footer {
+      padding: 6px 0;
+      background-color: #fff;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .x-datepicker-mp {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

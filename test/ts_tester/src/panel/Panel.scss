@@ -1,0 +1,212 @@
+@import "../ThemeVars";
+
+.x-panel {
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  background: #fff;
+  color: $text-deep-color;
+  font-size: 13px;
+  font-weight: 300;
+  font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+
+  &.x-panel-border {
+    border-color: $theme-color;
+    border-width: 2px;
+    border-style: solid;
+  }
+
+  &.x-panel-fill {
+    width: 100%;
+    height: 100%;
+  }
+
+  .x-panel-body-el {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    width: 100%;
+
+    .x-panel-header {
+      position: relative;
+      z-index: 200;
+
+      .x-panel-header-body {
+        position: relative;
+        padding: 12px 16px 12px 16px;
+        background-image: none;
+        background-color: $theme-color;
+        color: #f0f0f0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        box-sizing: border-box;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+
+        .x-panel-header-inner {
+          overflow: hidden;
+          width: 100%;
+        }
+
+        .x-panel-header-title {
+          display: table-cell;
+          overflow: hidden;
+          white-space: nowrap;
+          -o-text-overflow: ellipsis;
+          text-overflow: ellipsis;
+          vertical-align: middle;
+          font-size: 16px;
+          font-weight: 400;
+          font-family: 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+          line-height: 20px;
+        }
+
+        .x-panel-header-icon-body {
+          display: flex;
+
+          .x-panel-header-icon-inner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 16px;
+            height: 16px;
+            font-size: 17px;
+            cursor: pointer;
+            margin: 0px 0px 0px 3px;
+
+            &.x-panel-header-icon-tool {
+              -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+              opacity: 0.8;
+
+              &:hover {
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+                opacity: 1;
+              }
+
+              &:active {
+                -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+                opacity: 0.8;
+              }
+            }
+          }
+
+          .x-panel-header-img-inner {
+            overflow: hidden;
+          }
+
+          .x-panel-header-title-icon {
+            padding-right: 8px;
+          }
+        }
+      }
+    }
+
+    .x-panel-wrapper-el {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+
+      .x-panel-inner-el {
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+
+        &.x-panel-inner-padding {
+          padding: 10px;
+          box-sizing: border-box;
+        }
+
+        &.x-panel-scroll-x {
+          overflow-x: scroll;
+        }
+
+        &.x-panel-scroll-y {
+          overflow-y: scroll;
+        }
+
+        &.x-panel-scroll-ax {
+          overflow-x: auto;
+        }
+
+        &.x-panel-scroll-ay {
+          overflow-y: auto;
+        }
+      }
+    }
+  }
+
+  &.x-panel-frame {
+    &.x-panel-border {
+      border-color: $theme-color;
+      border-width: 2px;
+      border-style: solid;
+    }
+
+    .x-panel-header-body {
+      border-bottom: 2px solid $theme-color;
+      padding: 11px 16px 11px 16px;
+    }
+  }
+
+  &.x-align-right {
+    .x-panel-body-el {
+      flex-direction: row;
+
+      .x-panel-header-body {
+        transform: rotate(90deg);
+        transform-origin: 0 0;
+        position: relative;
+      }
+    }
+  }
+
+  &.x-align-left {
+    .x-panel-body-el {
+      flex-direction: row;
+
+      .x-panel-header-body {
+        transform: rotate(90deg);
+        transform-origin: 0 0;
+        position: relative;
+      }
+    }
+  }
+
+  &.x-panel-light {
+    .x-panel-body-el {
+      .x-panel-header-body {
+        background-color: #ffffff;
+        color: #606060;
+
+        .x-panel-header-icon-body {
+          color: #919191
+        }
+      }
+
+      .x-panel-header-title {
+        color: $text-dark-color;
+      }
+
+      .x-panel-header-icon {
+        color: #919191;
+      }
+    }
+
+    &.x-panel-frame {
+      &.x-panel-border {
+        border-color: #d0d0d0;
+      }
+
+      .x-panel-header-body {
+        border-color: #d0d0d0;
+      }
+    }
+  }
+}

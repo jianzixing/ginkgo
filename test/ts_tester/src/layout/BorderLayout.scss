@@ -1,0 +1,96 @@
+.x-border-layout {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #ececec;
+
+  .x-border-layout-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .x-border-layout-north {
+      position: absolute;
+      width: 100%;
+      z-index: 5;
+    }
+
+    .x-border-layout-south {
+      position: absolute;
+      width: 100%;
+      z-index: 5;
+    }
+
+    .x-border-layout-east {
+      position: absolute;
+      z-index: 5;
+    }
+
+    .x-border-layout-west {
+      position: absolute;
+      z-index: 5;
+    }
+
+    .x-border-layout-center {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .x-collapse-el {
+      position: absolute;
+      cursor: pointer;
+      color: #919191;
+      background-color: #e0e0e0;
+      font-size: 16px;
+
+      &.x-collapse-split-left {
+        top: 50%;
+        margin-top: -24px;
+        width: 100%;
+        height: 48px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      &.x-collapse-split-bottom {
+        left: 50%;
+        width: 48px;
+        height: 100%;
+        margin-left: -24px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .x-border-layout-split {
+      position: absolute;
+      background-color: #ececec;
+      z-index: 10;
+
+      &.x-split-v {
+        cursor: row-resize;
+      }
+
+      &.x-split-h {
+        cursor: col-resize;
+      }
+
+      &.x-split-active {
+        background-color: #b4b4b4;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+        opacity: 0.8;
+        z-index: 10;
+
+        .x-collapse-el {
+          -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+          opacity: 0.3;
+        }
+      }
+    }
+  }
+}

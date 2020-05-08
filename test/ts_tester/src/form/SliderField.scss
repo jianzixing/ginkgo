@@ -1,0 +1,46 @@
+.x-sliderfield-body {
+  display: block;
+  position: relative;
+  width: 100%;
+  min-height: 32px;
+
+  .x-sliderfield-body-bg {
+    position: absolute;
+    height: 10px;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    margin-top: -5px;
+    border: 1px solid #d0d0d0;
+    border-radius: 2px;
+    background-color: #eee;
+    box-sizing: border-box;
+    z-index: 1;
+  }
+
+  .x-sliderfield-body-rect {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    margin-top: -10px;
+    background-color: #f6f6f6;
+    border: 1px solid #d0d0d0;
+    border-radius: 2px;
+    text-align: center;
+    color: #d0d0d0;
+    font-size: 12px;
+    box-sizing: border-box;
+    line-height: 18px;
+  }
+
+  .x-sliderfield-body-real {
+    position: absolute;
+    height: 10px;
+    left: 0px;
+    right: 20px;
+    top: 50%;
+    margin-top: -5px;
+    z-index: 2;
+  }
+}

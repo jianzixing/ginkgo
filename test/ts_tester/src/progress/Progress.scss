@@ -1,0 +1,40 @@
+@import "../ThemeVars";
+
+.x-progress {
+  position: relative;
+  background-color: #ececec;
+  height: 24px;
+  border-width: 0;
+  border-color: $theme-color;
+  border-style: solid;
+  min-width: 150px;
+  line-height: 24px;
+  text-align: center;
+
+  .x-progress-bar {
+    position: absolute;
+    background-image: none;
+    background-color: #7fb5e4;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    overflow: hidden;
+
+    .x-progress-bar-text {
+      line-height: 24px;
+      text-align: center;
+
+      .x-progress-text {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .x-progress-text {
+    color: #404040;
+    font-size: 13px;
+    font-weight: 400;
+  }
+}
