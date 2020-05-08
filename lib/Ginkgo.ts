@@ -3,7 +3,7 @@ import {ContextLink, GinkgoContainer} from "./GinkgoContainer";
 import {DataType, GinkgoHttpRequest} from "./GinkgoHttpRequest";
 import {BindComponent} from "./BindComponent";
 import {FragmentComponent} from "./FragmentComponent";
-import GinkgoAnimation from "./GinkgoAnimation";
+import {GinkgoAnimation} from "./GinkgoAnimation";
 
 export {GinkgoTools} from "./GinkgoTools";
 export {GinkgoContainer} from "./GinkgoContainer";

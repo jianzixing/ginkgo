@@ -2,7 +2,7 @@
   "name": "ginkgoes",
   "version": "0.0.1",
   "description": "",
-  "main": "./dist/ginkgoes.min.js",
+  "main": "./dist/ginkgoes.js",
   "types": "./dist/Ginkgo.d.ts",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --reporter spec --require ts-node/register test/*.test.ts",

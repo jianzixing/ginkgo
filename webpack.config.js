@@ -7,7 +7,7 @@ module.exports = {
     entry: "./lib/Ginkgo.ts",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "ginkgo.js",
+        filename: "ginkgoes.js",
         library: "ginkgo",
         libraryTarget: "umd"
     },

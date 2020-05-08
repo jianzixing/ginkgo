@@ -4,6 +4,7 @@ import Toolbar from "../toolbar/Toolbar";
 import Button from "../button/Button";
 import GridPanel from "../grid/GridPanel";
 import TestBuilder from "./TestBuilder";
+import CascaderField from "../form/CascaderField";
 
 export interface TestManagerProps extends AppManagerProps {
 }
@@ -54,6 +55,7 @@ export default class TestManager extends AppManager<TestManagerProps> {
                                            onClick={e => {
                                                this.forward(<TestBuilder/>)
                                            }}/>
+                                   <CascaderField fieldLabel={"级联选择"} width={300}/>
                                </Toolbar>
                            ]
                        }>

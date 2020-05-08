@@ -1,7 +1,7 @@
 import {GinkgoComponent} from "./GinkgoComponent";
 import {GinkgoElement} from "./Ginkgo";
 import {CSSProperties} from "./CSSProperties";
-import GinkgoAnimation, {AnimationParams} from "./GinkgoAnimation";
+import {GinkgoAnimation, AnimationParams} from "./GinkgoAnimation";
 
 export type EventHandler = (e: Event) => void;
 

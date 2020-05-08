@@ -275,9 +275,6 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
                 this.scrollerShow = true;
             }
         }
-        if (this.scrollerShow != oldScrollerShow) {
-            this.redrawing();
-        }
 
         if (this.toolbarScrollerEl) {
             let dom = this.toolbarScrollerEl.dom as HTMLElement;
@@ -390,6 +387,10 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
                     dom.style.top = dl + "px";
                 }
             }
+        }
+
+        if (this.scrollerShow != oldScrollerShow) {
+            this.redrawing();
         }
     }
 
