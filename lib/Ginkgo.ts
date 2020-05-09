@@ -256,3 +256,5 @@ export default class Ginkgo {
         return GinkgoHttpRequest.post(url, data);
     }
 }
+
+console.log("%c%c北京简子行科技有限公司%c https://www.jianzixing.com.cn", "line-height:28px;", "line-height:28px;padding:4px 9px 4px 9px;background:#FF7F50;color:#fff;font-size:16px;margin-right:15px;border-radius:6px", "color:#333333;line-height:28px;font-size:16px;");
