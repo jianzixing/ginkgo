@@ -38,14 +38,14 @@ export class GinkgoCompare {
             if (this.parent.status == "mount") {
                 let lifecycleComponents = [];
                 this.mountElements2Dom(this.parent, this.parent.shouldEl, false, lifecycleComponents);
-                let time = new Date().getTime();
+                // let time = new Date().getTime();
                 this.goAfterDomLife(lifecycleComponents);
-                let endTime = new Date().getTime();
-                if (endTime - time > 100) {
-                    console.warn("lifecycle time is too long",
-                        (endTime - time) / 1000 + "s",
-                        this.parent.props)
-                }
+                // let endTime = new Date().getTime();
+                // if (endTime - time > 100) {
+                // console.warn("lifecycle time is too long",
+                //     (endTime - time) / 1000 + "s",
+                //     this.parent.props)
+                // }
             }
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);

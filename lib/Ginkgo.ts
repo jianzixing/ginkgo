@@ -88,6 +88,7 @@ export interface RefObject<C extends GinkgoComponent> {
 export default class Ginkgo {
     public static Component = GinkgoComponent;
     public static Fragment = FragmentComponent;
+    private static isWarn: boolean = false;
 
     public static createElement<P extends GinkgoElement, T extends GinkgoComponent<P>>(
         tag: ComponentType<P, T> | ElementType | Function | string,
@@ -111,9 +112,10 @@ export default class Ginkgo {
                             item.map(value => {
                                 if (value) {
                                     childElements.push(value);
-                                    if (value.key == null) {
+                                    if (value.key == null && !this.isWarn) {
                                         console.warn("Warning: Each child in an array or iterator should have a unique " +
                                             "\"key\" prop. Check the elements");
+                                        this.isWarn = true;
                                     }
                                 }
                             });
