@@ -161,14 +161,18 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
             if (this.scrollerRightDisabled == true) tscB.push(Toolbar.toolbarClsScrollerDisabled);
 
             innerEls.push(
-                <div className={tscA.join(" ")} onClick={(e) => this.onLeftScrollerClick(e)}>
+                <div className={tscA.join(" ")}
+                     onClick={(e) => this.onLeftScrollerClick(e)}
+                     key={"toolbar_scroll_left"}>
                     {this.props.direction == 'vertical' ?
                         <Icon icon={IconTypes.chevronUp}/> :
                         <Icon icon={IconTypes.chevronLeft}/>
                     }
                 </div>);
             innerEls.push(
-                <div ref={c => this.toolbarScrollerEl = c} className={Toolbar.toolbarClsScrollerBody}>
+                <div ref={c => this.toolbarScrollerEl = c}
+                     className={Toolbar.toolbarClsScrollerBody}
+                     key={"toolbar_body"}>
                     <div
                         ref={c => this.toolbarScrollerBodyEl = c}
                         className={bodyCls.join(" ")}
@@ -179,14 +183,18 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
                 </div>
             );
             innerEls.push(
-                <div className={tscB.join(" ")} onClick={(e) => this.onRightScrollerClick(e)}>
+                <div className={tscB.join(" ")}
+                     onClick={(e) => this.onRightScrollerClick(e)}
+                     key={"toolbar_scroll_right"}>
                     {this.props.direction == 'vertical' ?
                         <Icon icon={IconTypes.chevronDown}/> :
                         <Icon icon={IconTypes.chevronRight}/>}
                 </div>);
         } else {
             innerEls.push(
-                <div ref={c => this.toolbarScrollerEl = c} className={Toolbar.toolbarClsScrollerBody}>
+                <div ref={c => this.toolbarScrollerEl = c}
+                     className={Toolbar.toolbarClsScrollerBody}
+                     key={"toolbar_body"}>
                     <div
                         ref={c => this.toolbarScrollerBodyEl = c}
                         className={bodyCls.join(" ")}
@@ -390,7 +398,6 @@ export default class Toolbar<P extends ToolbarProps> extends Component<P> {
         }
 
         if (this.scrollerShow != oldScrollerShow) {
-            debugger
             this.redrawing();
         }
     }

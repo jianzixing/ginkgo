@@ -62,7 +62,9 @@ export default class FormField<P extends FormFieldProps> extends AbstractFormFie
     protected errorTooltipsManager: TooltipManager;
     protected errorText?: string;
 
-    protected pickerWidth = 0;
+    protected pickerWidth: number = 0;
+    protected isAutoPickerWidth: boolean = true;
+    protected pickerAlign: "right" | "left" = "right";
 
     constructor(props) {
         super(props);
@@ -264,6 +266,9 @@ export default class FormField<P extends FormFieldProps> extends AbstractFormFie
         if (this.pickerRefObject && this.pickerRefObject.instance) {
             let instance = this.pickerRefObject.instance as HTMLComponent;
             let dom = instance.dom as HTMLElement;
+            if (this.isAutoPickerWidth == false) {
+                (dom as HTMLDivElement).style.width = null;
+            }
             let bounds = this.getBounds(this.fieldBodyRefObject.instance as HTMLComponent,
                 from == 1 ? true : false);
             let x = bounds.x - 1,
@@ -279,23 +284,28 @@ export default class FormField<P extends FormFieldProps> extends AbstractFormFie
             }
 
             if (this.pickerWidth > 0) {
-                x = bounds.x + (bounds.w - this.pickerWidth);
+                if (this.pickerAlign == "right") {
+                    x = bounds.x + (bounds.w - this.pickerWidth);
+                } else {
+                    x = bounds.x;
+                }
             }
 
-            let el = this.pickerRefObject.instance as HTMLComponent;
             let shadow = this.pickerShadowRefObject.instance as HTMLComponent;
-            if (el) {
-                (el.dom as HTMLDivElement).style.left = x + "px";
-                (el.dom as HTMLDivElement).style.top = y + "px";
-                if (this.pickerWidth > 0) {
-                    (el.dom as HTMLDivElement).style.width = this.pickerWidth + "px";
-                } else {
-                    (el.dom as HTMLDivElement).style.width = bounds.w + "px";
+            if (dom) {
+                (dom as HTMLDivElement).style.left = x + "px";
+                (dom as HTMLDivElement).style.top = y + "px";
+                if (this.isAutoPickerWidth != false) {
+                    if (this.pickerWidth > 0) {
+                        (dom as HTMLDivElement).style.width = this.pickerWidth + "px";
+                    } else {
+                        (dom as HTMLDivElement).style.width = bounds.w + "px";
+                    }
                 }
             }
             if (shadow) {
-                sw = (el.dom as HTMLDivElement).offsetWidth;
-                sh = (el.dom as HTMLDivElement).offsetHeight;
+                sw = (dom as HTMLDivElement).offsetWidth;
+                sh = (dom as HTMLDivElement).offsetHeight;
                 if (direction == 'd') {
                     sh -= 4;
                     y += 4;

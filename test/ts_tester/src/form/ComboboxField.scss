@@ -1,3 +1,5 @@
+@import "../ThemeVars";
+
 .x-comboboxfield-spinner {
   display: table-cell;
   width: 32px;
@@ -50,14 +52,14 @@
 
       &.x-picker-item-selected {
         color: #fff;
-        background: #5fa2dd;
-        border-color: #5fa2dd;
+        background: $theme-color;
+        border-color: $theme-color;
       }
 
       &:hover {
         color: #fff;
-        background: #7fb5e4;
-        border-color: #7fb5e4;
+        background: $menu-select-color;
+        border-color: $menu-select-color;
       }
     }
   }

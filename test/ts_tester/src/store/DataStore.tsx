@@ -1,5 +1,4 @@
-import Ginkgo from "../../carbon/Ginkgo";
-import {GinkgoHttpRequest} from "../../carbon/GinkgoHttpRequest";
+import Ginkgo, {GinkgoComponent} from "../../carbon/Ginkgo";
 
 export interface StoreProcessor {
     storeBeforeLoad?(): void;
@@ -11,17 +10,17 @@ export interface StoreProcessor {
 
 export interface DataStoreProps {
     // 是否自动加载
-    autoLoad: boolean;
-    type: "ajax" | "storage";
+    autoLoad?: boolean;
+    type?: "ajax" | "storage";
     api: string;
-    method: "post" | "get",
-    dataType: "json";
-    params: any,
+    method?: "post" | "get",
+    dataType?: "json";
+    params?: any,
 
     // 是否需要使用dataField获取数据中的数据 true 不需要 false 需要
-    root: boolean;
-    totalField: string;
-    dataField: string;
+    root?: boolean;
+    totalField?: string;
+    dataField?: string;
 }
 
 export default class DataStore {
@@ -33,7 +32,7 @@ export default class DataStore {
 
     protected status = 0;
 
-    constructor(props) {
+    constructor(props: DataStoreProps) {
         this.props = {
             autoLoad: false,
             type: "ajax",
@@ -63,6 +62,18 @@ export default class DataStore {
             if (this.data) {
                 if (this.props.dataType == "json") {
                     this.setStoreJsonData(processor, this.data);
+                }
+            }
+            let rms;
+            for (let p of this.processor) {
+                if (Ginkgo.getComponentStatus(p as any) == null) {
+                    if (!rms) rms = [];
+                    rms.push(p);
+                }
+            }
+            if (rms) {
+                for (let rm of rms) {
+                    this.processor.splice(this.processor.indexOf(rm), 1);
                 }
             }
         }

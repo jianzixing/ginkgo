@@ -42,6 +42,7 @@ export default class ComboboxField<P extends ComboboxFieldProps> extends TextFie
     protected static comboboxFieldEmpty;
 
     protected value: ComboboxModel;
+    protected cacheSetValue: any;
     protected models?: Array<ComboboxModel> = this.props.models;
     protected pickerBindRef: RefObject<BindComponent> = Ginkgo.createRef();
     protected isLoading?: boolean = false;
@@ -145,20 +146,28 @@ export default class ComboboxField<P extends ComboboxFieldProps> extends TextFie
     protected data2Models(data) {
         let models: Array<ComboboxModel> = [];
         for (let dt of data) {
-            models.push({
+            let item = {
                 value: dt[this.props.valueField || 'id'],
                 text: typeof dt == "object" ? dt[this.props.displayField || 'text'] : dt,
                 selected: this.props.selectData ? this.props.selectData == dt : false,
                 data: dt
-            })
+            };
+            if (!item.value) {
+                item.value = item.text;
+            }
+            models.push(item);
         }
         return models;
+    }
+
+    protected redrawingPickerBody() {
+        this.pickerBindRef.instance.forceRender();
     }
 
     storeBeforeLoad(): void {
         if (this.pickerBindRef && this.pickerBindRef.instance) {
             this.isLoading = true;
-            this.pickerBindRef.instance.forceRender();
+            this.redrawingPickerBody();
         }
     }
 
@@ -167,18 +176,31 @@ export default class ComboboxField<P extends ComboboxFieldProps> extends TextFie
         if (data && data instanceof Array) {
             this.models = this.data2Models(data);
             if (this.pickerBindRef && this.pickerBindRef.instance) {
-                this.pickerBindRef.instance.forceRender();
+                this.redrawingPickerBody();
             }
         } else {
             if (this.pickerBindRef && this.pickerBindRef.instance) {
-                this.pickerBindRef.instance.forceRender();
+                this.redrawingPickerBody();
             }
+        }
+
+        if (this.cacheSetValue) {
+            let value = this.cacheSetValue;
+            this.cacheSetValue = undefined;
+            this.setValue(value);
         }
     }
 
     setValue(value: any): void {
-        if (this.props.data && !this.props.models) {
-            this.models = this.data2Models(this.props.data);
+        if (!this.models || this.models.length == 0) {
+            if (this.props.data && !this.props.models) {
+                this.models = this.data2Models(this.props.data);
+            }
+            if (this.props.store && !this.props.models) {
+                this.cacheSetValue = value;
+                this.props.store.load();
+                return;
+            }
         }
 
         if (typeof value == "object") {

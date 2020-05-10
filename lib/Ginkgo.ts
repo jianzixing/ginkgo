@@ -104,13 +104,21 @@ export default class Ginkgo {
                 children = children.filter(value => value);
                 // resolve <div>{this.props.children}<span></span></div>
                 // tsx compiled GinkgoElement : [[...],{}]
-                for (let el of children) {
+                for (let item of children) {
                     if (!childElements) childElements = [];
-                    if (el) {
-                        if (el instanceof Array) {
-                            el.map(value => childElements.push(value));
+                    if (item) {
+                        if (item instanceof Array) {
+                            item.map(value => {
+                                if (value) {
+                                    childElements.push(value);
+                                    if (value.key == null) {
+                                        console.warn("Warning: Each child in an array or iterator should have a unique " +
+                                            "\"key\" prop. Check the elements");
+                                    }
+                                }
+                            });
                         } else {
-                            childElements.push(el);
+                            childElements.push(item);
                         }
                     }
                 }

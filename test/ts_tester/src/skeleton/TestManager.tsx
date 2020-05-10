@@ -5,6 +5,7 @@ import Button from "../button/Button";
 import GridPanel from "../grid/GridPanel";
 import TestBuilder from "./TestBuilder";
 import CascaderField from "../form/CascaderField";
+import DataStore from "../store/DataStore";
 
 export interface TestManagerProps extends AppManagerProps {
 }
@@ -55,7 +56,9 @@ export default class TestManager extends AppManager<TestManagerProps> {
                                            onClick={e => {
                                                this.forward(<TestBuilder/>)
                                            }}/>
-                                   <CascaderField fieldLabel={"级联选择"} width={300}/>
+                                   <CascaderField fieldLabel={"级联选择"} width={300}
+                                                  store={new DataStore({api: "http://localhost:3300/cascader_data.json"})}
+                                                  value={11}/>
                                </Toolbar>
                            ]
                        }>

@@ -1,0 +1,64 @@
+@import "../ThemeVars";
+
+.x-cascader-field-picker {
+  float: left;
+  overflow: hidden;
+
+  .x-cascader-field-ul {
+    list-style-type: none;
+    float: left;
+    margin: 0;
+    padding: 0;
+
+    &.x-cascader-field-list-border {
+      border-right: 1px solid #D0D0D0;
+      box-sizing: border-box;
+    }
+
+    .x-cascader-field-li {
+      display: table;
+      padding: 0 10px;
+      line-height: 30px !important;
+      font: normal 13px 'Open Sans', 'Helvetica Neue', helvetica, arial, verdana, sans-serif;
+      cursor: pointer;
+      border: 1px dotted #ffffff;
+
+      .x-cascader-field-text {
+        display: table-cell;
+        color: #404040;
+      }
+
+      .x-cascader-field-icon {
+        display: table-cell;
+        width: 16px;
+        height: 16px;
+        margin: auto 4px;
+        font-size: 16px;
+        color: #919191;
+        text-align: center;
+        line-height: 16px;
+        vertical-align: middle;
+      }
+
+      &.x-cascader-field-selected {
+        color: #fff;
+        background: $theme-color;
+        border-color: $theme-color;
+
+        .x-cascader-field-icon, .x-cascader-field-text {
+          color: #ffffff;
+        }
+      }
+
+      &:hover {
+        color: #fff;
+        background: $menu-select-color;
+        border-color: $menu-select-color;
+
+        .x-cascader-field-icon, .x-cascader-field-text {
+          color: #ffffff;
+        }
+      }
+    }
+  }
+}
