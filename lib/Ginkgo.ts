@@ -1,6 +1,6 @@
 import {GinkgoComponent} from "./GinkgoComponent";
 import {ContextLink, GinkgoContainer} from "./GinkgoContainer";
-import {DataType, GinkgoHttpRequest} from "./GinkgoHttpRequest";
+import {DataType, GinkgoHttpRequest, HttpConfig} from "./GinkgoHttpRequest";
 import {BindComponent} from "./BindComponent";
 import {FragmentComponent} from "./FragmentComponent";
 import {GinkgoAnimation} from "./GinkgoAnimation";
@@ -258,12 +258,16 @@ export default class Ginkgo {
         }
     }
 
-    public static get(url: string, data?: { [key: string]: any } | FormData): Promise<any> {
-        return GinkgoHttpRequest.get(url, data);
+    public static get(url: string, data?: { [key: string]: any } | FormData, config?: HttpConfig): Promise<any> {
+        return GinkgoHttpRequest.get(url, data, config);
     }
 
-    public static post(url: string, data?: DataType): Promise<any> {
-        return GinkgoHttpRequest.post(url, data);
+    public static post(url: string, data?: DataType, config?: HttpConfig): Promise<any> {
+        return GinkgoHttpRequest.post(url, data, config);
+    }
+
+    public static ajax(config: HttpConfig) {
+        return GinkgoHttpRequest.ajax(config);
     }
 }
 

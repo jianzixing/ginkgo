@@ -14,11 +14,14 @@ interface Response {
     statusCode?: number;
 }
 
-interface HttpConfig {
+export interface HttpConfig {
     url: string;
     method?: "GET" | "POST";
     data?: DataType;
     postQueryString?: boolean;
+    withCredentials?: boolean;
+    headers?: { [key: string]: string };
+    timeout?: number;
 }
 
 function getValue2String(value: any) {
@@ -33,26 +36,39 @@ function getValue2String(value: any) {
 
 export class GinkgoHttpRequest {
 
-    public static get(url: string, data?: { [key: string]: any } | FormData) {
-        return this.ajax({url: url, method: "GET", data: data});
+    public static get(url: string, data?: { [key: string]: any } | FormData, config?: HttpConfig) {
+        config = config || {url: url};
+        config.url = url;
+        config.method = "GET";
+        config.data = data;
+        return this.ajax(config);
     }
 
-    public static post(url: string, data?: DataType) {
+    public static post(url: string, data?: DataType, config?: HttpConfig) {
+        config = config || {url: url};
+        config.url = url;
+        config.method = "POST";
+        config.data = data;
+
         let postQueryString = false;
         if (typeof data == "object") {
             postQueryString = true;
         }
-        return this.ajax({url: url, method: "POST", postQueryString: postQueryString, data: data});
-    }
-
-    public static upload(input: InputComponent) {
-
+        config.postQueryString = postQueryString;
+        return this.ajax(config);
     }
 
     public static ajax(config?: HttpConfig): Promise<any> {
         return new Promise<any>((resolve, reject: (info: Response) => void) => {
             let http = new XMLHttpRequest();
             let url = config.url;
+            if (config.withCredentials != null) http.withCredentials = config.withCredentials;
+            if (config.headers) {
+                for (let key in config.headers) {
+                    http.setRequestHeader(key, config.headers[key]);
+                }
+            }
+            if (config.timeout != null) http.timeout = config.timeout;
             http.onreadystatechange = function () {
                 if (http.readyState == 4) {
                     if (http.status == 200) {

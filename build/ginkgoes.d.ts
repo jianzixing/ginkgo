@@ -442,9 +442,8 @@ interface HttpConfig {
 export declare class GinkgoHttpRequest {
     static get(url: string, data?: {
         [key: string]: any;
-    } | FormData): Promise<any>;
-    static post(url: string, data?: DataType): Promise<any>;
-    static upload(input: InputComponent): void;
+    } | FormData, config?: HttpConfig): Promise<any>;
+    static post(url: string, data?: DataType, config?: HttpConfig): Promise<any>;
     static ajax(config?: HttpConfig): Promise<any>;
     private static appendUrlQueryString;
     static object2QueryString(params: {
@@ -1126,8 +1125,9 @@ export default class Ginkgo {
     private static forEachChildrenByLink;
     static get(url: string, data?: {
         [key: string]: any;
-    } | FormData): Promise<any>;
-    static post(url: string, data?: DataType): Promise<any>;
+    } | FormData, config?: HttpConfig): Promise<any>;
+    static post(url: string, data?: DataType, config?: HttpConfig): Promise<any>;
+    static ajax(config: HttpConfig): Promise<any>;
 }
 
 declare namespace JSX {
