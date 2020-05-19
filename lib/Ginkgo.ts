@@ -135,9 +135,7 @@ export default class Ginkgo {
                 children: childElements
             };
 
-            if (Ginkgo.TakeParts
-                && Ginkgo.TakeParts.length > 0
-                && Ginkgo.checkTakeParts(props)) {
+            if (Ginkgo.checkTakeParts(props)) {
                 return props;
             }
         }
