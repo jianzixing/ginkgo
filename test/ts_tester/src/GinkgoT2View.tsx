@@ -27,7 +27,7 @@ export default class GinkgoT2View extends Ginkgo.Component {
         return (
             <GinkgoT1View>
                 <div>这是T2组件内容，T1组件子</div>
-                <div ref={this.box}>
+                <div id={"box-id"} ref={this.box}>
                     <span ref={this.span}>第一个文字</span>
                 </div>
                 <Ginkgo.Fragment>
@@ -69,5 +69,9 @@ export default class GinkgoT2View extends Ginkgo.Component {
             this.forceRender();
             console.log("force render ...")
         }, 6000);
+
+        setTimeout(() => {
+            console.log("query => ", this.query("#box-id"));
+        });
     }
 }

@@ -310,7 +310,8 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     setState(state: {
         [key: string]: any;
     }): void;
-    query(...selector: any): Array<GinkgoComponent>;
+    queryAll(...selector: any): Array<GinkgoComponent>;
+    query(...selector: any): GinkgoComponent;
 }
 
 /**GinkgoContainer.d.ts**/

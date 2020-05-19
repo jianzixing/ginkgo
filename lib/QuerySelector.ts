@@ -3,7 +3,7 @@ import {ContextLink} from "./GinkgoContainer";
 
 export class QuerySelector {
     private component: GinkgoComponent;
-    private condition: Array<{ module: {}, class: {}, attr: {} }>;
+    private condition: Array<{ module: {}, class: {}, attr: {}, id: string }>;
     private matches: Array<ContextLink> = [];
 
     constructor(component: GinkgoComponent, condition: Array<any>) {
@@ -53,7 +53,7 @@ export class QuerySelector {
         }
     }
 
-    private isMatch(link: ContextLink, cnd: { module: {}, class: {}, attr: {} }): boolean {
+    private isMatch(link: ContextLink, cnd: { module: {}, class: {}, attr: {}, id: string }): boolean {
         let props = link.props as any;
         let c1 = 0, c2 = 0;
         if (cnd.module) {
@@ -108,11 +108,17 @@ export class QuerySelector {
                 c2++;
             }
         }
+        if (cnd.id && cnd.id != '') {
+            c1++;
+            if (props['id'] == cnd.id) {
+                c2++;
+            }
+        }
         if (c1 == c2) return true;
         return false;
     }
 
-    private parseCondition(cnd: any): { module: {}, class: {}, attr: {} } {
+    private parseCondition(cnd: any): { module: {}, class: {}, attr: {}, id: string } {
         let cs: any = [];
         let conditionObjects: any = {};
         if (cnd instanceof Array) {
@@ -163,6 +169,9 @@ export class QuerySelector {
                     if (!conditionObjects["attr"]) conditionObjects["attr"] = [];
                     conditionObjects["attr"].push({key: c.key, value: c.value});
                 }
+                if (c.type == 3) {
+                    conditionObjects["id"] = c.name;
+                }
             }
         }
         return conditionObjects;
@@ -171,13 +180,17 @@ export class QuerySelector {
     private parseConditionStr(str: string) {
         let cs = [];
         let last = "";
-        let area = 0; // 0元素名称 1CSS样式名称 2属性值
+        let area = 0; // 0元素名称 1CSS样式名称 2属性值 3元素ID
         let start = 0;
         for (let i = 0; i < str.length; i++) {
             let char = str.charAt(i);
             if (char == ".") {
                 if (area == 0) {
-                    cs.push({type: 0, group: 0, name: last});
+                    if (last.startsWith("#")) {
+                        cs.push({type: 3, group: 0, name: last.substring(1)});
+                    } else {
+                        cs.push({type: 0, group: 0, name: last});
+                    }
                     area = 1;
                 }
                 if (area == 1) {
@@ -191,7 +204,11 @@ export class QuerySelector {
             } else if (char == "[") {
                 start = 1;
                 if (area == 0) {
-                    cs.push({type: 0, name: last});
+                    if (last.startsWith("#")) {
+                        cs.push({type: 3, group: 0, name: last.substring(1)});
+                    } else {
+                        cs.push({type: 0, name: last});
+                    }
                 }
                 if (area == 1) {
                     cs.push({type: 1, name: last});
@@ -224,6 +241,20 @@ export class QuerySelector {
                 last += char;
             }
         }
+        if (last && last != '') {
+            if (area == 0) {
+                if (last.startsWith("#")) {
+                    cs.push({type: 3, group: 0, name: last.substring(1)});
+                } else {
+                    cs.push({type: 0, name: last});
+                }
+            }
+            if (area == 1) {
+                cs.push({type: 1, group: 0, name: last});
+            }
+            last = "";
+        }
+
         return cs;
     }
 }

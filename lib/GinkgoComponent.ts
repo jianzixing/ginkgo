@@ -188,8 +188,15 @@ export class GinkgoComponent<P = {}, S = {}> {
         }
     }
 
-    query(...selector: any): Array<GinkgoComponent> {
+    queryAll(...selector: any): Array<GinkgoComponent> {
         let qs = new QuerySelector(this, selector);
         return qs.selector();
+    }
+
+    query(...selector: any): GinkgoComponent {
+        let qs = new QuerySelector(this, selector);
+        let arr = qs.selector();
+        if (arr && arr.length > 0) return arr[0];
+        return null;
     }
 }
