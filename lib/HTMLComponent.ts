@@ -252,7 +252,8 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                 if (key != "module"
                     && key != "children"
                     && key != "ref"
-                    && key != "setInnerHTML") {
+                    && key != "setInnerHTML"
+                    && key != "key") {
 
                     if (props.style && dom instanceof HTMLElement) {
                         let style: any = props.style;
@@ -341,7 +342,8 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                 if (key != "module"
                     && key != "children"
                     && key != "ref"
-                    && key != "setInnerHTML") {
+                    && key != "setInnerHTML"
+                    && key != "key") {
 
                     if (this.isEventProps(props, key)) {
                         this.bindDomEvent(props, key);

@@ -354,24 +354,4 @@ export class GinkgoContainer {
             }
         }
     }
-
-    /**
-     * 获取所有BingComponent组件
-     * @param link
-     */
-    public static getBindLinks(link: ContextLink): Array<ContextLink> {
-        if (link.children) {
-            let arr = [];
-            for (let child of link.children) {
-                if (child.component instanceof BindComponent) {
-                    arr.push(child);
-                }
-                let childArr = this.getBindLinks(child);
-                if (childArr) {
-                    childArr.map(value => arr.push(value));
-                }
-            }
-            return arr;
-        }
-    }
 }

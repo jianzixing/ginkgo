@@ -1,6 +1,7 @@
-import {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools} from "./Ginkgo";
+import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, BindComponent} from "./Ginkgo";
 import {BindComponentElement} from "./BindComponent";
 import {ContextLink} from "./GinkgoContainer";
+import {QuerySelector} from "./QuerySelector";
 
 export class GinkgoComponent<P = {}, S = {}> {
 
@@ -149,49 +150,46 @@ export class GinkgoComponent<P = {}, S = {}> {
                 this.state[stateKey] = state[stateKey];
             }
 
-            let link = GinkgoContainer.getLinkByComponent(this);
-            let content = link.content;
-            if (content) {
-                let bindLinks = GinkgoContainer.getBindLinks(content);
-                if (bindLinks) {
-                    for (let bl of bindLinks) {
-                        let newBindLinks = GinkgoContainer.getBindLinks(content);
-                        if (newBindLinks.indexOf(bl) >= 0) {
-                            let bindProps = bl.props as BindComponentElement;
-                            if (bindProps) {
-                                let bindKeys = bindProps.bind;
-                                if (bindKeys) {
-                                    if (bindKeys instanceof Array) {
-                                        for (let bk of bindKeys) {
-                                            let ks = bk.split("\\.");
-                                            let data = state;
-                                            for (let k of ks) {
-                                                if (data != undefined) data = data[k]; else break;
-                                            }
-                                            if (data != undefined) {
-                                                GinkgoContainer.forceComponent(bl);
-                                            }
-                                        }
-                                    } else {
-                                        let ks = bindKeys.split("\\.");
-                                        let data = state;
-                                        for (let k of ks) {
-                                            if (data != undefined) data = data[k]; else break;
-                                        }
-                                        if (data != undefined) {
-                                            GinkgoContainer.forceComponent(bl);
-                                        }
+            Ginkgo.forEachChildren(component => {
+                if (component instanceof BindComponent) {
+                    let link = GinkgoContainer.getLinkByComponent(component);
+
+                    let bindProps = link.props as BindComponentElement;
+                    if (bindProps) {
+                        let bindKeys = bindProps.bind;
+                        if (bindKeys) {
+                            if (bindKeys instanceof Array) {
+                                for (let bk of bindKeys) {
+                                    let ks = bk.split(".");
+                                    let data = state;
+                                    for (let k of ks) {
+                                        if (data != undefined) data = data[k]; else break;
                                     }
-                                } else {
-                                    GinkgoContainer.forceComponent(bl);
+                                    if (data != undefined) {
+                                        GinkgoContainer.forceComponent(link);
+                                    }
+                                }
+                            } else {
+                                let ks = bindKeys.split(".");
+                                let data = state;
+                                for (let k of ks) {
+                                    if (data != undefined) data = data[k]; else break;
+                                }
+                                if (data != undefined) {
+                                    GinkgoContainer.forceComponent(link);
                                 }
                             }
                         } else {
-                            // if after forceComponent , some components fail to skip
+                            GinkgoContainer.forceComponent(link);
                         }
                     }
                 }
-            }
+            }, this);
         }
+    }
+
+    query(...selector: any): Array<GinkgoComponent> {
+        let qs = new QuerySelector(this, selector);
+        return qs.selector();
     }
 }

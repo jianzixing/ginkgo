@@ -216,6 +216,21 @@ export declare class GinkgoCompare {
 }
 
 
+/**QuerySelector.d.ts**/
+export class QuerySelector {
+    private component;
+    private condition;
+    private matches;
+    constructor(component: GinkgoComponent, condition: Array<any>);
+    selector(): Array<GinkgoComponent>;
+    private matchForEach;
+    private isMatch;
+    private parseCondition;
+    private parseConditionStr;
+}
+
+
+
 /**GinkgoComponent.d.ts**/
 export declare class GinkgoComponent<P = {}, S = {}> {
     /**
@@ -295,6 +310,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     setState(state: {
         [key: string]: any;
     }): void;
+    query(...selector: any): Array<GinkgoComponent>;
 }
 
 /**GinkgoContainer.d.ts**/
@@ -420,11 +436,6 @@ export declare class GinkgoContainer {
      * @param renderTo
      */
     static unmountComponentByElement(props: GinkgoElement, renderTo: Element): void;
-    /**
-     * 获取所有BingComponent组件
-     * @param link
-     */
-    static getBindLinks(link: ContextLink): Array<ContextLink>;
 }
 
 
