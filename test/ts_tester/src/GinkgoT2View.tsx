@@ -37,7 +37,9 @@ export default class GinkgoT2View extends Ginkgo.Component {
                 </Ginkgo.Fragment>
                 <div setInnerHTML={"<span>html字符串</span>"}></div>
 
-                <div style={{display: "block", width: 300, height: 80}}>
+                <div className={"ccc"}
+                     style={{display: "block", width: 300, height: 80}}
+                     dataid={"c"}>
                     {testkeys}
                 </div>
 
@@ -71,7 +73,7 @@ export default class GinkgoT2View extends Ginkgo.Component {
         }, 6000);
 
         setTimeout(() => {
-            console.log("query => ", this.query("#box-id"));
+            console.log("query => ", this.query("div.ccc[dataid='c']"));
         });
     }
 }

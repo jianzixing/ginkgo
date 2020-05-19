@@ -73,26 +73,28 @@ export class QuerySelector {
             if (typeof propsCls == "string") {
                 propsCls = propsCls.split(" ");
             }
-            for (let cls of cnd.class) {
-                let eq = true;
-                if (cls.list && cls.list.length > 0) {
-                    for (let c of cls.list) {
-                        let is = false;
-                        for (let oc of propsCls) {
-                            if (c.trim() == oc.trim()) {
-                                is = true;
+            if (propsCls && propsCls instanceof Array && propsCls.length > 0) {
+                for (let cls of cnd.class) {
+                    let eq = true;
+                    if (cls.list && cls.list.length > 0) {
+                        for (let c of cls.list) {
+                            let is = false;
+                            for (let oc of propsCls) {
+                                if (c.trim() == oc.trim()) {
+                                    is = true;
+                                    break;
+                                }
+                            }
+                            if (!is) {
+                                eq = false;
                                 break;
                             }
                         }
-                        if (!is) {
-                            eq = false;
-                            break;
-                        }
                     }
-                }
-                if (eq) {
-                    c2++;
-                    break;
+                    if (eq) {
+                        c2++;
+                        break;
+                    }
                 }
             }
         }
@@ -114,7 +116,7 @@ export class QuerySelector {
                 c2++;
             }
         }
-        if (c1 == c2) return true;
+        if (c1 != 0 && c2 != 0 && c1 == c2) return true;
         return false;
     }
 
@@ -147,7 +149,7 @@ export class QuerySelector {
                 if (c.type == 0) {
                     if (!conditionObjects["module"]) conditionObjects["module"] = {};
                     if (c.name) {
-                        conditionObjects["module"]["name"] = c.object;
+                        conditionObjects["module"]["name"] = c.name;
                         conditionObjects["module"]["type"] = 0;
                     }
                     if (c.object) {
@@ -158,11 +160,16 @@ export class QuerySelector {
                 if (c.type == 1) {
                     if (!conditionObjects["class"]) conditionObjects["class"] = [];
                     let classNames = conditionObjects["class"];
+                    let is = false;
                     for (let cn of classNames) {
                         if (cn.group == c.group) {
                             if (!cn.list) cn.list = [];
                             cn.list.push(c.name);
+                            is = true;
                         }
+                    }
+                    if (!is) {
+                        classNames.push({group: c.group, list: [c.name]});
                     }
                 }
                 if (c.type == 2) {
@@ -185,16 +192,18 @@ export class QuerySelector {
         for (let i = 0; i < str.length; i++) {
             let char = str.charAt(i);
             if (char == ".") {
-                if (area == 0) {
+                if (area == 0 && last && last != '') {
                     if (last.startsWith("#")) {
-                        cs.push({type: 3, group: 0, name: last.substring(1)});
+                        cs.push({type: 3, name: last.substring(1)});
                     } else {
-                        cs.push({type: 0, group: 0, name: last});
+                        cs.push({type: 0, name: last});
                     }
-                    area = 1;
+                    last = "";
                 }
-                if (area == 1) {
+                area = 1;
+                if (area == 1 && last && last != '') {
                     cs.push({type: 1, group: 0, name: last});
+                    last = "";
                 }
                 if (area == 2 && start == 1) {
                     last += char;
@@ -203,23 +212,26 @@ export class QuerySelector {
                 }
             } else if (char == "[") {
                 start = 1;
-                if (area == 0) {
+                if (area == 0 && last && last != '') {
                     if (last.startsWith("#")) {
-                        cs.push({type: 3, group: 0, name: last.substring(1)});
+                        cs.push({type: 3, name: last.substring(1)});
                     } else {
                         cs.push({type: 0, name: last});
                     }
+                    last = "";
                 }
                 if (area == 1) {
                     cs.push({type: 1, name: last});
+                    last = "";
                 }
+                last = "";
                 cs.push({type: 2, key: undefined, value: undefined});
                 area = 2;
             } else if (char == "]") {
-                if (area == 2) {
+                if (area == 2 && last && last != '') {
                     if ((last.startsWith("\"") && last.endsWith("\""))
                         || (last.startsWith("\'") && last.endsWith("\'"))) {
-                        cs[cs.length - 1].value = "" + last;
+                        cs[cs.length - 1].value = last.substring(1, last.length - 1);
                     } else {
                         if (last.indexOf(".") >= 0) {
                             cs[cs.length - 1].value = parseFloat("" + last);
@@ -231,9 +243,10 @@ export class QuerySelector {
                         }
                     }
                 }
+                last = "";
                 start = 0;
             } else if (char == "=") {
-                if (area == 2) {
+                if (area == 2 && last && last != '') {
                     cs[cs.length - 1].key = last;
                 }
                 last = "";
@@ -244,7 +257,7 @@ export class QuerySelector {
         if (last && last != '') {
             if (area == 0) {
                 if (last.startsWith("#")) {
-                    cs.push({type: 3, group: 0, name: last.substring(1)});
+                    cs.push({type: 3, name: last.substring(1)});
                 } else {
                     cs.push({type: 0, name: last});
                 }
