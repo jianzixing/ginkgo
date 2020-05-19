@@ -1,6 +1,8 @@
 import Ginkgo, {HTMLComponent, RefObject} from "../carbon/Ginkgo";
 import GinkgoT1View from "./GinkgoT1View";
 
+Ginkgo.TakeParts.push("auth_1");
+
 export default class GinkgoT2View extends Ginkgo.Component {
     private box?: RefObject<HTMLComponent> = Ginkgo.createRef();
     private span?: RefObject<HTMLComponent> = Ginkgo.createRef();
@@ -46,6 +48,9 @@ export default class GinkgoT2View extends Ginkgo.Component {
                 <div style={{display: "block", width: 300, height: 80}}>
                     {el1}
                 </div>
+
+                <div part={"auth_1"}>auth_1</div>
+                <div part={"auth_2"}>auth_2</div>
             </GinkgoT1View>)
     }
 

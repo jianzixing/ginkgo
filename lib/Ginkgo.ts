@@ -79,6 +79,8 @@ export interface GinkgoElement<C extends GinkgoComponent = any> {
     readonly module?: ComponentType<any, any> | ElementType | Function | string;
     children?: Array<GinkgoElement>;
     ref?: refObjectCall | string | RefObject<C>;
+    // 是否根据配置参与渲染
+    part?: string;
 }
 
 export interface RefObject<C extends GinkgoComponent> {
@@ -88,6 +90,7 @@ export interface RefObject<C extends GinkgoComponent> {
 export default class Ginkgo {
     public static Component = GinkgoComponent;
     public static Fragment = FragmentComponent;
+    public static TakeParts: Array<string> = [];
     private static isWarn: boolean = false;
 
     public static createElement<P extends GinkgoElement, T extends GinkgoComponent<P>>(
@@ -131,8 +134,41 @@ export default class Ginkgo {
                 module: tag,
                 children: childElements
             };
-            return props;
+
+            if (Ginkgo.TakeParts
+                && Ginkgo.TakeParts.length > 0
+                && Ginkgo.checkTakeParts(props)) {
+                return props;
+            }
         }
+    }
+
+    private static checkTakeParts(props: GinkgoElement): boolean {
+        if (props.part
+            && props.part != ''
+            && Ginkgo.TakeParts
+            && Ginkgo.TakeParts instanceof Array
+            && Ginkgo.TakeParts.indexOf(props.part) == -1) {
+            return false;
+        }
+
+        let children = props.children;
+        if (children && children.length > 0) {
+            let rms;
+            for (let c of children) {
+                if (!Ginkgo.checkTakeParts(c)) {
+                    if (!rms) rms = [];
+                    rms.push(c);
+                }
+            }
+            if (rms) {
+                for (let rm of rms) {
+                    children.splice(children.indexOf(rm), 1);
+                }
+            }
+        }
+
+        return true;
     }
 
     public static createRef<C extends GinkgoComponent>(): RefObject<C> {

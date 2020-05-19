@@ -1112,6 +1112,7 @@ export interface GinkgoElement<C extends GinkgoComponent = any> {
     readonly module?: ComponentType<any, any> | ElementType | Function | string;
     children?: Array<GinkgoElement>;
     ref?: refObjectCall | string | RefObject<C>;
+    part?: string;
 }
 export interface RefObject<C extends GinkgoComponent> {
     instance?: C;
@@ -1119,9 +1120,12 @@ export interface RefObject<C extends GinkgoComponent> {
 export default class Ginkgo {
     static Component: typeof GinkgoComponent;
     static Fragment: typeof FragmentComponent;
+    static TakeParts: Array<string>;
+    private static isWarn;
     static createElement<P extends GinkgoElement, T extends GinkgoComponent<P>>(tag: ComponentType<P, T> | ElementType | Function | string, attrs: {
         [key: string]: any;
     }, ...children: Array<GinkgoElement>): GinkgoElement;
+    private static checkTakeParts;
     static createRef<C extends GinkgoComponent>(): RefObject<C>;
     static render<C extends GinkgoComponent, P extends GinkgoElement>(element: GinkgoElement, renderTo: Element): {
         component: C;
