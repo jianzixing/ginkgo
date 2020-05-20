@@ -445,7 +445,7 @@ export declare type DataType = {
     [key: string]: any;
 } | Blob | BufferSource | FormData | URLSearchParams | ReadableStream<Uint8Array> | string | Document;
 export interface HttpConfig {
-    url: string;
+    url?: string;
     method?: "GET" | "POST";
     data?: DataType;
     postQueryString?: boolean;

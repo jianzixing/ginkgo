@@ -15,7 +15,7 @@ interface Response {
 }
 
 export interface HttpConfig {
-    url: string;
+    url?: string;
     method?: "GET" | "POST";
     data?: DataType;
     postQueryString?: boolean;
