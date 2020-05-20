@@ -293,7 +293,13 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                             if (key == "value") {
                                 dom['value'] = p[key];
                             }
-                            dom.setAttribute(key.toLowerCase(), p[key]);
+                            if (key == "src"
+                                && props.module == "img"
+                                && props['src'] == dom.getAttribute("src")) {
+
+                            } else {
+                                dom.setAttribute(key.toLowerCase(), p[key]);
+                            }
                         }
                     }
                 } else if (key == "setInnerHTML") {

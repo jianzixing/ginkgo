@@ -8,6 +8,8 @@ export default class GinkgoT2View extends Ginkgo.Component {
     private span?: RefObject<HTMLComponent> = Ginkgo.createRef();
     private queryEl?: RefObject<HTMLComponent> = Ginkgo.createQuery(this, "div.ccc[dataid='c']");
     private i = 0;
+    private url = "http://localhost:8080/valcode/image.jhtml";
+    private url2 = "http://localhost:8080/valcode/image.jhtml";
 
     render() {
         let testkeys = [];
@@ -52,6 +54,11 @@ export default class GinkgoT2View extends Ginkgo.Component {
 
                 <div part={"auth_1"}>auth_1</div>
                 <div part={"auth_2"}>auth_2</div>
+                <img src={this.url2}
+                     onClick={e => {
+                         this.url2 = this.url + "?t=" + new Date().getTime();
+                         this.forceRender();
+                     }}/>
             </GinkgoT1View>)
     }
 
