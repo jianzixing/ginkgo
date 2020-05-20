@@ -1117,6 +1117,12 @@ export interface GinkgoElement<C extends GinkgoComponent = any> {
 export interface RefObject<C extends GinkgoComponent> {
     instance?: C;
 }
+export declare class QueryObject<C extends GinkgoComponent> {
+    private selector;
+    private component;
+    constructor(component: GinkgoComponent, selector: Array<any>);
+    get instance(): C;
+}
 export default class Ginkgo {
     static Component: typeof GinkgoComponent;
     static Fragment: typeof FragmentComponent;
@@ -1127,6 +1133,7 @@ export default class Ginkgo {
     }, ...children: Array<GinkgoElement>): GinkgoElement;
     private static checkTakeParts;
     static createRef<C extends GinkgoComponent>(): RefObject<C>;
+    static createQuery<C extends GinkgoComponent>(component: GinkgoComponent, ...selector: any): QueryObject<C>;
     static render<C extends GinkgoComponent, P extends GinkgoElement>(element: GinkgoElement, renderTo: Element): {
         component: C;
         props: P;

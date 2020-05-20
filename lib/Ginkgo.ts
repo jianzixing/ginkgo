@@ -87,6 +87,23 @@ export interface RefObject<C extends GinkgoComponent> {
     instance?: C;
 }
 
+export class QueryObject<C extends GinkgoComponent> {
+    private selector: Array<any>;
+    private component: GinkgoComponent;
+
+    constructor(component: GinkgoComponent, selector: Array<any>) {
+        this.component = component;
+        this.selector = selector;
+    }
+
+    get instance(): C {
+        if (this.component && this.selector) {
+            return this.component.query(this.selector) as C;
+        }
+        return null;
+    }
+}
+
 export default class Ginkgo {
     public static Component = GinkgoComponent;
     public static Fragment = FragmentComponent;
@@ -171,6 +188,11 @@ export default class Ginkgo {
 
     public static createRef<C extends GinkgoComponent>(): RefObject<C> {
         return {};
+    }
+
+    public static createQuery<C extends GinkgoComponent>(component: GinkgoComponent,
+                                                         ...selector: any): QueryObject<C> {
+        return new QueryObject(component, selector);
     }
 
     public static render<C extends GinkgoComponent, P extends GinkgoElement>(element: GinkgoElement, renderTo: Element)

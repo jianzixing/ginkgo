@@ -6,6 +6,7 @@ Ginkgo.TakeParts.push("auth_1");
 export default class GinkgoT2View extends Ginkgo.Component {
     private box?: RefObject<HTMLComponent> = Ginkgo.createRef();
     private span?: RefObject<HTMLComponent> = Ginkgo.createRef();
+    private queryEl?: RefObject<HTMLComponent> = Ginkgo.createQuery(this, "div.ccc[dataid='c']");
     private i = 0;
 
     render() {
@@ -78,7 +79,8 @@ export default class GinkgoT2View extends Ginkgo.Component {
         }, 6000);
 
         setTimeout(() => {
-            console.log("query => ", this.query("div.ccc[dataid='c']"));
+            console.log("query1 => ", this.query("div.ccc[dataid='c']"));
+            console.log("query2 => ", this.queryEl.instance);
         });
     }
 }
