@@ -440,16 +440,20 @@ export declare class GinkgoContainer {
 }
 
 
-
 /**GinkgoHttpRequest.d.ts**/
 export declare type DataType = {
     [key: string]: any;
 } | Blob | BufferSource | FormData | URLSearchParams | ReadableStream<Uint8Array> | string | Document;
-interface HttpConfig {
+export interface HttpConfig {
     url: string;
     method?: "GET" | "POST";
     data?: DataType;
     postQueryString?: boolean;
+    withCredentials?: boolean;
+    headers?: {
+        [key: string]: string;
+    };
+    timeout?: number;
 }
 export declare class GinkgoHttpRequest {
     static get(url: string, data?: {
@@ -463,7 +467,6 @@ export declare class GinkgoHttpRequest {
     }): string;
     static queryString2Object(url: string): {};
 }
-export {};
 
 /**GinkgoTools.d.ts**/
 export declare class GinkgoTools {
