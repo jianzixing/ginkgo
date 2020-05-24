@@ -1,9 +1,6 @@
-import {InputComponent} from "./InputComponent";
-
 export type DataType =
     { [key: string]: any }
     | Blob
-    | BufferSource
     | FormData
     | URLSearchParams
     | ReadableStream<Uint8Array>
@@ -95,14 +92,26 @@ export class GinkgoHttpRequest {
                 return;
             } else {
                 http.open(config.method || "POST", url);
-                if (config.data && typeof config.data == "object") {
-                    http.send(JSON.stringify(config.data));
-                } else {
-                    if (config.data) {
-                        http.send("" + config.data);
+                if (config.data) {
+                    //| Blob
+                    //     | BufferSource
+                    //     | FormData
+                    //     | URLSearchParams
+                    //     | ReadableStream<Uint8Array>
+                    //     | string
+                    //     | Document
+                    if (config.data instanceof Blob
+                        || config.data instanceof FormData
+                        || config.data instanceof URLSearchParams
+                        || config.data instanceof ReadableStream
+                        || config.data instanceof Document
+                        || typeof config.data == "string") {
+                        http.send(config.data);
                     } else {
-                        http.send();
+                        http.send(JSON.stringify(config.data));
                     }
+                } else {
+                    http.send();
                 }
             }
 
