@@ -19,8 +19,8 @@
     "isolatedModules": false,
     "moduleResolution": "node",
     "module": "esnext",
-    "target": "es5",
     // 转化成的目标语言
+    "target": "es5",
     "baseUrl": "./",
     "types": [
       "node"

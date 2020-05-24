@@ -50,11 +50,6 @@ export class GinkgoHttpRequest {
         config.method = "POST";
         config.data = data;
 
-        let postQueryString = false;
-        if (typeof data == "object") {
-            postQueryString = true;
-        }
-        config.postQueryString = postQueryString;
         return this.ajax(config);
     }
 
