@@ -454,6 +454,7 @@ export interface HttpConfig {
         [key: string]: string;
     };
     timeout?: number;
+    onprogress?: (e: ProgressEvent) => void;
 }
 export declare class GinkgoHttpRequest {
     static get(url: string, data?: {

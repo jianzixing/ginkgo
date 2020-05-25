@@ -19,6 +19,7 @@ export interface HttpConfig {
     withCredentials?: boolean;
     headers?: { [key: string]: string };
     timeout?: number;
+    onprogress?: (e: ProgressEvent) => void;
 }
 
 function getValue2String(value: any) {
@@ -71,6 +72,12 @@ export class GinkgoHttpRequest {
                 }
             };
 
+            if (config.onprogress) {
+                http.onprogress = function (e) {
+                    config.onprogress(e);
+                }
+            }
+
             if (config.method == "GET") {
                 if (typeof config.data == "object") {
                     let queryString = this.object2QueryString(config.data);
@@ -93,13 +100,6 @@ export class GinkgoHttpRequest {
             } else {
                 http.open(config.method || "POST", url);
                 if (config.data) {
-                    //| Blob
-                    //     | BufferSource
-                    //     | FormData
-                    //     | URLSearchParams
-                    //     | ReadableStream<Uint8Array>
-                    //     | string
-                    //     | Document
                     if (config.data instanceof Blob
                         || config.data instanceof FormData
                         || config.data instanceof URLSearchParams
