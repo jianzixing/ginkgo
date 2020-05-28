@@ -371,6 +371,7 @@ export declare class GinkgoContainer {
      */
     static getLinkByComponent(component: GinkgoComponent): ContextLink;
     static getLinkByElement(element: Node): ContextLink;
+    static getLinkByProps(props: GinkgoElement): ContextLink;
     /**
      * 通过元素配置创建组件
      * @param element
@@ -1143,6 +1144,8 @@ export default class Ginkgo {
         props: P;
     };
     static getComponentStatus(component: GinkgoComponent): string;
+    static getComponentByProps(props: GinkgoElement): GinkgoComponent;
+    static getComponentByDom(dom: Node): GinkgoComponent;
     static unmount(renderTo: Element): void;
     static unmountByElement(element: GinkgoElement, renderTo: Element): void;
     static unmountByComponent(component: GinkgoComponent): void;

@@ -99,8 +99,16 @@ export class GinkgoContainer {
         return null;
     }
 
-    public static getLinkByElement(element: Node) {
+    public static getLinkByElement(element: Node): ContextLink {
         let items = this.context.filter(value => value.holder && value.holder.dom && value.holder.dom === element);
+        if (items && items.length > 0) {
+            return items[0];
+        }
+        return null;
+    }
+
+    public static getLinkByProps(props: GinkgoElement): ContextLink {
+        let items = this.context.filter(value => value.props && value.props === props);
         if (items && items.length > 0) {
             return items[0];
         }

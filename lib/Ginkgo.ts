@@ -220,6 +220,16 @@ export default class Ginkgo {
         }
     }
 
+    public static getComponentByProps(props: GinkgoElement): GinkgoComponent {
+        let link = GinkgoContainer.getLinkByProps(props);
+        if (link) return link.component;
+    }
+
+    public static getComponentByDom(dom: Node): GinkgoComponent {
+        let link = GinkgoContainer.getLinkByElement(dom);
+        if (link) return link.component;
+    }
+
     public static unmount(renderTo: Element): void {
         let link: ContextLink = GinkgoContainer.buildRenderLink(renderTo);
         GinkgoContainer.unmountComponentByLink(link);
