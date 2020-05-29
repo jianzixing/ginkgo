@@ -772,7 +772,6 @@ export class GinkgoCompare {
             if (setRemount) break;
         }
         if (setRemount) {
-            console.log("reorder", children)
             for (let c of children) {
                 if (c.component instanceof HTMLComponent || c.component instanceof TextComponent) {
                     if (c.holder.dom) shouldEl.append(c.holder.dom);
