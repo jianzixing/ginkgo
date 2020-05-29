@@ -218,7 +218,12 @@ export interface HTMLAttributes extends GinkgoElement, DOMAttributes {
     setInnerHTML?: string;
 }
 
-const Exclude2PxName = ["zIndex"];
+const Exclude2PxName = [
+    "zIndex",
+    "fontWeight",
+    "opacity",
+    "fontSizeAdjust"
+];
 
 export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoComponent<P> {
     protected readonly holder: { dom: Element };
