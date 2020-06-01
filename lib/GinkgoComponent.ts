@@ -92,10 +92,14 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      */
     append(props: GinkgoElement | GinkgoElement[] | string): void {
-        let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
-        let newPropsChildren = GinkgoTools.componentAppendProps(link.props as GinkgoElement, props);
-        if (newPropsChildren) {
-            GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
+        try {
+            let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
+            let newPropsChildren = GinkgoTools.componentAppendProps(link.props as GinkgoElement, props);
+            if (newPropsChildren) {
+                GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -104,11 +108,15 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      */
     overlap<E extends GinkgoElement>(props?: E | E[] | string | null | undefined): void {
-        let newPropsChildren = GinkgoTools.componentOverlayProps(props);
-        if (newPropsChildren) {
-            GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
-        } else {
-            GinkgoContainer.unmountComponentByLinkChildren(GinkgoContainer.getLinkByComponent(this));
+        try {
+            let newPropsChildren = GinkgoTools.componentOverlayProps(props);
+            if (newPropsChildren) {
+                GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
+            } else {
+                GinkgoContainer.unmountComponentByLinkChildren(GinkgoContainer.getLinkByComponent(this));
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
