@@ -142,6 +142,8 @@ export class QuerySelector {
             }
         } else if (typeof cnd == "string") {
             cs = this.parseConditionStr(cnd);
+        } else if (typeof cnd == "function") {
+            cs = [{type: 0, object: cnd}];
         }
 
         if (cs && cs.length > 0) {
