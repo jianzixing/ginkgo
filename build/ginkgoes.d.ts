@@ -714,7 +714,7 @@ export interface HTMLAnchorAttributes extends HTMLAttributes {
     media?: string;
     ping?: string;
     rel?: string;
-    target?: string;
+    target?: "_blank" | "_self" | "_parent" | "_top" | string;
     type?: string;
     referrerPolicy?: string;
 }
