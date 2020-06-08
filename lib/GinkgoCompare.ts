@@ -426,9 +426,10 @@ export class GinkgoCompare {
                 // 重新赋值引用获取组件对象
                 this.buildChildrenRef(compareLink);
                 // 如果浏览器元素组件则需要清除已经存在的事件设置，防止事件污染
-                if (component instanceof HTMLComponent) {
-                    component.clearDomEvents();
-                }
+                // 已经使用componentReceiveProps方法做事件替换以及移除
+                // if (component instanceof HTMLComponent) {
+                //     component.clearDomEvents();
+                // }
                 component.componentReceiveProps && component.componentReceiveProps(props, {oldProps, type: "mounted"});
 
                 if (component.componentChildChange && !(component instanceof BindComponent)) {

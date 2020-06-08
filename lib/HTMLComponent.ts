@@ -225,9 +225,21 @@ const Exclude2PxName = [
     "fontSizeAdjust"
 ];
 
+const NonAttrName = [
+    "module",
+    "children",
+    "ref",
+    "setInnerHTML",
+    "key",
+    "style",
+    "className",
+    "part"
+]
+
 export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoComponent<P> {
     protected readonly holder: { dom: Element };
     private componentEventCaches?: { [key: string]: EventHandler };
+    private componentClassNameCaches;
 
     constructor(props?: P, holder?: { dom: Element }) {
         super(props);
@@ -253,68 +265,239 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
             let style = props.style, oldStyle = context && context.oldProps ? context.oldProps.style : null;
             this.clearNullDomStyle(dom, style, oldStyle);
 
-            for (let key in props) {
-                if (key != "module"
-                    && key != "children"
-                    && key != "ref"
-                    && key != "setInnerHTML"
-                    && key != "key") {
-
-                    if (props.style && dom instanceof HTMLElement) {
-                        let style: any = props.style;
-                        if (typeof style == "function") {
-                            style = style();
-                        }
-                        for (let key in style) {
-                            let value = style[key];
-                            if (typeof value == "number" && Exclude2PxName.indexOf(key) === -1) {
-                                value = value + "px";
-                            }
-                            (<any>dom.style)[key] = value;
-                        }
+            let compare = this.comparePropsVersion(props, context.oldProps);
+            if (compare.setStyle) {
+                // 替换旧的style
+                if (props.style && dom instanceof HTMLElement) {
+                    let style: any = props.style;
+                    if (typeof style == "function") {
+                        style = style();
                     }
-                    if (props.className) {
-                        if (props.className instanceof Array) {
-                            dom.className = props.className.join(" ");
-                        } else if (typeof props.className == "function") {
-                            let cls = props.className();
-                            if (cls) {
-                                if (cls instanceof Array) {
-                                    dom.className = cls.join(" ");
-                                } else {
-                                    dom.className = cls;
-                                }
-                            }
-                        } else {
-                            dom.className = props.className;
+                    for (let key in style) {
+                        let value = style[key];
+                        if (typeof value == "number" && Exclude2PxName.indexOf(key) === -1) {
+                            value = value + "px";
                         }
+                        (<any>dom.style)[key] = value;
                     }
+                }
+            }
+            if (compare.setClassName) {
+                // 重新设置css
+                if (compare.classNames) {
+                    dom.className = compare.classNames;
+                } else {
+                    dom.removeAttribute("class");
+                }
+                this.componentClassNameCaches = compare.classNames;
+            }
 
-                    if (key != "style" && key != "className") {
-                        let p: any = props;
+            if (compare.setEvents) {
+                // 替换或者新增事件
+                let events = [];
+                for (let key in props) {
+                    if (NonAttrName.indexOf(key) == -1) {
                         if (this.isEventProps(props, key)) {
                             this.bindDomEvent(props, key);
-                        } else {
+                            events.push(key);
+                        }
+                    }
+                }
+
+                // 移除已经为空的事件
+                while (true) {
+                    let next = false;
+                    for (let eventName in this.componentEventCaches) {
+                        if (events.indexOf(eventName) == -1) {
+                            let evt = this.componentEventCaches[eventName];
+                            if (evt) {
+                                let en = eventName.toLowerCase().substring(2);
+                                dom.removeEventListener(en, evt);
+                            }
+                            this.componentEventCaches[eventName] = undefined;
+                            delete this.componentEventCaches[eventName];
+                            next = true;
+                            break;
+                        }
+                    }
+                    if (!next) break;
+                }
+            }
+
+            if (compare.setAttrs) {
+                // 替换或者新增属性值
+                for (let key in props) {
+                    if (NonAttrName.indexOf(key) == -1) {
+                        if (!this.isEventProps(props, key)) {
                             if (key == "value") {
-                                dom['value'] = p[key];
+                                dom['value'] = props[key];
                             }
                             if (key == "src"
                                 && props.module == "img"
                                 && props['src'] == dom.getAttribute("src")) {
-
                             } else {
-                                dom.setAttribute(key.toLowerCase(), p[key]);
+                                dom.setAttribute(key.toLowerCase(), (props as any)[key]);
                             }
                         }
                     }
-                } else if (key == "setInnerHTML") {
-                    let html = props[key];
-                    if (typeof html === "string") {
-                        dom.innerHTML = html;
+                }
+
+                // 移除设置为空的属性值
+                if (context.oldProps) {
+                    for (let k2 in context.oldProps) {
+                        if (NonAttrName.indexOf(k2) == -1) {
+                            if (!this.isEventProps(context.oldProps, k2) && props[k2] == null) {
+                                dom.removeAttribute(k2.toLowerCase());
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (props["setInnerHTML"]) {
+                let html = props["setInnerHTML"];
+                if (typeof html === "string") {
+                    dom.innerHTML = html;
+                }
+            }
+        }
+    }
+
+    private comparePropsVersion(oldProps, newProps):
+        {
+            setStyle: boolean,
+            styles: { [key: string]: any },
+            setClassName: boolean,
+            classNames: string,
+            setEvents: boolean,
+            setAttrs: boolean
+        } {
+
+        let change: any = {};
+        if (oldProps == null && newProps != null) {
+            return {
+                setStyle: true,
+                styles: newProps.style,
+                setClassName: true,
+                classNames: this.getFinalClassName(newProps),
+                setEvents: true,
+                setAttrs: true
+            }
+        }
+
+        let oldStyle = oldProps.style;
+        let style = newProps.style;
+        if (typeof style == "function") {
+            change.setStyle = style != oldStyle;
+        } else {
+            let r1 = this.isSameObject(oldStyle, style);
+            change.setStyle = !r1;
+        }
+        change.styles = style;
+
+        let oldClassName = this.componentClassNameCaches;
+        let newClassName = this.getFinalClassName(newProps);
+        let r2 = this.isSameClassName(oldClassName, newClassName);
+        change.setClassName = r2;
+        change.classNames = newClassName;
+
+        let r3 = false;
+        let r4 = false;
+        for (let key in newProps) {
+            if (NonAttrName.indexOf(key) == -1) {
+                if (this.isEventProps(newProps, key)) {
+                    if (r3 == false) {
+                        let evt = this.componentEventCaches ? this.componentEventCaches[key] : undefined;
+                        if (evt != newProps[key]) r3 = true;
+                    }
+                } else {
+                    if (r4 == false) {
+                        if (newProps[key] != oldProps[key]) r4 = true;
                     }
                 }
             }
         }
+
+        if (r3 == false && this.componentEventCaches) {
+            for (let cache in this.componentEventCaches) {
+                if (this.componentEventCaches[cache] != newProps[cache]) {
+                    r3 = true;
+                    break;
+                }
+            }
+        }
+        change.setEvents = r3;
+
+        if (r4 == false) {
+            for (let key in oldProps) {
+                if (NonAttrName.indexOf(key) == -1) {
+                    if (!this.isEventProps(oldProps, key)) {
+                        if (newProps[key] != oldProps[key]) {
+                            r4 = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        change.setAttrs = r4;
+
+        return change;
+    }
+
+    private getFinalClassName(props) {
+        let classNames;
+        if (props.className instanceof Array) {
+            classNames = props.className.join(" ");
+        } else if (typeof props.className == "function") {
+            let cls = props.className();
+            if (cls) {
+                if (cls instanceof Array) {
+                    classNames = cls.join(" ");
+                } else {
+                    classNames = cls;
+                }
+            }
+        } else {
+            classNames = props.className;
+        }
+        return classNames;
+    }
+
+    private isSameObject(obj1: Object, obj2: Object): boolean {
+        if (obj1 == null && obj2 != null) return false;
+        if (obj2 == null && obj1 != null) return false;
+        if (obj1 == null && obj2 == null) return true;
+
+        for (let key in obj1) {
+            if (obj2[key] != obj1[key]) return false;
+        }
+        for (let key in obj2) {
+            if (obj2[key] != obj1[key]) return false;
+        }
+
+        return true;
+    }
+
+    private isSameClassName(c1: string, c2: string): boolean {
+        if (c1 == null && c2 != null) return false;
+        if (c1 != null && c2 == null) return false;
+        if (c1 == null && c2 == null) return true;
+
+        let a1 = c1.split(" ");
+        let a2 = c2.split(" ");
+        if (a1.length != a2.length) return false;
+        for (let i1 of a1) {
+            let is = false;
+            for (let i2 of a2) {
+                if (i1.trim() == i2.trim()) {
+                    is = true;
+                    break;
+                }
+            }
+            if (!is) return false;
+        }
+        return true;
     }
 
     private clearNullDomStyle(dom, style, oldStyle) {
@@ -323,41 +506,6 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                 for (let os in oldStyle) {
                     if (style == undefined || style[os] == undefined) {
                         (<any>dom.style)[os] = null;
-                    }
-                }
-            }
-        }
-    }
-
-    clearDomEvents() {
-        if (this.componentEventCaches) {
-            if (this.holder && this.holder.dom) {
-                let dom = this.holder.dom;
-                for (let key in this.componentEventCaches) {
-                    let cacheEvent: EventHandler = this.componentEventCaches[key];
-                    if (cacheEvent) {
-                        let eventName = key.toLowerCase().substring(2);
-                        dom.removeEventListener(eventName, cacheEvent, false);
-                    }
-                }
-            }
-            this.componentEventCaches = {};
-        }
-    }
-
-    bindDomEvents() {
-        let props = this.props;
-        this.clearDomEvents();
-        if (props && this.holder && this.holder.dom) {
-            for (let key in props) {
-                if (key != "module"
-                    && key != "children"
-                    && key != "ref"
-                    && key != "setInnerHTML"
-                    && key != "key") {
-
-                    if (this.isEventProps(props, key)) {
-                        this.bindDomEvent(props, key);
                     }
                 }
             }
