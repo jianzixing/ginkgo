@@ -265,7 +265,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
             let style = props.style, oldStyle = context && context.oldProps ? context.oldProps.style : null;
             this.clearNullDomStyle(dom, style, oldStyle);
 
-            let compare = this.comparePropsVersion(props, context.oldProps);
+            let compare = this.comparePropsVersion(context.oldProps, props);
             if (compare.setStyle) {
                 // 替换旧的style
                 if (props.style && dom instanceof HTMLElement) {
@@ -398,49 +398,49 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         let oldClassName = this.componentClassNameCaches;
         let newClassName = this.getFinalClassName(newProps);
         let r2 = this.isSameClassName(oldClassName, newClassName);
-        change.setClassName = r2;
+        change.setClassName = !r2;
         change.classNames = newClassName;
 
-        let r3 = false;
-        let r4 = false;
+        let r3 = true;
+        let r4 = true;
         for (let key in newProps) {
             if (NonAttrName.indexOf(key) == -1) {
                 if (this.isEventProps(newProps, key)) {
-                    if (r3 == false) {
+                    if (r3 == true) {
                         let evt = this.componentEventCaches ? this.componentEventCaches[key] : undefined;
-                        if (evt != newProps[key]) r3 = true;
+                        if (evt != newProps[key]) r3 = false;
                     }
                 } else {
-                    if (r4 == false) {
-                        if (newProps[key] != oldProps[key]) r4 = true;
+                    if (r4 == true) {
+                        if (newProps[key] != oldProps[key]) r4 = false;
                     }
                 }
             }
         }
 
-        if (r3 == false && this.componentEventCaches) {
+        if (r3 == true && this.componentEventCaches) {
             for (let cache in this.componentEventCaches) {
                 if (this.componentEventCaches[cache] != newProps[cache]) {
-                    r3 = true;
+                    r3 = false;
                     break;
                 }
             }
         }
-        change.setEvents = r3;
+        change.setEvents = !r3;
 
-        if (r4 == false) {
+        if (r4 == true) {
             for (let key in oldProps) {
                 if (NonAttrName.indexOf(key) == -1) {
                     if (!this.isEventProps(oldProps, key)) {
                         if (newProps[key] != oldProps[key]) {
-                            r4 = true;
+                            r4 = false;
                             break;
                         }
                     }
                 }
             }
         }
-        change.setAttrs = r4;
+        change.setAttrs = !r4;
 
         return change;
     }

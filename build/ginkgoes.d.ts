@@ -677,6 +677,7 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
         dom: Element;
     };
     private componentEventCaches?;
+    private componentClassNameCaches;
     constructor(props?: P, holder?: {
         dom: Element;
     });
@@ -686,9 +687,11 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
         oldProps: P;
         type: "new" | "mounted";
     }): void;
+    private comparePropsVersion;
+    private getFinalClassName;
+    private isSameObject;
+    private isSameClassName;
     private clearNullDomStyle;
-    clearDomEvents(): void;
-    bindDomEvents(): void;
     private isEventProps;
     private bindDomEvent;
     reloadClassName(): void;
