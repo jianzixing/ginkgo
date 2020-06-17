@@ -22,7 +22,7 @@ export interface BindComponentElement extends GinkgoElement {
 }
 
 export class BindComponent<P extends BindComponentElement = any> extends GinkgoComponent<P> {
-    constructor(holder: {}, props?: P) {
+    constructor(props?: P, holder?: {}) {
         super(props);
     }
 
