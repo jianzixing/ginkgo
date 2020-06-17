@@ -6,7 +6,7 @@ export interface BindComponentElement extends GinkgoElement {
     component?: new () => any;
 }
 export declare class BindComponent<P extends BindComponentElement = any> extends GinkgoComponent<P> {
-    constructor(holder: {}, props?: P);
+    constructor(props?: P, holder?: {});
     append(props: GinkgoElement | GinkgoElement[] | string): void;
     overlap<E extends GinkgoElement>(props?: E[] | E | string | null | undefined): void;
     forceRender(): void;
