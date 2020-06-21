@@ -253,6 +253,12 @@ export class GinkgoCompare {
                     for (let c of children) {
                         this.mountElements2Dom(c, shouldEl, true, lifecycleComponents);
                     }
+
+                    // 按照列表顺序重新排序 => FragmentComponent的子元素可以有多个所以必须判断重新排序
+                    if (!isShouldLife) {
+                        this.setChildDomSort(shouldEl, children);
+                    }
+
                     mountLink.status = "mount";
 
                     if (isShouldLife) {
@@ -764,6 +770,10 @@ export class GinkgoCompare {
         // 如果不一致则修改状态为remount
 
         // PS : 如果当前组件是自定义组件且顺序不一致这时候计算要更复杂一些
+
+        if (children.length == 1) {
+            return false;
+        }
 
         let domChild = shouldEl.childNodes;
         let domIndex = {int: -1, old: -1};
