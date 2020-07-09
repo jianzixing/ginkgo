@@ -547,8 +547,9 @@ export class GinkgoCompare {
             contentProps = callBindRender(link.props as BindComponentElement);
         }
         if (contentProps && link) {
-            link.root = link;
             let contentLink = this.mountCreateFragment(link, contentProps);
+            link.root = link;
+            this.setContentRoot(link, contentLink);
 
             link.content = contentLink;
             component.content = contentLink.component;
@@ -560,12 +561,22 @@ export class GinkgoCompare {
         return link;
     }
 
+    private setContentRoot(root: ContextLink, content: ContextLink) {
+        if (content && root) {
+            content.root = root;
+            if (content.children) {
+                for (let c of content.children) {
+                    this.setContentRoot(root, c);
+                }
+            }
+        }
+    }
+
     private mountCreateFragmentLink(parent: ContextLink,
                                     props: GinkgoElement | string): ContextLink {
         let component,
             link: ContextLink,
             parentComponent = parent ? parent.component : undefined,
-            rootLink = parent.root,
             wrapper: ComponentWrapper;
 
         this.clearPropsEmptyChildren(props);
@@ -580,7 +591,6 @@ export class GinkgoCompare {
             holder: wrapper.holder,
             props: props,
             parent: parent,
-            root: rootLink,
             status: "new"
         };
 

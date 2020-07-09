@@ -239,6 +239,7 @@ const NonAttrName = [
 export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoComponent<P> {
     protected readonly holder: { dom: Element };
     private componentEventCaches?: { [key: string]: EventHandler };
+    private bindEventCaches?: { [key: string]: EventHandler[] };
     private componentClassNameCaches;
 
     constructor(props?: P, holder?: { dom: Element }) {
@@ -636,5 +637,101 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
             return this.dom.scrollTop;
         }
         return 0;
+    }
+
+    get style(): CSSStyleDeclaration {
+        if (this.dom instanceof HTMLElement) {
+            return this.dom.style;
+        }
+        return null
+    }
+
+    get className(): string {
+        return this.dom.className;
+    }
+
+    set className(name: string): void {
+        if (this.dom) {
+            this.dom.className = name;
+        }
+    }
+
+    attribute(key?: string, value?: string): any {
+        if (this.dom && key && value) {
+            this.dom.setAttribute(key, value);
+        }
+        if (this.dom && key && !value) {
+            return this.dom.getAttribute(key);
+        }
+        if (this.dom && !key && !value) {
+            let names = this.dom.getAttributeNames();
+            let obj = {};
+            for (let k of names) {
+                obj[k] = this.dom.getAttribute(k);
+            }
+            return obj;
+        }
+    }
+
+    html(html?: string): string {
+        if (this.dom && html) {
+            this.dom.innerHTML = html;
+        }
+        if (this.dom && !html) {
+            return this.dom.innerHTML;
+        }
+    }
+
+    text(text?: string): string {
+        if (this.dom && text) {
+            if (typeof this.dom.textContent == "undefined") {
+                (this.dom as any).innerText = text;
+            } else {
+                this.dom.textContent = text;
+            }
+        }
+        if (this.dom && !text) {
+            if (typeof this.dom.textContent == "undefined") {
+                return (this.dom as any).innerText;
+            } else {
+                return this.dom.textContent;
+            }
+        }
+    }
+
+    bind(name: string, callback: any, options?: any): void {
+        if (this.dom) {
+            this.dom.addEventListener(name, callback, options);
+            let events = this.bindEventCaches[name];
+            if (!events) events = [];
+            events.push(callback);
+            this.bindEventCaches[name] = events;
+        }
+    }
+
+    unbind(name: string, callback?: any, options?: any): void {
+        if (this.dom) {
+            if (name && callback) {
+                this.dom.removeEventListener(name, callback, options);
+                let events = this.bindEventCaches[name];
+                if (events && events.indexOf(callback) >= 0) {
+                    events.splice(events.indexOf(callback), 1);
+                }
+                if (events && events.length == 0) {
+                    this.bindEventCaches[name] = undefined;
+                } else {
+                    this.bindEventCaches[name] = events;
+                }
+            }
+            if (name && !callback) {
+                let events = this.bindEventCaches[name];
+                if (events) {
+                    for (let e of events) {
+                        this.dom.removeEventListener(name, e);
+                    }
+                    this.bindEventCaches[name] = undefined;
+                }
+            }
+        }
     }
 }
