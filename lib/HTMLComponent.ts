@@ -650,7 +650,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         return this.dom.className;
     }
 
-    set className(name: string): void {
+    set className(name: string) {
         if (this.dom) {
             this.dom.className = name;
         }

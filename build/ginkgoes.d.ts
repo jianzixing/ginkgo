@@ -677,6 +677,7 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
         dom: Element;
     };
     private componentEventCaches?;
+    private bindEventCaches?;
     private componentClassNameCaches;
     constructor(props?: P, holder?: {
         dom: Element;
@@ -705,6 +706,14 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
     get scrollHeight(): number;
     get scrollLeft(): number;
     get scrollTop(): number;
+    get style(): CSSStyleDeclaration;
+    get className(): string;
+    set className(name: string);
+    attribute(key?: string, value?: string): any;
+    html(html?: string): string;
+    text(text?: string): string;
+    bind(name: string, callback: any, options?: any): void;
+    unbind(name: string, callback?: any, options?: any): void;
 }
 export {};
 
