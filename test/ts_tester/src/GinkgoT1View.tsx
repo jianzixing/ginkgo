@@ -6,10 +6,12 @@ export default class GinkgoT1View extends Ginkgo.Component {
     private animEl?: RefObject<HTMLComponent> = Ginkgo.createRef();
 
     state = {
-        color: '#ffffff'
+        color: '#ffffff',
+        count: 0
     };
 
     render(): GinkgoNode {
+        console.log("......")
         return (
             <div ref={this.bodyEl}>
                 {this.props.children}
@@ -19,13 +21,14 @@ export default class GinkgoT1View extends Ginkgo.Component {
                 <div
                     ref={this.animEl}
                     style={{width: 100, height: 100, backgroundColor: "#000"}}>
-                    <bind render={this.buildChildren} bind={"color"} component={this}/>
+                    <bind render={this.buildChildren} component={this}/>
                 </div>
             </div>
         );
     }
 
     buildChildren(): GinkgoNode {
+        console.log(this.state)
         return <span style={{color: this.state.color}}>children node</span>
     }
 
@@ -36,7 +39,14 @@ export default class GinkgoT1View extends Ginkgo.Component {
         }, 3000);
 
         setTimeout(() => {
-            this.setState({color: '#aaffcc'});
+            this.setState({color: '#aaffcc'}, () => {
+                console.log("state end")
+            });
+            this.setState({count: 1});
+            this.setState({count: 2});
+            this.setState({count: 3});
+            this.setState({count: 4});
+            this.setState({count: 5});
         }, 5000);
     }
 }

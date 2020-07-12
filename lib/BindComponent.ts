@@ -17,7 +17,6 @@ export function callBindRender(props: BindComponentElement) {
 
 export interface BindComponentElement extends GinkgoElement {
     render: Function;
-    bind?: string | string[];
     component?: new () => any;
 }
 

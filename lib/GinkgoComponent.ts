@@ -1,7 +1,14 @@
 import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, BindComponent} from "./Ginkgo";
-import {BindComponentElement} from "./BindComponent";
 import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
+
+type QTks = {
+    promise: Promise<any>,
+    c: GinkgoComponent,
+    queue: Array<{ data: Object, callback: (data?: Object) => void }>,
+    trigger: boolean
+};
+let queueTasks: Array<QTks> = [];
 
 export class GinkgoComponent<P = {}, S = {}> {
 
@@ -151,48 +158,55 @@ export class GinkgoComponent<P = {}, S = {}> {
         GinkgoContainer.rerenderComponentByComponent(this);
     }
 
-    setState(state: { [key: string]: any }): void {
+    setState(state: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> {
         if (state) {
-
-            for (let stateKey in state) {
-                this.state[stateKey] = state[stateKey];
+            let task: QTks;
+            for (let queue of queueTasks) {
+                if (queue.c == this) {
+                    task = queue;
+                    break;
+                }
+            }
+            if (task == null) {
+                task = {
+                    promise: Promise.resolve(),
+                    c: this,
+                    queue: [{data: state, callback: fn}],
+                    trigger: false
+                };
+                queueTasks.push(task);
+            } else {
+                task.queue.push({data: state, callback: fn});
             }
 
-            Ginkgo.forEachChildren(component => {
-                if (component instanceof BindComponent) {
-                    let link = GinkgoContainer.getLinkByComponent(component);
-
-                    let bindProps = link.props as BindComponentElement;
-                    if (bindProps) {
-                        let bindKeys = bindProps.bind;
-                        if (bindKeys) {
-                            if (bindKeys instanceof Array) {
-                                for (let bk of bindKeys) {
-                                    let ks = bk.split(".");
-                                    let data = state;
-                                    for (let k of ks) {
-                                        if (data != undefined) data = data[k]; else break;
-                                    }
-                                    if (data != undefined) {
-                                        GinkgoContainer.forceComponent(link);
-                                    }
-                                }
-                            } else {
-                                let ks = bindKeys.split(".");
-                                let data = state;
-                                for (let k of ks) {
-                                    if (data != undefined) data = data[k]; else break;
-                                }
-                                if (data != undefined) {
-                                    GinkgoContainer.forceComponent(link);
+            if (!task.trigger) {
+                task.trigger = true;
+                task.promise.then(() => {
+                    let queue = task.queue;
+                    if (queue && queue.length > 0) {
+                        queue.forEach(v => {
+                            if (v && v.data) {
+                                for (let stateKey in v.data) {
+                                    this.state[stateKey] = v.data[stateKey];
                                 }
                             }
-                        } else {
-                            GinkgoContainer.forceComponent(link);
-                        }
+                        });
+
+                        this.forceRender();
+
+                        queue.forEach(v => {
+                            if (v && v.callback) {
+                                v.callback(v);
+                            }
+                        });
                     }
-                }
-            }, this);
+
+                    task.trigger = false;
+                    queueTasks.splice(queueTasks.indexOf(task), 1);
+                });
+            }
+
+            return task.promise;
         }
     }
 
