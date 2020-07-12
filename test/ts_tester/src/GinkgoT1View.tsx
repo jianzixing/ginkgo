@@ -13,7 +13,7 @@ export default class GinkgoT1View extends Ginkgo.Component {
     render(): GinkgoNode {
         console.log("......")
         return (
-            <div ref={this.bodyEl}>
+            <div ref={this.bodyEl} name={'a'}>
                 {this.props.children}
                 <input ref={this.inputEl} onChange={(e) => {
                     console.log(this.inputEl.instance.value)
@@ -47,6 +47,8 @@ export default class GinkgoT1View extends Ginkgo.Component {
             this.setState({count: 3});
             this.setState({count: 4});
             this.setState({count: 5});
+
+            console.log(this.query("div[name='a']"));
         }, 5000);
     }
 }

@@ -309,7 +309,9 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     forceRender(): void;
     setState(state: {
         [key: string]: any;
-    }): void;
+    }, fn?: (state?: {
+        [key: string]: any;
+    }) => void): Promise<any>;
     queryAll(...selector: any): Array<GinkgoComponent>;
     query(...selector: any): GinkgoComponent;
 }
