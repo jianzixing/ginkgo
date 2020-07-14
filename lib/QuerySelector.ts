@@ -147,6 +147,16 @@ export class QuerySelector {
         }
 
         if (cs && cs.length > 0) {
+            // 假如 query(input,"type='password'")
+            if (this.condition && this.condition.length >= 1) {
+                if (cs.length > 1 && cs[0].type == 0 && cs[1].type == 2) {
+                    let first = cs.splice(0, 1);
+                    if (first && first.length > 0) cs[0]['key'] = first[0]['name'];
+                }
+                if (cs[0].type == 0 || cs[0].type == 3) {
+                    throw new Error("the " + (this.condition.length + 1) + "th can't use tag or id condition.");
+                }
+            }
             for (let c of cs) {
                 if (c.type == 0) {
                     if (!conditionObjects["module"]) conditionObjects["module"] = {};
