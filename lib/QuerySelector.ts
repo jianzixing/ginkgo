@@ -3,7 +3,7 @@ import {ContextLink} from "./GinkgoContainer";
 
 export class QuerySelector {
     private component: GinkgoComponent;
-    private condition: Array<{ module: {}, class: {}, attr: {}, id: string }>;
+    private condition: Array<{ module: {}, class: {}, attr: {}, id: string, next?: boolean }>;
     private matches: Array<ContextLink> = [];
 
     constructor(component: GinkgoComponent, condition: Array<any>) {
@@ -13,6 +13,22 @@ export class QuerySelector {
             for (let c of condition) {
                 this.condition.push(this.parseCondition(c));
             }
+            if (this.condition && this.condition.length > 0) {
+                let cnd: any = {next: false};
+                let newCnds = [];
+                for (let c of this.condition) {
+                    if (c.next == true) {
+                        newCnds.push(cnd);
+                    } else {
+                        if (c.module) cnd['module'] = c.module;
+                        if (c.id) cnd['id'] = c.id;
+                        if (c.class) cnd['class'] = c.class;
+                        if (c.attr) cnd['attr'] = c.attr;
+                    }
+                }
+                newCnds.push(cnd);
+                this.condition = newCnds;
+            }
         }
     }
 
@@ -21,7 +37,7 @@ export class QuerySelector {
             let link = GinkgoContainer.getLinkByComponent(this.component);
             let content = link.content;
             if (content) {
-                this.matchForEach(content, 0);
+                this.matchForEach(content);
             }
             let arr = [];
             this.matches.map(value => arr.push(value.component));
@@ -30,24 +46,23 @@ export class QuerySelector {
         return [];
     }
 
-    private matchForEach(link: ContextLink, index: number) {
-        if (this.isMatch(link, this.condition[index])) {
-            if (index == this.condition.length - 1) {
-                this.matches.push(link);
-            } else {
-                let children = link.children;
-                if (children) {
-                    for (let c of children) {
-                        index++;
-                        this.matchForEach(c, index);
-                    }
+    private matchForEach(link: ContextLink) {
+        if (this.condition && this.condition.length > 0) {
+            let match = false;
+            for (let cnd of this.condition) {
+                if (this.isMatch(link, cnd)) {
+                    match = true;
+                    break;
                 }
             }
-        } else {
+            if (match) {
+                this.matches.push(link);
+            }
+
             let children = link.children;
             if (children) {
                 for (let c of children) {
-                    this.matchForEach(c, index);
+                    this.matchForEach(c);
                 }
             }
         }
