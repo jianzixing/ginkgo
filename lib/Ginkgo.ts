@@ -152,14 +152,15 @@ export default class Ginkgo {
                 children: childElements
             };
 
-            if (Ginkgo.checkTakeParts(props)) {
+            if (props && Ginkgo.checkTakeParts(props)) {
                 return props;
             }
         }
     }
 
     private static checkTakeParts(props: GinkgoElement): boolean {
-        if (props.part
+        if (props &&
+            props.part
             && props.part != ''
             && Ginkgo.TakeParts
             && Ginkgo.TakeParts instanceof Array
@@ -171,7 +172,7 @@ export default class Ginkgo {
         if (children && children.length > 0) {
             let rms;
             for (let c of children) {
-                if (!Ginkgo.checkTakeParts(c)) {
+                if (c && !Ginkgo.checkTakeParts(c)) {
                     if (!rms) rms = [];
                     rms.push(c);
                 }
