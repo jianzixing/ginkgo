@@ -158,7 +158,7 @@ export class GinkgoComponent<P = {}, S = {}> {
         GinkgoContainer.rerenderComponentByComponent(this);
     }
 
-    setState(state: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> {
+    setState(state?: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> {
         if (state) {
             let task: QTks;
             for (let queue of queueTasks) {
