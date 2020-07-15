@@ -159,55 +159,54 @@ export class GinkgoComponent<P = {}, S = {}> {
     }
 
     setState(state?: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> {
-        if (state) {
-            let task: QTks;
-            for (let queue of queueTasks) {
-                if (queue.c == this) {
-                    task = queue;
-                    break;
-                }
+        if (state == null) state = {};
+        let task: QTks;
+        for (let queue of queueTasks) {
+            if (queue.c == this) {
+                task = queue;
+                break;
             }
-            if (task == null) {
-                task = {
-                    promise: Promise.resolve(),
-                    c: this,
-                    queue: [{data: state, callback: fn}],
-                    trigger: false
-                };
-                queueTasks.push(task);
-            } else {
-                task.queue.push({data: state, callback: fn});
-            }
-
-            if (!task.trigger) {
-                task.trigger = true;
-                task.promise.then(() => {
-                    let queue = task.queue;
-                    if (queue && queue.length > 0) {
-                        queue.forEach(v => {
-                            if (v && v.data) {
-                                for (let stateKey in v.data) {
-                                    this.state[stateKey] = v.data[stateKey];
-                                }
-                            }
-                        });
-
-                        this.forceRender();
-
-                        queue.forEach(v => {
-                            if (v && v.callback) {
-                                v.callback(v);
-                            }
-                        });
-                    }
-
-                    task.trigger = false;
-                    queueTasks.splice(queueTasks.indexOf(task), 1);
-                });
-            }
-
-            return task.promise;
         }
+        if (task == null) {
+            task = {
+                promise: Promise.resolve(),
+                c: this,
+                queue: [{data: state, callback: fn}],
+                trigger: false
+            };
+            queueTasks.push(task);
+        } else {
+            task.queue.push({data: state, callback: fn});
+        }
+
+        if (!task.trigger) {
+            task.trigger = true;
+            task.promise.then(() => {
+                let queue = task.queue;
+                if (queue && queue.length > 0) {
+                    queue.forEach(v => {
+                        if (v && v.data) {
+                            for (let stateKey in v.data) {
+                                this.state[stateKey] = v.data[stateKey];
+                            }
+                        }
+                    });
+
+                    this.forceRender();
+
+                    queue.forEach(v => {
+                        if (v && v.callback) {
+                            v.callback(v);
+                        }
+                    });
+                }
+
+                task.trigger = false;
+                queueTasks.splice(queueTasks.indexOf(task), 1);
+            });
+        }
+
+        return task.promise;
     }
 
     queryAll(...selector: any): Array<GinkgoComponent> {
