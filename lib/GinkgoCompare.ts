@@ -291,6 +291,8 @@ export class GinkgoCompare {
                                 component.componentDidMount && component.componentDidMount();
                             }
                         }
+                    } else {
+                        mountLink.status = "mount";
                     }
                 }
             }
