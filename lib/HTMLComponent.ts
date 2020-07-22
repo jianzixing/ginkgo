@@ -264,7 +264,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
             let dom = this.holder.dom;
 
             let style = props.style, oldStyle = context && context.oldProps ? context.oldProps.style : null;
-            this.clearNullDomStyle(dom, style, oldStyle);
+            if (typeof style == "object") this.clearNullDomStyle(dom, style, oldStyle);
 
             let compare = this.comparePropsVersion(context.oldProps, props);
             if (compare.setStyle) {
@@ -274,12 +274,16 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                     if (typeof style == "function") {
                         style = style();
                     }
-                    for (let key in style) {
-                        let value = style[key];
-                        if (typeof value == "number" && Exclude2PxName.indexOf(key) === -1) {
-                            value = value + "px";
+                    if (typeof style == "object") {
+                        for (let key in style) {
+                            let value = style[key];
+                            if (typeof value == "number" && Exclude2PxName.indexOf(key) === -1) {
+                                value = value + "px";
+                            }
+                            (<any>dom.style)[key] = value;
                         }
-                        (<any>dom.style)[key] = value;
+                    } else if (typeof style == "string") {
+                        dom.setAttribute("style", style);
                     }
                 }
             }
@@ -367,7 +371,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
     private comparePropsVersion(oldProps, newProps):
         {
             setStyle: boolean,
-            styles: { [key: string]: any },
+            styles: { [key: string]: any } | string,
             setClassName: boolean,
             classNames: string,
             setEvents: boolean,
@@ -469,6 +473,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         if (obj1 == null && obj2 != null) return false;
         if (obj2 == null && obj1 != null) return false;
         if (obj1 == null && obj2 == null) return true;
+        if (obj1 != null && obj2 != null && obj1 == obj2) return true;
 
         for (let key in obj1) {
             if (obj2[key] != obj1[key]) return false;
