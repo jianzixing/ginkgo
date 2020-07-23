@@ -37,7 +37,7 @@ export class GinkgoCompare {
 
             // 如果this.parent只有已经挂载了才能挂载子元素
             if (this.parent.status == "mount") {
-                this.mountElement.syncVirtualDom(this.parent, this.parent.shouldEl, false, this.skips);
+                this.mountElement.syncVirtualDom(this.parent, this.skips);
             }
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);
@@ -70,7 +70,7 @@ export class GinkgoCompare {
 
             // 如果this.parent只有已经挂载了才能挂载子元素
             if (this.parent.status == "mount") {
-                this.mountElement.syncVirtualDom(this.parent, this.parent.shouldEl, false, this.skips);
+                this.mountElement.syncVirtualDom(this.parent, this.skips);
             }
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);
@@ -99,7 +99,7 @@ export class GinkgoCompare {
 
             // 如果this.parent只有已经挂载了才能挂载子元素
             if (this.parent.status == "mount") {
-                this.mountElement.syncVirtualDom(this.parent, this.parent.shouldEl, false, this.skips);
+                this.mountElement.syncVirtualDom(this.parent, this.skips);
             }
         }
 
@@ -415,7 +415,7 @@ export class GinkgoCompare {
         let children = link.children;
         if (children && children.length > 0) {
             for (let c of children) {
-                this.setContentVirtualParent(virtualParent, c);
+                this.setContentVirtualParent(link, c);
             }
         }
     }

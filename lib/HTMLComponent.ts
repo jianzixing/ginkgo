@@ -403,7 +403,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         let newClassName = this.getFinalClassName(newProps);
         // 默认css是重新设置的，减少相同判断提高效率
         // 去掉isSameClassName判断
-        change.setClassName = true;
+        change.setClassName = !(this.componentClassNameCaches === newClassName);
         change.classNames = newClassName;
 
         let r3 = true;
@@ -470,19 +470,8 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
     }
 
     private isSameObject(obj1: Object, obj2: Object): boolean {
-        if (obj1 == null && obj2 != null) return false;
-        if (obj2 == null && obj1 != null) return false;
-        if (obj1 == null && obj2 == null) return true;
-        if (obj1 != null && obj2 != null && obj1 == obj2) return true;
-
-        for (let key in obj1) {
-            if (obj2[key] != obj1[key]) return false;
-        }
-        for (let key in obj2) {
-            if (obj2[key] != obj1[key]) return false;
-        }
-
-        return true;
+        if (obj1 === obj2) return true;
+        return false;
     }
 
     /**

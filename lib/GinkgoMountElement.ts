@@ -23,11 +23,182 @@ export class GinkgoMountElement {
         }
     }
 
-    public syncVirtualDom(mountLink: ContextLink, shouldEl: Element, isShouldLife, skips) {
+    public syncVirtualDom(mountLink: ContextLink, skips) {
+        let component = mountLink.component;
         let lifecycleComponents = [];
-        this.mountElements2Dom(mountLink, shouldEl, isShouldLife, lifecycleComponents, skips);
+        let shouldEl = mountLink.shouldEl;
+        if (component instanceof HTMLComponent
+            || component instanceof TextComponent
+            || component instanceof FragmentComponent) {
+            // 遍历children
+            this.mountElementChildren(mountLink, shouldEl, lifecycleComponents, skips);
+        } else {
+            // 遍历content
+            let content = mountLink.content;
+            if (content) {
+                content.shouldEl = mountLink.shouldEl;
+                this.mountElementChildren(content, shouldEl, lifecycleComponents, skips);
+            }
+        }
         this.goAfterDomLife(lifecycleComponents);
+        // let lifecycleComponents = [];
+        // this.mountElements2Dom(mountLink, mountLink.shouldEl, false, lifecycleComponents, skips);
+        // this.goAfterDomLife(lifecycleComponents);
     }
+
+    private mountElementChildren(mountLink: ContextLink, shouldEl: Element, lifecycleComponents, skips) {
+        // 跳过排除的,节约遍历时间
+        if (skips && skips.indexOf(mountLink) >= 0) {
+            return;
+        }
+
+        let component = mountLink.component;
+        let isShouldLife = true;
+        if (mountLink.status == "mount" || mountLink.status == "remount") {
+            isShouldLife = false;
+        }
+        if (mountLink.status == "mount") {
+            shouldEl = mountLink.shouldEl;
+        } else {
+            mountLink.shouldEl = shouldEl;
+        }
+
+        if (component instanceof HTMLComponent || component instanceof TextComponent) {
+            let component = mountLink.component,
+                props = mountLink.props;
+
+            if (isShouldLife) {
+                component.componentWillMount && component.componentWillMount();
+                lifecycleComponents.push(mountLink);
+
+                if (component instanceof HTMLComponent && typeof props === "object") {
+                    let type = props.module;
+                    if (typeof type == "string") {
+                        let el = document.createElement(type);
+                        if (shouldEl) {
+                            shouldEl.append(el);
+                            mountLink.status = "mount";
+                        }
+                        mountLink.holder.dom = el;
+                        shouldEl = el;
+                    } else {
+                        throw Error("not support html tag " + type + ".");
+                    }
+                }
+
+                if (component instanceof TextComponent && GinkgoContainer.isBaseType(props)) {
+                    if (shouldEl && component.text != null && component.text != undefined) {
+                        let text = document.createTextNode("" + component.text);
+                        shouldEl.append(text);
+                        mountLink.status = "mount";
+                        if (mountLink) {
+                            if (!mountLink.holder) {
+                                mountLink.holder = {dom: text};
+                            } else {
+                                mountLink.holder.dom = text;
+                            }
+                        }
+                    }
+                }
+
+                mountLink.shouldEl = shouldEl;
+            } else {
+                // 假如第一次content已经挂载children元素，之后多次重新挂载状态不变，element重新添加
+                let el = mountLink && mountLink.holder ? mountLink.holder.dom : undefined;
+                if (mountLink.status == "remount") {
+                    if (el && component instanceof TextComponent && GinkgoContainer.isBaseType(mountLink.props)) {
+                        el.textContent = "" + mountLink.props;
+                    }
+                }
+            }
+
+            let children = mountLink.children;
+            if (children && children.length > 0) {
+                for (let c of children) {
+                    this.mountElementChildren(c, shouldEl, lifecycleComponents, skips);
+                }
+
+                // 按照列表顺序重新排序
+                if (!isShouldLife) {
+                    this.setChildDomSort(shouldEl, children);
+                }
+            }
+
+            if (isShouldLife) {
+                if (!lifecycleComponents) {
+                    component.componentReceiveProps && component.componentReceiveProps(props, {
+                        oldProps: {},
+                        type: "new"
+                    });
+                    component.componentDidMount && component.componentDidMount();
+                }
+            }
+        } else {
+            if (shouldEl && mountLink) {
+                let component = mountLink.component;
+                let props = mountLink.props;
+
+                if (component instanceof FragmentComponent) {
+                    let children = mountLink.children;
+
+                    if (isShouldLife) {
+                        component.componentWillMount && component.componentWillMount();
+                        lifecycleComponents.push(mountLink);
+                    }
+
+                    for (let c of children) {
+                        this.mountElementChildren(c, shouldEl, lifecycleComponents, skips);
+                    }
+
+                    // 按照列表顺序重新排序 => FragmentComponent的子元素可以有多个所以必须判断重新排序
+                    if (!isShouldLife) {
+                        this.setChildDomSort(shouldEl, children);
+                    }
+
+                    mountLink.status = "mount";
+
+                    if (isShouldLife) {
+                        if (!lifecycleComponents) {
+                            component.componentReceiveProps && component.componentReceiveProps(props, {
+                                oldProps: {},
+                                type: "new"
+                            });
+                            component.componentDidMount && component.componentDidMount();
+                        }
+                    }
+                } else {
+                    if (mountLink.content) {
+                        let content = mountLink.content;
+
+                        if (isShouldLife) {
+                            component.componentWillMount && component.componentWillMount();
+                            lifecycleComponents.push(mountLink);
+                        }
+                        if (content.status == "new" || content.status == "remount") {
+                            this.mountElementChildren(content, shouldEl, lifecycleComponents, skips);
+                        } else {
+                            // let nextDom = this.getComponentFirstRealDom(content);
+                            // if (nextDom) shouldEl.append(nextDom);
+                        }
+                        mountLink.status = "mount";
+
+                        if (isShouldLife) {
+                            if (!lifecycleComponents) {
+                                component.componentReceiveProps && component.componentReceiveProps(props, {
+                                    oldProps: {},
+                                    type: "new"
+                                });
+                                component.componentDidMount && component.componentDidMount();
+                            }
+                        }
+                    } else {
+                        mountLink.status = "mount";
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * componentReceiveProps 和 componentDidMount 后发执行,顺序改为先添加好所有dom然后再走生命周期
@@ -60,8 +231,7 @@ export class GinkgoMountElement {
 
         if (parentComponent instanceof HTMLComponent || parentComponent instanceof TextComponent) {
             let component = mountLink.component,
-                props = mountLink.props,
-                traverseChildren = true;
+                props = mountLink.props;
 
             if (isShouldLife) {
                 component.componentWillMount && component.componentWillMount();
@@ -107,17 +277,15 @@ export class GinkgoMountElement {
                 }
             }
 
-            if (traverseChildren) {
-                let children = mountLink.children;
-                if (children && children.length > 0) {
-                    for (let c of children) {
-                        this.mountElements2Dom(c, shouldEl, true, lifecycleComponents, skips);
-                    }
+            let children = mountLink.children;
+            if (children && children.length > 0) {
+                for (let c of children) {
+                    this.mountElements2Dom(c, shouldEl, true, lifecycleComponents, skips);
+                }
 
-                    // 按照列表顺序重新排序
-                    if (!isShouldLife) {
-                        this.setChildDomSort(shouldEl, children);
-                    }
+                // 按照列表顺序重新排序
+                if (!isShouldLife) {
+                    this.setChildDomSort(shouldEl, children);
                 }
             }
 

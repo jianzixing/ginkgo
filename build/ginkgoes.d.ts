@@ -150,7 +150,8 @@ export declare const GinkgoAnimation: typeof anime;
 /** GinkgoMountElement.d.ts* */
 export declare class GinkgoMountElement {
     private goAfterDomLife;
-    syncVirtualDom(mountLink: ContextLink, shouldEl: Element, isShouldLife: any, skips: any): void;
+    syncVirtualDom(mountLink: ContextLink, skips: any): void;
+    private mountElementChildren;
     /**
      * componentReceiveProps 和 componentDidMount 后发执行,顺序改为先添加好所有dom然后再走生命周期
      * 这样就可以避免componentReceiveProps内重新绘制时样式或者一些其他问题,所以参数lifecycleComponents
