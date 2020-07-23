@@ -693,7 +693,6 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
     private comparePropsVersion;
     private getFinalClassName;
     private isSameObject;
-    private isSameClassName;
     private clearNullDomStyle;
     private isEventProps;
     private bindDomEvent;

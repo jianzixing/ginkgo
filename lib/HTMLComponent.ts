@@ -400,10 +400,10 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         }
         change.styles = style;
 
-        let oldClassName = this.componentClassNameCaches;
         let newClassName = this.getFinalClassName(newProps);
-        let r2 = this.isSameClassName(oldClassName, newClassName);
-        change.setClassName = !r2;
+        // 默认css是重新设置的，减少相同判断提高效率
+        // 去掉isSameClassName判断
+        change.setClassName = true;
         change.classNames = newClassName;
 
         let r3 = true;
@@ -485,26 +485,28 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         return true;
     }
 
-    private isSameClassName(c1: string, c2: string): boolean {
-        if (c1 == null && c2 != null) return false;
-        if (c1 != null && c2 == null) return false;
-        if (c1 == null && c2 == null) return true;
-
-        let a1 = c1.split(" ");
-        let a2 = c2.split(" ");
-        if (a1.length != a2.length) return false;
-        for (let i1 of a1) {
-            let is = false;
-            for (let i2 of a2) {
-                if (i1.trim() == i2.trim()) {
-                    is = true;
-                    break;
-                }
-            }
-            if (!is) return false;
-        }
-        return true;
-    }
+    /**
+     *  private isSameClassName(c1: string, c2: string): boolean {
+     *     if (c1 == null && c2 != null) return false;
+     *     if (c1 != null && c2 == null) return false;
+     *     if (c1 == null && c2 == null) return true;
+     *
+     *     let a1 = c1.split(" ");
+     *     let a2 = c2.split(" ");
+     *     if (a1.length != a2.length) return false;
+     *     for (let i1 of a1) {
+     *         let is = false;
+     *         for (let i2 of a2) {
+     *             if (i1.trim() == i2.trim()) {
+     *                 is = true;
+     *                 break;
+     *             }
+     *         }
+     *         if (!is) return false;
+     *     }
+     *     return true;
+     * }
+     **/
 
     private clearNullDomStyle(dom, style, oldStyle) {
         if (style != oldStyle) {
