@@ -36,7 +36,9 @@ export class GinkgoMountElement {
             // 遍历content
             let content = mountLink.content;
             if (content) {
-                content.shouldEl = mountLink.shouldEl;
+                if (content.status == "new") {
+                    content.shouldEl = mountLink.shouldEl;
+                }
                 this.mountElementChildren(content, shouldEl, lifecycleComponents, skips);
             }
         }
