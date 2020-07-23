@@ -78,12 +78,26 @@ export class GinkgoComponent<P = {}, S = {}> {
      * 每次执行对比时的新的属性对象
      * 无论属性对象是否一致该方法每次对比时都会执行
      *
+     * 当组件第一次创建和每次更新时都会调用执行
+     *
      * @param props
      * @param context
      */
     componentReceiveProps?(props: P, context?: { oldProps: P, type: "new" | "mounted" }): void;
 
-    update(props: P | string, propsValue?: any) {
+    /**
+     * 每次执行对比时的新的属性对象
+     * 无论属性对象是否一致该方法每次对比时都会执行
+     *
+     * 当组件第一次创建时不会调用次方法，只有当组件更新时会调用次方法
+     * 相当于componentReceiveProps(props,{oldProps,type:"mounted"})
+     *
+     * @param props
+     * @param context
+     */
+    componentUpdateProps?(props: P, context?: { oldProps: P }): void;
+
+    set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {
             props = {...this.props, ...props};
             GinkgoContainer.updateComponentProps(this, props);

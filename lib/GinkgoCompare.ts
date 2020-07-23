@@ -439,6 +439,7 @@ export class GinkgoCompare {
                 //     component.clearDomEvents();
                 // }
                 component.componentReceiveProps && component.componentReceiveProps(props, {oldProps, type: "mounted"});
+                component.componentUpdateProps && component.componentUpdateProps(props, {oldProps});
 
                 if (component.componentChildChange && !(component instanceof BindComponent)) {
                     let newChild = props.children;

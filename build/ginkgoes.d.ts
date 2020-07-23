@@ -287,6 +287,8 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * 每次执行对比时的新的属性对象
      * 无论属性对象是否一致该方法每次对比时都会执行
      *
+     * 当组件第一次创建和每次更新时都会调用执行
+     *
      * @param props
      * @param context
      */
@@ -294,7 +296,20 @@ export declare class GinkgoComponent<P = {}, S = {}> {
         oldProps: P;
         type: "new" | "mounted";
     }): void;
-    update(props: P | string, propsValue?: any): void;
+    /**
+     * 每次执行对比时的新的属性对象
+     * 无论属性对象是否一致该方法每次对比时都会执行
+     *
+     * 当组件第一次创建时不会调用次方法，只有当组件更新时会调用次方法
+     * 相当于componentReceiveProps(props,{oldProps,type:"mounted"})
+     *
+     * @param props
+     * @param context
+     */
+    componentUpdateProps?(props: P, context?: {
+        oldProps: P;
+    }): void;
+    set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素
      * @param props
@@ -307,7 +322,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     overlap<E extends GinkgoElement>(props?: E | E[] | string | null | undefined): void;
     remove(props: GinkgoElement | GinkgoElement[]): void;
     forceRender(): void;
-    setState(state: {
+    setState(state?: {
         [key: string]: any;
     }, fn?: (state?: {
         [key: string]: any;
