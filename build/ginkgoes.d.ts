@@ -147,9 +147,29 @@ declare namespace anime {
 declare function removeTargets(targets: any): void;
 export declare const GinkgoAnimation: typeof anime;
 
+/** GinkgoMountElement.d.ts* */
+export declare class GinkgoMountElement {
+    private goAfterDomLife;
+    syncVirtualDom(mountLink: ContextLink, shouldEl: Element, isShouldLife: any, skips: any): void;
+    /**
+     * componentReceiveProps 和 componentDidMount 后发执行,顺序改为先添加好所有dom然后再走生命周期
+     * 这样就可以避免componentReceiveProps内重新绘制时样式或者一些其他问题,所以参数lifecycleComponents
+     * 用来存放这些组件
+     *
+     * @param mountLink
+     * @param shouldEl
+     * @param isShouldLife
+     */
+    private mountElements2Dom;
+    private setChildDomSort;
+    private isChildrenRemountOrder;
+    private isChildrenOrderIndex;
+    private getComponentFirstRealDom;
+}
 
 /** GinkgoCompare.d.ts **/
 export declare class GinkgoCompare {
+    private readonly mountElement;
     private readonly context;
     private readonly parent;
     private elements?;
@@ -173,18 +193,7 @@ export declare class GinkgoCompare {
      * 触发重新渲染BindComponent的子元素
      */
     force(): Array<ContextLink>;
-    private goAfterDomLife;
     setSkipCompare(elements: ContextLink[]): void;
-    /**
-     * componentReceiveProps 和 componentDidMount 后发执行,顺序改为先添加好所有dom然后再走生命周期
-     * 这样就可以避免componentReceiveProps内重新绘制时样式或者一些其他问题,所以参数lifecycleComponents
-     * 用来存放这些组件
-     *
-     * @param mountLink
-     * @param shouldEl
-     * @param isShouldLife
-     */
-    private mountElements2Dom;
     private mountDiffElements;
     /**
      *
@@ -195,12 +204,12 @@ export declare class GinkgoCompare {
     private mountDiffFragment;
     private mountCreateElements;
     private mountCreateFragment;
+    private setContentRoot;
     private mountCreateFragmentLink;
     private setContentVirtualParent;
     private buildChildrenRef;
     private beforeProcessProps;
     private clearPropsEmptyChildren;
-    private getLinkParentShouldEl;
     private resetContextLinkStatus;
     /**
      * 对比新旧对象将最相近的对象放在一起
@@ -209,10 +218,6 @@ export declare class GinkgoCompare {
      * @param newChildren
      */
     private alignNewOldPropsChildren;
-    private setChildDomSort;
-    private isChildrenRemountOrder;
-    private isChildrenOrderIndex;
-    private getComponentFirstRealDom;
 }
 
 
