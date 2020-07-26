@@ -238,13 +238,13 @@ export class QuerySelector {
 
 
 /**GinkgoComponent.d.ts**/
-declare type ContextUpdate<P> = {
+export declare type ContextUpdate<P> = {
     oldProps: P;
     childChange?: boolean;
     children?: Array<GinkgoElement>;
     oldChildren?: Array<GinkgoElement>;
 };
-declare type ContextReceive<P> = {
+export declare type ContextReceive<P> = {
     oldProps: P;
     type: "new" | "mounted";
     childChange?: boolean;

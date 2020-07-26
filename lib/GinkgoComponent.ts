@@ -2,14 +2,14 @@ import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, BindCom
 import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
 
-type ContextUpdate<P> = {
+export type ContextUpdate<P> = {
     oldProps: P,
     childChange?: boolean,
     children?: Array<GinkgoElement>,
     oldChildren?: Array<GinkgoElement>
 };
 
-type ContextReceive<P> = {
+export type ContextReceive<P> = {
     oldProps: P,
     type: "new" | "mounted",
     childChange?: boolean,
