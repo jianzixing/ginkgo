@@ -244,12 +244,10 @@ export class GinkgoCompare {
 
                 // 重新赋值引用获取组件对象
                 this.buildChildrenRef(compareLink);
-                component.componentReceiveProps && component.componentReceiveProps(props, {oldProps, type: "mounted"});
-                component.componentUpdateProps && component.componentUpdateProps(props, {oldProps});
-
+                let isChildrenChanged = false;
+                let newChild = props.children;
+                let oldChild = oldProps.children;
                 if (component.componentChildChange && !(component instanceof BindComponent)) {
-                    let newChild = props.children;
-                    let oldChild = oldProps.children;
 
                     let changed = false;
                     if ((newChild != null || oldChild != null)
@@ -271,8 +269,26 @@ export class GinkgoCompare {
                     }
 
                     if (changed) {
-                        component.componentChildChange(newChild, oldChild);
+                        isChildrenChanged = true;
                     }
+                }
+
+                let contextWrap: any = {
+                    oldProps
+                }
+                if (isChildrenChanged) {
+                    contextWrap.childChange = true;
+                    contextWrap.children = newChild;
+                    contextWrap.oldChildren = oldChild;
+                }
+                component.componentReceiveProps && component.componentReceiveProps(props, {
+                    ...contextWrap,
+                    type: "mounted"
+                });
+                component.componentUpdateProps && component.componentUpdateProps(props, contextWrap);
+
+                if (isChildrenChanged) {
+                    component.componentChildChange(newChild, oldChild);
                 }
 
                 // 如果是Bind组件则调用组件更新获取最新的绑定元素

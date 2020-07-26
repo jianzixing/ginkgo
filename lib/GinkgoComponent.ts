@@ -83,7 +83,13 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentReceiveProps?(props: P, context?: { oldProps: P, type: "new" | "mounted" }): void;
+    componentReceiveProps?(props: P, context?: {
+        oldProps: P,
+        type: "new" | "mounted",
+        childChange?: boolean,
+        children?: Array<GinkgoElement>,
+        oldChildren?: Array<GinkgoElement>
+    }): void;
 
     /**
      * 每次执行对比时的新的属性对象
@@ -95,7 +101,12 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentUpdateProps?(props: P, context?: { oldProps: P }): void;
+    componentUpdateProps?(props: P, context?: {
+        oldProps: P,
+        childChange?: boolean,
+        children?: Array<GinkgoElement>,
+        oldChildren?: Array<GinkgoElement>
+    }): void;
 
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {

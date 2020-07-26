@@ -301,6 +301,9 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     componentReceiveProps?(props: P, context?: {
         oldProps: P;
         type: "new" | "mounted";
+        childChange?: boolean;
+        children?: Array<GinkgoElement>;
+        oldChildren?: Array<GinkgoElement>;
     }): void;
     /**
      * 每次执行对比时的新的属性对象
@@ -314,6 +317,9 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      */
     componentUpdateProps?(props: P, context?: {
         oldProps: P;
+        childChange?: boolean;
+        children?: Array<GinkgoElement>;
+        oldChildren?: Array<GinkgoElement>;
     }): void;
     set(props: P | string, propsValue?: any): void;
     /**
