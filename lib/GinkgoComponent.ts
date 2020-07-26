@@ -2,6 +2,21 @@ import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, BindCom
 import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
 
+type ContextUpdate<P> = {
+    oldProps: P,
+    childChange?: boolean,
+    children?: Array<GinkgoElement>,
+    oldChildren?: Array<GinkgoElement>
+};
+
+type ContextReceive<P> = {
+    oldProps: P,
+    type: "new" | "mounted",
+    childChange?: boolean,
+    children?: Array<GinkgoElement>,
+    oldChildren?: Array<GinkgoElement>
+}
+
 type QTks = {
     promise: Promise<any>,
     c: GinkgoComponent,
@@ -83,13 +98,7 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentReceiveProps?(props: P, context?: {
-        oldProps: P,
-        type: "new" | "mounted",
-        childChange?: boolean,
-        children?: Array<GinkgoElement>,
-        oldChildren?: Array<GinkgoElement>
-    }): void;
+    componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
 
     /**
      * 每次执行对比时的新的属性对象
@@ -101,12 +110,7 @@ export class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentUpdateProps?(props: P, context?: {
-        oldProps: P,
-        childChange?: boolean,
-        children?: Array<GinkgoElement>,
-        oldChildren?: Array<GinkgoElement>
-    }): void;
+    componentUpdateProps?(props: P, context?: ContextUpdate<P>): void;
 
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {

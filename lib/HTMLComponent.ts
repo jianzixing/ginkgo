@@ -259,7 +259,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         }
     }
 
-    componentReceiveProps(props: P, context?: { oldProps: P, type: "new" | "mounted" }): void {
+    componentReceiveProps(props: P, context?): void {
         if (props && this.holder && this.holder.dom) {
             let dom = this.holder.dom;
 

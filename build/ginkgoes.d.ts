@@ -238,6 +238,19 @@ export class QuerySelector {
 
 
 /**GinkgoComponent.d.ts**/
+declare type ContextUpdate<P> = {
+    oldProps: P;
+    childChange?: boolean;
+    children?: Array<GinkgoElement>;
+    oldChildren?: Array<GinkgoElement>;
+};
+declare type ContextReceive<P> = {
+    oldProps: P;
+    type: "new" | "mounted";
+    childChange?: boolean;
+    children?: Array<GinkgoElement>;
+    oldChildren?: Array<GinkgoElement>;
+};
 export declare class GinkgoComponent<P = {}, S = {}> {
     /**
      * current component parent
@@ -298,13 +311,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentReceiveProps?(props: P, context?: {
-        oldProps: P;
-        type: "new" | "mounted";
-        childChange?: boolean;
-        children?: Array<GinkgoElement>;
-        oldChildren?: Array<GinkgoElement>;
-    }): void;
+    componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
     /**
      * 每次执行对比时的新的属性对象
      * 无论属性对象是否一致该方法每次对比时都会执行
@@ -315,12 +322,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param props
      * @param context
      */
-    componentUpdateProps?(props: P, context?: {
-        oldProps: P;
-        childChange?: boolean;
-        children?: Array<GinkgoElement>;
-        oldChildren?: Array<GinkgoElement>;
-    }): void;
+    componentUpdateProps?(props: P, context?: ContextUpdate<P>): void;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素

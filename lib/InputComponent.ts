@@ -68,7 +68,7 @@ export class InputComponent<P extends HTMLInputAttributes = any> extends HTMLCom
         }
     }
 
-    componentReceiveProps(props: P, context?: { oldProps: P, type: "new" | "mounted" }): void {
+    componentReceiveProps(props: P, context?): void {
         super.componentReceiveProps(props, context);
     }
 }
