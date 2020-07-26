@@ -169,13 +169,14 @@ export class GinkgoMountElement {
                         }
                     }
                 } else {
+                    if (isShouldLife) {
+                        component.componentWillMount && component.componentWillMount();
+                        lifecycleComponents.push(mountLink);
+                    }
+
                     if (mountLink.content) {
                         let content = mountLink.content;
 
-                        if (isShouldLife) {
-                            component.componentWillMount && component.componentWillMount();
-                            lifecycleComponents.push(mountLink);
-                        }
                         if (content.status == "new" || content.status == "remount") {
                             this.mountElementChildren(content, shouldEl, lifecycleComponents, skips);
                         } else {
@@ -183,18 +184,18 @@ export class GinkgoMountElement {
                             // if (nextDom) shouldEl.append(nextDom);
                         }
                         mountLink.status = "mount";
-
-                        if (isShouldLife) {
-                            if (!lifecycleComponents) {
-                                component.componentReceiveProps && component.componentReceiveProps(props, {
-                                    oldProps: {},
-                                    type: "new"
-                                });
-                                component.componentDidMount && component.componentDidMount();
-                            }
-                        }
                     } else {
                         mountLink.status = "mount";
+                    }
+
+                    if (isShouldLife) {
+                        if (!lifecycleComponents) {
+                            component.componentReceiveProps && component.componentReceiveProps(props, {
+                                oldProps: {},
+                                type: "new"
+                            });
+                            component.componentDidMount && component.componentDidMount();
+                        }
                     }
                 }
             }
