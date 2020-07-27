@@ -211,6 +211,24 @@ export declare class GinkgoCompare {
     private buildChildrenRef;
     private beforeProcessProps;
     private clearPropsEmptyChildren;
+    /**
+     * 假如有一个全局对象 c = <span></span>
+     * <div>
+     *     <div>
+     *         位置A
+     *     </div>
+     *     <div>
+     *         位置B {c}
+     *     </div>
+     * </div>
+     * 第一种情况
+     * 如果全局对象c从位置B变到位置A，则先diff位置A这时发现c已经存在
+     * 第二种情况
+     * 如果全局对象c从位置A变到位置B，则先diff位置A没有问题，在diff位置
+     * B这是发现已经存在c组件
+     *
+     * @param links
+     */
     private resetContextLinkStatus;
     /**
      * 对比新旧对象将最相近的对象放在一起

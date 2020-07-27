@@ -14,7 +14,7 @@ export {InputComponent} from "./InputComponent";
 export {BindComponent} from "./BindComponent";
 export {GinkgoAnimation};
 export {CSSProperties} from "./CSSProperties";
-export {GinkgoComponent} from "./GinkgoComponent";
+export {GinkgoComponent, ContextReceive} from "./GinkgoComponent";
 export {HTMLComponent, HTMLAttributes} from "./HTMLComponent";
 export {
     HTMLAnchorAttributes,
