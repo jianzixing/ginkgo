@@ -297,7 +297,13 @@ export class GinkgoContainer {
      * @param link
      */
     public static unmountComponentByLink(link: ContextLink) {
-        if (link) {
+        /**
+         * 如果link的status是remount状态说明这个组件很可能是已经存在
+         * 且组件的位置发生了改变，比如从<div><div>A</div><div>B</div></div>
+         * B位置改变到了A位置，由于使用的是共享的GinkgoElement所以需要重置
+         * 位置和状态，不需要卸载
+         */
+        if (link && link.status != "remount") {
             let component = link.component;
             if (component && component.componentWillUnmount) {
                 component.componentWillUnmount();

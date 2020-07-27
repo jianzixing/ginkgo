@@ -344,7 +344,7 @@ export class GinkgoCompare {
         if (exists && exists.length > 0) {
             let exist = exists[0];
             if (exist && exist.status == "mount") {
-                this.resetContextLinkStatus(exist, "remount");
+                this.resetContextLinkStatus(exist);
             }
             return exist;
         }
@@ -493,17 +493,39 @@ export class GinkgoCompare {
         }
     }
 
-    private resetContextLinkStatus(link: ContextLink, status: "new" | "mount" | "remount") {
-        if (link) {
-            link.status = status;
-            let content = link.content;
-            let children = link.children;
-            if (content) {
-                this.resetContextLinkStatus(content, status);
-            }
-            if (children) {
-                for (let c of children) {
-                    this.resetContextLinkStatus(c, status);
+    /**
+     * 假如有一个全局对象 c = <span></span>
+     * <div>
+     *     <div>
+     *         位置A
+     *     </div>
+     *     <div>
+     *         位置B {c}
+     *     </div>
+     * </div>
+     * 第一种情况
+     * 如果全局对象c从位置B变到位置A，则先diff位置A这时发现c已经存在
+     * 第二种情况
+     * 如果全局对象c从位置A变到位置B，则先diff位置A没有问题，在diff位置
+     * B这是发现已经存在c组件
+     *
+     * @param links
+     */
+    private resetContextLinkStatus(links: Array<ContextLink> | ContextLink) {
+        if (links) {
+            if (links instanceof Array) {
+                for (let link of links) {
+                    link.status = "remount";
+                    let children = link.children;
+                    if (children) {
+                        this.resetContextLinkStatus(children);
+                    }
+                }
+            } else {
+                links.status = "remount";
+                let content = links.content;
+                if (content) {
+                    this.resetContextLinkStatus(content);
                 }
             }
         }

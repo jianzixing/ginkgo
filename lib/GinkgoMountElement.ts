@@ -111,6 +111,9 @@ export class GinkgoMountElement {
                     if (el && component instanceof TextComponent && GinkgoContainer.isBaseType(mountLink.props)) {
                         el.textContent = "" + mountLink.props;
                     }
+                    if (el && component instanceof HTMLComponent) {
+                        shouldEl.append(el);
+                    }
                 }
             }
 
