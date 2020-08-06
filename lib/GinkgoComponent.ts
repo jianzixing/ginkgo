@@ -242,7 +242,9 @@ export class GinkgoComponent<P = {}, S = {}> {
         didUpdateCall(this);
     }
 
-    setState(state?: { [key: string]: any }, fn?: ((state?: { [key: string]: any }) => void) | boolean): Promise<any> | any {
+    setState(state?: { [key: string]: any },
+             fn?: ((state?: { [key: string]: any }) => void) | boolean,
+             isCallUpdate?: boolean): Promise<any> | any {
         if (state == null) state = {};
         let task: QTks;
         for (let queue of queueTasks) {
@@ -277,12 +279,12 @@ export class GinkgoComponent<P = {}, S = {}> {
                         }
                     });
 
-                    if (fn !== false) willUpdateCall(this);
+                    if (fn !== false && isCallUpdate !== false) willUpdateCall(this);
                     for (let stateKey in replaceData) {
                         this.state[stateKey] = replaceData[stateKey];
                     }
                     this.forceRender();
-                    if (fn !== false) didUpdateCall(this);
+                    if (fn !== false && isCallUpdate !== false) didUpdateCall(this);
 
                     queue.forEach(v => {
                         if (v && v.callback) {

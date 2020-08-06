@@ -381,7 +381,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
         [key: string]: any;
     }, fn?: ((state?: {
         [key: string]: any;
-    }) => void) | boolean): Promise<any> | any;
+    }) => void) | boolean, isCallUpdate?: boolean): Promise<any> | any;
     queryAll<C extends GinkgoComponent>(...selector: any): Array<C>;
     query<C extends GinkgoComponent>(...selector: any): C;
 }
