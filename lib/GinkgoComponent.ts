@@ -38,6 +38,9 @@ let didUpdateCall = function (c: GinkgoComponent) {
         if (c.componentDidUpdate) {
             c.componentDidUpdate(c.props, c.state)
         }
+        if (c.componentRenderUpdate) {
+            c.componentRenderUpdate(c.props, c.state)
+        }
     } catch (e) {
         console.error(e);
     }
@@ -146,6 +149,16 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     componentDidUpdate?(props?: P, state?: S): void;
 
+    /**
+     * 和 componentDidUpdate 相同
+     * 区别在于第一次渲染后也会调用这个方法
+     * 类似componentReceiveProps和componentUpdateProps的区别
+     *
+     * @param props
+     * @param state
+     */
+    componentRenderUpdate?(props?: P, state?: S): void;
+
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {
             props = {...this.props, ...props};
@@ -229,7 +242,7 @@ export class GinkgoComponent<P = {}, S = {}> {
         didUpdateCall(this);
     }
 
-    setState(state?: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> | any {
+    setState(state?: { [key: string]: any }, fn?: ((state?: { [key: string]: any }) => void) | boolean): Promise<any> | any {
         if (state == null) state = {};
         let task: QTks;
         for (let queue of queueTasks) {
@@ -242,12 +255,12 @@ export class GinkgoComponent<P = {}, S = {}> {
             task = {
                 promise: Promise.resolve(),
                 c: this,
-                queue: [{data: state, callback: fn}],
+                queue: [{data: state, callback: typeof fn == "function" ? fn : undefined}],
                 trigger: false
             };
             queueTasks.push(task);
         } else {
-            task.queue.push({data: state, callback: fn});
+            task.queue.push({data: state, callback: typeof fn == "function" ? fn : undefined});
         }
 
         if (!task.trigger) {
@@ -264,12 +277,12 @@ export class GinkgoComponent<P = {}, S = {}> {
                         }
                     });
 
-                    willUpdateCall(this);
+                    if (fn !== false) willUpdateCall(this);
                     for (let stateKey in replaceData) {
                         this.state[stateKey] = replaceData[stateKey];
                     }
                     this.forceRender();
-                    didUpdateCall(this);
+                    if (fn !== false) didUpdateCall(this);
 
                     queue.forEach(v => {
                         if (v && v.callback) {
@@ -286,15 +299,17 @@ export class GinkgoComponent<P = {}, S = {}> {
         return task.promise;
     }
 
-    queryAll(...selector: any): Array<GinkgoComponent> {
+    queryAll<C extends GinkgoComponent>(...selector: any): Array<C> {
         let qs = new QuerySelector(this, selector);
         return qs.selector();
     }
 
-    query(...selector: any): GinkgoComponent {
+    query<C extends GinkgoComponent>(...selector: any): C {
         let qs = new QuerySelector(this, selector);
         let arr = qs.selector();
-        if (arr && arr.length > 0) return arr[0];
+        if (arr && arr.length > 0) {
+            return arr[0] as C;
+        }
         return null;
     }
 }

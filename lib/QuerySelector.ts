@@ -32,7 +32,7 @@ export class QuerySelector {
         }
     }
 
-    selector(): Array<GinkgoComponent> {
+    selector<C extends GinkgoComponent>(): Array<C> {
         if (this.condition && this.condition.length > 0) {
             let link = GinkgoContainer.getLinkByComponent(this.component);
             let content = link.content;

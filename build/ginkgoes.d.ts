@@ -246,7 +246,7 @@ export class QuerySelector {
     private condition;
     private matches;
     constructor(component: GinkgoComponent, condition: Array<any>);
-    selector(): Array<GinkgoComponent>;
+    selector<C extends GinkgoComponent>(): Array<C>;
     private matchForEach;
     private isMatch;
     private parseCondition;
@@ -355,6 +355,15 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param state
      */
     componentDidUpdate?(props?: P, state?: S): void;
+    /**
+     * 和 componentDidUpdate 相同
+     * 区别在于第一次渲染后也会调用这个方法
+     * 类似componentReceiveProps和componentUpdateProps的区别
+     *
+     * @param props
+     * @param state
+     */
+    componentRenderUpdate?(props?: P, state?: S): void;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素
@@ -370,11 +379,11 @@ export declare class GinkgoComponent<P = {}, S = {}> {
     forceRender(): void;
     setState(state?: {
         [key: string]: any;
-    }, fn?: (state?: {
+    }, fn?: ((state?: {
         [key: string]: any;
-    }) => void): Promise<any> | any;
-    queryAll(...selector: any): Array<GinkgoComponent>;
-    query(...selector: any): GinkgoComponent;
+    }) => void) | boolean): Promise<any> | any;
+    queryAll<C extends GinkgoComponent>(...selector: any): Array<C>;
+    query<C extends GinkgoComponent>(...selector: any): C;
 }
 
 /**GinkgoContainer.d.ts**/

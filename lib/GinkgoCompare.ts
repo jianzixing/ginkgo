@@ -353,6 +353,9 @@ export class GinkgoCompare {
             component = link.component,
             childProps = typeof link.props == "object" ? link.props.children : undefined;
 
+        // 生命周期第一个
+        component.componentWillMount && component.componentWillMount();
+
         if (childProps) {
             let children = [], childComponents: Array<GinkgoComponent> = [];
             for (let cp of childProps) {

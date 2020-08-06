@@ -5,28 +5,10 @@ import {FragmentComponent} from "./FragmentComponent";
 
 export class GinkgoMountElement {
 
-    private goAfterDomLife(lifecycleComponents) {
-        if (lifecycleComponents && lifecycleComponents.length > 0) {
-            for (let link of lifecycleComponents) {
-                let component = link.component;
-                let props = link.props;
-                component.componentReceiveProps && component.componentReceiveProps(props, {
-                    oldProps: {},
-                    type: "new"
-                });
-            }
-
-            for (let link of lifecycleComponents) {
-                let component = link.component;
-                component.componentDidMount && component.componentDidMount();
-            }
-        }
-    }
-
     public syncVirtualDom(mountLink: ContextLink, skips) {
         let component = mountLink.component;
-        let lifecycleComponents = [];
         let shouldEl = mountLink.shouldEl;
+        let lifecycleComponents: Array<ContextLink> = [];
         if (component instanceof HTMLComponent
             || component instanceof TextComponent
             || component instanceof FragmentComponent) {
@@ -42,10 +24,14 @@ export class GinkgoMountElement {
                 this.mountElementChildren(content, shouldEl, lifecycleComponents, skips);
             }
         }
-        this.goAfterDomLife(lifecycleComponents);
-        // let lifecycleComponents = [];
-        // this.mountElements2Dom(mountLink, mountLink.shouldEl, false, lifecycleComponents, skips);
-        // this.goAfterDomLife(lifecycleComponents);
+
+        if (lifecycleComponents && lifecycleComponents.length > 0) {
+            for (let link of lifecycleComponents) {
+                if (link && link.component && link.component.componentRenderUpdate) {
+                    link.component.componentRenderUpdate(link.props, link.component.state);
+                }
+            }
+        }
     }
 
     private mountElementChildren(mountLink: ContextLink, shouldEl: Element, lifecycleComponents, skips) {
@@ -70,9 +56,6 @@ export class GinkgoMountElement {
                 props = mountLink.props;
 
             if (isShouldLife) {
-                component.componentWillMount && component.componentWillMount();
-                lifecycleComponents.push(mountLink);
-
                 if (component instanceof HTMLComponent && typeof props === "object") {
                     let type = props.module;
                     if (typeof type == "string") {
@@ -130,13 +113,13 @@ export class GinkgoMountElement {
             }
 
             if (isShouldLife) {
-                if (!lifecycleComponents) {
-                    component.componentReceiveProps && component.componentReceiveProps(props, {
-                        oldProps: {},
-                        type: "new"
-                    });
-                    component.componentDidMount && component.componentDidMount();
-                }
+                component.componentReceiveProps && component.componentReceiveProps(props, {
+                    oldProps: {},
+                    type: "new"
+                });
+                component.componentDidMount && component.componentDidMount();
+
+                lifecycleComponents.push(mountLink);
             }
         } else {
             if (shouldEl && mountLink) {
@@ -145,11 +128,6 @@ export class GinkgoMountElement {
 
                 if (component instanceof FragmentComponent) {
                     let children = mountLink.children;
-
-                    if (isShouldLife) {
-                        component.componentWillMount && component.componentWillMount();
-                        lifecycleComponents.push(mountLink);
-                    }
 
                     for (let c of children) {
                         this.mountElementChildren(c, shouldEl, lifecycleComponents, skips);
@@ -163,20 +141,15 @@ export class GinkgoMountElement {
                     mountLink.status = "mount";
 
                     if (isShouldLife) {
-                        if (!lifecycleComponents) {
-                            component.componentReceiveProps && component.componentReceiveProps(props, {
-                                oldProps: {},
-                                type: "new"
-                            });
-                            component.componentDidMount && component.componentDidMount();
-                        }
-                    }
-                } else {
-                    if (isShouldLife) {
-                        component.componentWillMount && component.componentWillMount();
+                        component.componentReceiveProps && component.componentReceiveProps(props, {
+                            oldProps: {},
+                            type: "new"
+                        });
+                        component.componentDidMount && component.componentDidMount();
+
                         lifecycleComponents.push(mountLink);
                     }
-
+                } else {
                     if (mountLink.content) {
                         let content = mountLink.content;
 
@@ -192,13 +165,13 @@ export class GinkgoMountElement {
                     }
 
                     if (isShouldLife) {
-                        if (!lifecycleComponents) {
-                            component.componentReceiveProps && component.componentReceiveProps(props, {
-                                oldProps: {},
-                                type: "new"
-                            });
-                            component.componentDidMount && component.componentDidMount();
-                        }
+                        component.componentReceiveProps && component.componentReceiveProps(props, {
+                            oldProps: {},
+                            type: "new"
+                        });
+                        component.componentDidMount && component.componentDidMount();
+
+                        lifecycleComponents.push(mountLink);
                     }
                 }
             }
@@ -240,9 +213,6 @@ export class GinkgoMountElement {
                 props = mountLink.props;
 
             if (isShouldLife) {
-                component.componentWillMount && component.componentWillMount();
-                lifecycleComponents.push(mountLink);
-
                 if (component instanceof HTMLComponent && typeof props === "object") {
                     let type = props.module;
                     if (typeof type == "string") {
@@ -322,11 +292,6 @@ export class GinkgoMountElement {
                 if (component instanceof FragmentComponent) {
                     let children = mountLink.children;
 
-                    if (isShouldLife) {
-                        component.componentWillMount && component.componentWillMount();
-                        lifecycleComponents.push(mountLink);
-                    }
-
                     for (let c of children) {
                         this.mountElements2Dom(c, shouldEl, true, lifecycleComponents, skips);
                     }
@@ -350,11 +315,6 @@ export class GinkgoMountElement {
                 } else {
                     if (mountLink.content) {
                         let content = mountLink.content;
-
-                        if (isShouldLife) {
-                            component.componentWillMount && component.componentWillMount();
-                            lifecycleComponents.push(mountLink);
-                        }
 
                         this.mountElements2Dom(content, shouldEl, true, lifecycleComponents, skips);
                         mountLink.status = "mount";
