@@ -341,6 +341,20 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param context
      */
     componentUpdateProps?(props: P, context?: ContextUpdate<P>): void;
+    /**
+     * 当前组件更新之前调用
+     *
+     * @param nextProps
+     * @param nextState
+     */
+    componentWillUpdate?(nextProps?: P, nextState?: S): void;
+    /**
+     * 当前组件更新之后调用
+     *
+     * @param props
+     * @param state
+     */
+    componentDidUpdate?(props?: P, state?: S): void;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素
@@ -1168,7 +1182,7 @@ export declare class TextComponent extends GinkgoComponent {
 /**Ginkgo.d.ts**/
 declare type ElementType = keyof HTMLElementTagNameMap;
 declare type ComponentType<P extends GinkgoElement, T extends GinkgoComponent<P>> = (new (props: P) => T);
-declare type refObjectCall = (instance: GinkgoComponent) => void;
+declare type refObjectCall<C extends GinkgoComponent = any> = (instance: C) => void;
 export declare type Bind = BindComponent;
 export declare type Request = GinkgoHttpRequest;
 export declare type GinkgoNode = GinkgoElement | string | undefined | null;

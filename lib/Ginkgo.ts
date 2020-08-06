@@ -67,7 +67,7 @@ type ElementType = keyof HTMLElementTagNameMap;
 
 type ComponentType<P extends GinkgoElement, T extends GinkgoComponent<P>> = (new (props: P) => T);
 
-type refObjectCall = (instance: GinkgoComponent) => void;
+type refObjectCall<C extends GinkgoComponent = any> = (instance: C) => void;
 
 export type Bind = BindComponent;
 export type Request = GinkgoHttpRequest;

@@ -6,9 +6,14 @@ export interface ViewDProps extends GinkgoElement {
 }
 
 export default class ViewD extends Ginkgo.Component<ViewDProps> {
+    state = {
+        name:null
+    }
+
     render(): GinkgoNode {
+        console.log(this.props.text)
         return <div>
-            <span>D view {this.props.text}</span>
+            <span>D view {this.props.text} + {this.state.name}</span>
         </div>
     }
 
