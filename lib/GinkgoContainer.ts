@@ -246,7 +246,11 @@ export class GinkgoContainer {
             link.props = props;
             (link.component as any).props = props;
             if (link.status == "mount") {
-                link.component.componentReceiveProps(props, {oldProps: oldProps, type: "mounted"});
+                link.component.componentReceiveProps && link.component.componentReceiveProps(props, {
+                    oldProps: oldProps,
+                    type: "mounted"
+                });
+                link.component.componentUpdateProps && link.component.componentUpdateProps(props, {oldProps: oldProps});
             }
         }
     }

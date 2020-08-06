@@ -35,13 +35,15 @@ export class QuerySelector {
     selector<C extends GinkgoComponent>(): Array<C> {
         if (this.condition && this.condition.length > 0) {
             let link = GinkgoContainer.getLinkByComponent(this.component);
-            let content = link.content;
-            if (content) {
-                this.matchForEach(content);
+            if (link) {
+                let content = link.content;
+                if (content) {
+                    this.matchForEach(content);
+                }
+                let arr = [];
+                this.matches.map(value => arr.push(value.component));
+                return arr;
             }
-            let arr = [];
-            this.matches.map(value => arr.push(value.component));
-            return arr;
         }
         return [];
     }
