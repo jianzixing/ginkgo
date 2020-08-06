@@ -24,6 +24,24 @@ type QTks = {
     trigger: boolean
 };
 let queueTasks: Array<QTks> = [];
+let willUpdateCall = function (c: GinkgoComponent) {
+    try {
+        if (c.componentWillUpdate) {
+            c.componentWillUpdate(c.props, c.state)
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+let didUpdateCall = function (c: GinkgoComponent) {
+    try {
+        if (c.componentDidUpdate) {
+            c.componentDidUpdate(c.props, c.state)
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
 
 export class GinkgoComponent<P = {}, S = {}> {
 
@@ -145,25 +163,13 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     append(props: GinkgoElement | GinkgoElement[] | string): void {
         try {
-            try {
-                if (this.componentWillUpdate) {
-                    this.componentWillUpdate(this.props, this.state)
-                }
-            } catch (e) {
-                console.error(e);
-            }
+            willUpdateCall(this);
             let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
             let newPropsChildren = GinkgoTools.componentAppendProps(link.props as GinkgoElement, props);
             if (newPropsChildren) {
                 GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
             }
-            try {
-                if (this.componentDidUpdate) {
-                    this.componentDidUpdate(this.props, this.state)
-                }
-            } catch (e) {
-                console.error(e);
-            }
+            didUpdateCall(this);
         } catch (e) {
             console.error(e);
         }
@@ -175,26 +181,14 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     overlap<E extends GinkgoElement>(props?: E | E[] | string | null | undefined): void {
         try {
-            try {
-                if (this.componentWillUpdate) {
-                    this.componentWillUpdate(this.props, this.state)
-                }
-            } catch (e) {
-                console.error(e);
-            }
+            willUpdateCall(this);
             let newPropsChildren = GinkgoTools.componentOverlayProps(props);
             if (newPropsChildren) {
                 GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
             } else {
                 GinkgoContainer.unmountComponentByLinkChildren(GinkgoContainer.getLinkByComponent(this));
             }
-            try {
-                if (this.componentDidUpdate) {
-                    this.componentDidUpdate(this.props, this.state)
-                }
-            } catch (e) {
-                console.error(e);
-            }
+            didUpdateCall(this);
         } catch (e) {
             console.error(e);
         }
@@ -202,6 +196,7 @@ export class GinkgoComponent<P = {}, S = {}> {
 
     remove(props: GinkgoElement | GinkgoElement[]): void {
         if (props) {
+            willUpdateCall(this);
             let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
             let children = link.children;
             let rms = [];
@@ -224,14 +219,17 @@ export class GinkgoComponent<P = {}, S = {}> {
             for (let c of rms) {
                 GinkgoContainer.unmountComponentByLink(c);
             }
+            didUpdateCall(this);
         }
     }
 
     forceRender() {
+        willUpdateCall(this);
         GinkgoContainer.rerenderComponentByComponent(this);
+        didUpdateCall(this);
     }
 
-    setState(state?: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> {
+    setState(state?: { [key: string]: any }, fn?: (state?: { [key: string]: any }) => void): Promise<any> | any {
         if (state == null) state = {};
         let task: QTks;
         for (let queue of queueTasks) {
@@ -266,24 +264,12 @@ export class GinkgoComponent<P = {}, S = {}> {
                         }
                     });
 
-                    try {
-                        if (this.componentWillUpdate) {
-                            this.componentWillUpdate(this.props, this.state)
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    willUpdateCall(this);
                     for (let stateKey in replaceData) {
                         this.state[stateKey] = replaceData[stateKey];
                     }
                     this.forceRender();
-                    try {
-                        if (this.componentDidUpdate) {
-                            this.componentDidUpdate(this.props, this.state)
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
+                    didUpdateCall(this);
 
                     queue.forEach(v => {
                         if (v && v.callback) {
