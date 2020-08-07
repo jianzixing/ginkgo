@@ -346,13 +346,15 @@ export class GinkgoMountElement {
         if (children.length == 1) {
             return false;
         }
-
-        let domChild = shouldEl.childNodes;
-        let domIndex = {int: -1, old: -1};
         let setRemount = false;
-        for (let c of children) {
-            setRemount = this.isChildrenRemountOrder(c, domChild, domIndex);
-            if (setRemount) break;
+        // 不判断是否需要重新排序速度会更快
+        if (children) {
+            for (let c of children) {
+                if (c.props['key'] != null) {
+                    setRemount = true;
+                    break;
+                }
+            }
         }
         if (setRemount) {
             for (let c of children) {
@@ -362,49 +364,6 @@ export class GinkgoMountElement {
                     let dom = this.getComponentFirstRealDom(c);
                     if (dom) shouldEl.append(dom);
                 }
-            }
-        }
-    }
-
-    private isChildrenRemountOrder(c: ContextLink, domChild, domIndex: { int: number, old: number }) {
-        let setRemount = false;
-        if (c.component instanceof HTMLComponent || c.component instanceof TextComponent) {
-            if (c.holder && c.holder.dom) this.isChildrenOrderIndex(domIndex, c.holder.dom, domChild);
-            if (domIndex.int != -1 && domIndex.old != -1 && domIndex.int <= domIndex.old) {
-                return true;
-            }
-        } else {
-            if (c.component instanceof FragmentComponent) {
-                let fragmentChild = c.children;
-                if (fragmentChild && fragmentChild.length > 0) {
-                    for (let fc of fragmentChild) {
-                        setRemount = this.isChildrenRemountOrder(fc, domChild, domIndex);
-                        if (setRemount == true) return setRemount;
-                    }
-                }
-            } else {
-                let dom = this.getComponentFirstRealDom(c);
-                // if (dom != domChild[domIndex.int]) {
-                //     setRemount = true;
-                //     return setRemount;
-                // }
-                if (dom) this.isChildrenOrderIndex(domIndex, dom, domChild);
-                if (domIndex.int != -1 && domIndex.old != -1 && domIndex.int <= domIndex.old) {
-                    return true;
-                }
-            }
-        }
-        return setRemount;
-    }
-
-    private isChildrenOrderIndex(domIndex: { int: number, old: number },
-                                 dom,
-                                 domChild) {
-        for (let i = 0; i < domChild.length; i++) {
-            if (domChild[i] == dom) {
-                domIndex.old = domIndex.int
-                domIndex.int = i;
-                break;
             }
         }
     }

@@ -42,7 +42,15 @@ export interface ContextLink {
      * 则在content中的父元素就是virtualParent
      */
     virtualParent?: ContextLink;
+
+    /**
+     * 自定义组件的组成元素
+     */
     content?: ContextLink;
+
+    /**
+     * 自定义组件的子元素
+     */
     children?: Array<ContextLink>;
 }
 
