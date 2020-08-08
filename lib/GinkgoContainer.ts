@@ -281,7 +281,7 @@ export class GinkgoContainer {
                     oldProps: oldProps,
                     type: "mounted"
                 });
-                link.component.componentUpdateProps && link.component.componentUpdateProps(props, {oldProps: oldProps});
+                link.component.componentCompareProps && link.component.componentCompareProps(props, {oldProps: oldProps});
             }
         }
     }

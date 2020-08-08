@@ -204,6 +204,7 @@ export declare class GinkgoCompare {
      * @param type 0获取第一个  1获取最后一个 2获取第一层列表
      */
     private getComponentRealDom;
+    private makeWillPropsLife;
 }
 
 
@@ -225,16 +226,10 @@ export class QuerySelector {
 /**GinkgoComponent.d.ts**/
 export declare type ContextUpdate<P> = {
     oldProps: P;
-    childChange?: boolean;
-    children?: Array<GinkgoElement>;
-    oldChildren?: Array<GinkgoElement>;
 };
 export declare type ContextReceive<P> = {
     oldProps: P;
     type: "new" | "mounted";
-    childChange?: boolean;
-    children?: Array<GinkgoElement>;
-    oldChildren?: Array<GinkgoElement>;
 };
 export declare class GinkgoComponent<P = {}, S = {}> {
     /**
@@ -287,27 +282,10 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param old
      */
     componentChildChange?(children: Array<GinkgoElement>, old: Array<GinkgoElement>): void;
-    /**
-     * 每次执行对比时的新的属性对象
-     * 无论属性对象是否一致该方法每次对比时都会执行
-     *
-     * 当组件第一次创建和每次更新时都会调用执行
-     *
-     * @param props
-     * @param context
-     */
+    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S;
     componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
-    /**
-     * 每次执行对比时的新的属性对象
-     * 无论属性对象是否一致该方法每次对比时都会执行
-     *
-     * 当组件第一次创建时不会调用次方法，只有当组件更新时会调用次方法
-     * 相当于componentReceiveProps(props,{oldProps,type:"mounted"})
-     *
-     * @param props
-     * @param context
-     */
-    componentUpdateProps?(props: P, context?: ContextUpdate<P>): void;
+    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S;
+    componentCompareProps?(props: P, context?: ContextUpdate<P>): void;
     /**
      * 当前组件更新之前调用
      *
@@ -344,7 +322,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      */
     overlap<E extends GinkgoElement>(props?: E | E[] | string | null | undefined): void;
     remove(props: GinkgoElement | GinkgoElement[]): void;
-    forceRender(): void;
+    forceRender(isCallUpdate?: boolean): void;
     setState(state?: {
         [key: string]: any;
     }, fn?: ((state?: {
