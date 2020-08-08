@@ -1,5 +1,5 @@
 import {GinkgoContainer, ContextLink, ComponentWrapper} from "./GinkgoContainer";
-import {FragmentComponent, GinkgoElement, HTMLComponent} from "./Ginkgo";
+import {FragmentComponent, GinkgoComponent, GinkgoElement, HTMLComponent} from "./Ginkgo";
 import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
 
@@ -119,10 +119,20 @@ export class GinkgoCompare {
             }
         }
 
+        let oldProps = {};
+        if (parent.status === "compare") {
+            oldProps = parent.oldProps;
+            parent.oldProps = undefined;
+        }
         component.componentReceiveProps && component.componentReceiveProps(parent.props, {
-            oldProps: {},
+            oldProps: oldProps,
             type: parent.status == "new" ? "new" : "mounted"
         });
+        if (parent.status === "compare") {
+            component.componentCompareProps && component.componentCompareProps(parent.props, {
+                oldProps: oldProps
+            });
+        }
         component.componentDidMount && component.componentDidMount();
         parent.status = "mount";
     }
@@ -285,7 +295,8 @@ export class GinkgoCompare {
             link.previousSibling = previousSibling || parent.previousSibling;
         }
 
-        this.buildChildrenRef(link)
+        this.buildChildrenRef(link);
+        this.makeWillPropsLife(component, link.props, {}, "new", true);
 
         return link;
     }
@@ -303,6 +314,7 @@ export class GinkgoCompare {
     private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement, previousSibling): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
+        let oldProps = compareProps;
 
         if (compareProps && component && component instanceof TextComponent) {
             /**
@@ -317,6 +329,8 @@ export class GinkgoCompare {
                     if (compareLink.holder && compareLink.holder.dom) {
                         (compareLink.holder.dom as Text).textContent = newText;
                     }
+                    compareLink.status = "compare";
+                    compareLink.oldProps = oldProps;
                 }
             } else {
                 return false;
@@ -325,8 +339,6 @@ export class GinkgoCompare {
             && typeof compareProps == "object"
             && component
             && props.module == compareProps.module) {
-
-            let oldProps = compareProps;
             compareLink.props = props;
             (component as any).props = props;
 
@@ -339,7 +351,7 @@ export class GinkgoCompare {
 
             let isChildrenChanged = false;
             let newChild = props.children;
-            let oldChild = oldProps.children;
+            let oldChild = (oldProps as GinkgoElement).children;
             if (component.componentChildChange && !(component instanceof BindComponent)) {
                 let changed = false;
                 if ((newChild != null || oldChild != null)
@@ -364,31 +376,15 @@ export class GinkgoCompare {
                     isChildrenChanged = true;
                 }
             }
-
-            let contextWrap: any = {
-                oldProps
-            }
-            if (isChildrenChanged) {
-                contextWrap.childChange = true;
-                contextWrap.children = newChild;
-                contextWrap.oldChildren = oldChild;
-            }
-            component.componentReceiveProps && component.componentReceiveProps(props, {
-                ...contextWrap,
-                type: "mounted"
-            });
-            component.componentUpdateProps && component.componentUpdateProps(props, contextWrap);
+            this.makeWillPropsLife(component, props, oldProps, "mounted", true);
+            this.makeWillPropsLife(component, props, oldProps, "mounted", false);
 
             if (isChildrenChanged) {
                 component.componentChildChange(newChild, oldChild);
             }
 
-            // 如果是Bind组件则调用组件更新获取最新的绑定元素
-            // Bind组件的获取的元素作为content内容
-            // Bind组件的更新分为跟随父元素更新和使用绑定数据更新
-            // if (component instanceof BindComponent) {
-            //     component.forceRender();
-            // }
+            compareLink.status = "compare";
+            compareLink.oldProps = oldProps;
         } else {
             return false;
         }
@@ -542,5 +538,32 @@ export class GinkgoCompare {
             }
         }
         return null;
+    }
+
+    private makeWillPropsLife(component: GinkgoComponent,
+                              props,
+                              oldProps,
+                              type: "new" | "mounted",
+                              isReceive: boolean) {
+        let state;
+        component['_disableSetStateCall'] = true;
+        if (isReceive) {
+            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props, {
+                oldProps: oldProps, type: type
+            });
+        } else {
+            state = component.componentWillCompareProps && component.componentWillCompareProps(props, {
+                oldProps
+            })
+        }
+        component['_disableSetStateCall'] = false;
+        if (state) {
+            let oldState = component.state;
+            if (oldState == null) oldState = {};
+            for (let key in state) {
+                oldState[key] = state[key];
+            }
+            component.state = oldState;
+        }
     }
 }

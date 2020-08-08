@@ -3,18 +3,12 @@ import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
 
 export type ContextUpdate<P> = {
-    oldProps: P,
-    childChange?: boolean,
-    children?: Array<GinkgoElement>,
-    oldChildren?: Array<GinkgoElement>
+    oldProps: P
 };
 
 export type ContextReceive<P> = {
     oldProps: P,
-    type: "new" | "mounted",
-    childChange?: boolean,
-    children?: Array<GinkgoElement>,
-    oldChildren?: Array<GinkgoElement>
+    type: "new" | "mounted"
 }
 
 type QTks = {
@@ -110,28 +104,13 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     componentChildChange?(children: Array<GinkgoElement>, old: Array<GinkgoElement>): void;
 
-    /**
-     * 每次执行对比时的新的属性对象
-     * 无论属性对象是否一致该方法每次对比时都会执行
-     *
-     * 当组件第一次创建和每次更新时都会调用执行
-     *
-     * @param props
-     * @param context
-     */
+    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S;
+
     componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
 
-    /**
-     * 每次执行对比时的新的属性对象
-     * 无论属性对象是否一致该方法每次对比时都会执行
-     *
-     * 当组件第一次创建时不会调用次方法，只有当组件更新时会调用次方法
-     * 相当于componentReceiveProps(props,{oldProps,type:"mounted"})
-     *
-     * @param props
-     * @param context
-     */
-    componentUpdateProps?(props: P, context?: ContextUpdate<P>): void;
+    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S;
+
+    componentCompareProps?(props: P, context?: ContextUpdate<P>): void;
 
     /**
      * 当前组件更新之前调用
@@ -239,6 +218,9 @@ export class GinkgoComponent<P = {}, S = {}> {
     }
 
     forceRender() {
+        if (this['_disableSetStateCall'] === true) {
+            return;
+        }
         willUpdateCall(this);
         GinkgoContainer.rerenderComponentByComponent(this);
         didUpdateCall(this);
@@ -247,6 +229,9 @@ export class GinkgoComponent<P = {}, S = {}> {
     setState(state?: { [key: string]: any },
              fn?: ((state?: { [key: string]: any }) => void) | boolean,
              isCallUpdate?: boolean): Promise<any> | any {
+        if (this['_disableSetStateCall'] === true) {
+            return;
+        }
         if (state == null) state = {};
         let task: QTks;
         for (let queue of queueTasks) {

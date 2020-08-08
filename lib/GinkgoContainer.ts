@@ -34,7 +34,7 @@ export interface ContextLink {
      * mount    已经被挂载到dom中，再成为mount时会开始组件的生命周期
      *
      */
-    status?: "new" | "mount";
+    status?: "new" | "mount" | "compare";
 
     parent?: ContextLink;
 
@@ -52,6 +52,11 @@ export interface ContextLink {
      * 排序的序号
      */
     mountIndex?: number;
+
+    /**
+     * 用于临时存储使用，使用后立即清除
+     */
+    oldProps?: any;
 }
 
 export interface ComponentWrapper {
