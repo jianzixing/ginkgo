@@ -224,7 +224,7 @@ export class GinkgoCompare {
 
     private insertTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, lastIndex, element: GinkgoElement) {
         let newNode;
-        let previousSibling = treeNodes && treeNodes.length > 0 ? treeNodes[treeNodes.length - 1] : undefined;
+        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, lastIndex);
         newNode = this.createElement(parent, element, previousSibling);
         treeNodes.splice(lastIndex + 1, 0, newNode);
     }
@@ -249,7 +249,7 @@ export class GinkgoCompare {
 
     /************* 算法结束 ******************/
 
-    private createElement(parent: ContextLink, element: GinkgoElement, previousSibling: ContextLink): ContextLink {
+    private createElement(parent: ContextLink, element: GinkgoElement, previousSibling): ContextLink {
         if (element == null || element == undefined) return null; // 判断props不能为空否则遍历会取到body容器
 
         let link: ContextLink = this.mountCreateFragmentLink(parent, element),
@@ -259,9 +259,20 @@ export class GinkgoCompare {
         component.componentWillMount && component.componentWillMount();
         this.buildRealDom(link);
         if (link && link.holder && link.holder.dom && parent.shouldEl) {
-            parent.shouldEl.append(link.holder.dom);
+            if (previousSibling) {
+                (previousSibling.parentElement as any).insertBefore(link.holder.dom, previousSibling.nextSibling);
+            } else {
+                let pps = parent.previousSibling;
+                if (pps) {
+                    (pps.parentElement as any).insertBefore(link.holder.dom, pps.nextSibling);
+                    parent.previousSibling = undefined;
+                } else {
+                    parent.shouldEl.append(link.holder.dom);
+                }
+            }
         } else {
             link.shouldEl = parent.shouldEl;
+            link.previousSibling = previousSibling || parent.previousSibling;
         }
 
         this.buildChildrenRef(link)
@@ -447,6 +458,11 @@ export class GinkgoCompare {
         }
     }
 
+    /**
+     * 给ref赋值
+     *
+     * @param link
+     */
     private buildChildrenRef(link: ContextLink) {
         let props = link.props;
         let childComponent = link.component;
@@ -461,5 +477,54 @@ export class GinkgoCompare {
                 props.ref.instance = childComponent;
             }
         }
+    }
+
+    private getComponentRealDomWhenFind(links: Array<ContextLink>, index: number) {
+        for (let i = index; i >= 0; i--) {
+            let link = links[i];
+            let dom = this.getComponentRealDom(link, 1);
+            if (dom) return dom;
+        }
+    }
+
+    /**
+     * 获取自定义组件的第一个或者最后一个真实dom
+     * @param child
+     * @param type 0获取第一个  1获取最后一个 2获取第一层列表
+     */
+    private getComponentRealDom(link: ContextLink, type: number) {
+        if (link) {
+            if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
+                return link.holder.dom;
+            } else {
+                if (link.content) {
+                    return this.getComponentRealDom(link, type);
+                } else if (link.children) {
+                    let children = link.children;
+                    if (type == 0) {
+                        for (let item of children) {
+                            let dom = this.getComponentRealDom(item, type);
+                            if (dom) return dom;
+                        }
+                    }
+                    if (type == 1) {
+                        for (let i = children.length - 1; i >= 0; i--) {
+                            let item = children[i];
+                            let dom = this.getComponentRealDom(item, type);
+                            if (dom) return dom;
+                        }
+                    }
+                    if (type == 2) {
+                        let arr = [];
+                        for (let item of children) {
+                            let dom = this.getComponentRealDom(item, type);
+                            if (dom) arr.push(dom);
+                        }
+                        return arr;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
