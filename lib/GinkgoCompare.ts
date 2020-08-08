@@ -133,7 +133,10 @@ export class GinkgoCompare {
                 oldProps: oldProps
             });
         }
-        component.componentDidMount && component.componentDidMount();
+        if (parent.status === "new") {
+            component.componentDidMount && component.componentDidMount();
+        }
+        component.componentRenderUpdate && component.componentRenderUpdate(parent.props, parent.component.state);
         parent.status = "mount";
     }
 

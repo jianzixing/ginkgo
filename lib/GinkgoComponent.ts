@@ -217,13 +217,13 @@ export class GinkgoComponent<P = {}, S = {}> {
         }
     }
 
-    forceRender() {
+    forceRender(isCallUpdate?: boolean) {
         if (this['_disableSetStateCall'] === true) {
             return;
         }
-        willUpdateCall(this);
+        if (isCallUpdate !== false) willUpdateCall(this);
         GinkgoContainer.rerenderComponentByComponent(this);
-        didUpdateCall(this);
+        if (isCallUpdate !== false) didUpdateCall(this);
     }
 
     setState(state?: { [key: string]: any },
@@ -270,7 +270,7 @@ export class GinkgoComponent<P = {}, S = {}> {
                     for (let stateKey in replaceData) {
                         this.state[stateKey] = replaceData[stateKey];
                     }
-                    this.forceRender();
+                    this.forceRender(false);
                     if (fn !== false && isCallUpdate !== false) didUpdateCall(this);
 
                     queue.forEach(v => {

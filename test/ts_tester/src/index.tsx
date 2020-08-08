@@ -1,4 +1,5 @@
 import Ginkgo, {CSSProperties} from "../carbon/Ginkgo";
+import ViewLifecycle from "./ViewLifecycle";
 // import "./index.scss";
 // import GinkgoT2View from "./GinkgoT2View";
 // import ViewA from "./ViewA";
@@ -8,7 +9,7 @@ import Ginkgo, {CSSProperties} from "../carbon/Ginkgo";
 // import ViewBind from "./ViewBind";
 // import ViewInsert from "./ViewInsert";
 // import ViewMoving from "./ViewMoving";
-import ViewUnauto from "./ViewUnauto";
+// import ViewUnauto from "./ViewUnauto";
 
 
 // Ginkgo.render(<App/>, document.body);
@@ -21,4 +22,5 @@ import ViewUnauto from "./ViewUnauto";
 // Ginkgo.render(<ViewFragment/>, document.body);
 // Ginkgo.render(<ViewInsert/>, document.body);
 // Ginkgo.render(<ViewMoving/>, document.body);
-Ginkgo.render(<ViewUnauto/>, document.body);
+// Ginkgo.render(<ViewUnauto/>, document.body);
+Ginkgo.render(<ViewLifecycle/>, document.body);
