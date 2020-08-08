@@ -78,7 +78,7 @@ export interface GinkgoElement<C extends GinkgoComponent = any> {
     key?: string | number;
     readonly module?: ComponentType<any, any> | ElementType | Function | string;
     children?: Array<GinkgoElement>;
-    ref?: refObjectCall | string | RefObject<C>;
+    ref?: refObjectCall | RefObject<C>;
     // 是否根据配置参与渲染
     part?: string;
 }

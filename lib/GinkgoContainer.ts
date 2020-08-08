@@ -17,10 +17,6 @@ export interface ContextLink {
      * 当前组件的子元素应该添加到的父元素
      */
     shouldEl?: Element;
-    /**
-     * 自定义组件中content元素及其子元素所在的当前组件
-     */
-    root?: ContextLink;
 
     /**
      * 组建组件的属性值，如果是string类型表示当前组件属于text类型(TextComponent)
@@ -31,17 +27,11 @@ export interface ContextLink {
      * 当前组件的状态
      * new      新建组件只创建了实例，如果自定义组件的子元素没有被content引用则永远是new状态
      * mount    已经被挂载到dom中，再成为mount时会开始组件的生命周期
-     * remount  已经被挂载到dom中，重新渲染后标记为当前状态并移动子元素真实dom
      *
      */
-    status?: "new" | "mount" | "remount";
+    status?: "new" | "mount";
 
     parent?: ContextLink;
-    /**
-     * 如果当前元素是组件的子元素且被content元素引用成为content元素的子元素
-     * 则在content中的父元素就是virtualParent
-     */
-    virtualParent?: ContextLink;
 
     /**
      * 自定义组件的组成元素
@@ -314,13 +304,7 @@ export class GinkgoContainer {
      * @param link
      */
     public static unmountComponentByLink(link: ContextLink) {
-        /**
-         * 如果link的status是remount状态说明这个组件很可能是已经存在
-         * 且组件的位置发生了改变，比如从<div><div>A</div><div>B</div></div>
-         * B位置改变到了A位置，由于使用的是共享的GinkgoElement所以需要重置
-         * 位置和状态，不需要卸载
-         */
-        if (link && link.status != "remount") {
+        if (link) {
             let component = link.component;
             if (component && component.componentWillUnmount) {
                 component.componentWillUnmount();

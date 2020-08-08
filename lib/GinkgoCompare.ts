@@ -28,7 +28,7 @@ export class GinkgoCompare {
             this.elements = this.elements.filter(value => value != null && value != undefined);
             let time = new Date().getTime();
             this.compare(this.parent, this.elements);
-            console.log(new Date().getTime() - time)
+            console.log((new Date().getTime() - time) + "ms");
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);
         }
@@ -44,7 +44,7 @@ export class GinkgoCompare {
     rerender(): Array<ContextLink> {
         let time = new Date().getTime();
         this.compare(this.parent, this.elements);
-        console.log(new Date().getTime() - time)
+        console.log((new Date().getTime() - time) + "ms");
 
         return this.context;
     }
@@ -58,7 +58,7 @@ export class GinkgoCompare {
         if (this.parent && this.parent.component instanceof BindComponent) {
             let time = new Date().getTime();
             this.compare(this.parent, this.elements);
-            console.log(new Date().getTime() - time)
+            console.log((new Date().getTime() - time) + "ms");
         }
 
         return this.context;
@@ -69,6 +69,7 @@ export class GinkgoCompare {
     }
 
     /************* 算法开始 ******************/
+
     private compare(parent: ContextLink, elements: GinkgoElement[]) {
         let isContent = this.isComponentContent(parent);
         let component = parent.component;
@@ -81,9 +82,12 @@ export class GinkgoCompare {
                 elements = [el];
             }
         }
+
+
         let children = isContent ? (parent.content ? [parent.content] : []) : parent.children;
         children = children || [];
         this.compareSibling(parent, children, elements);
+
         if (children && children.length > 0) {
             let index = 1;
             for (let ch of children) {
@@ -93,7 +97,10 @@ export class GinkgoCompare {
                 let props = ch.props;
                 if (typeof props !== "string") {
                     this.compare(ch, props.children);
+                } else {
+                    ch.status = "mount";
                 }
+
                 index++;
             }
         }
@@ -116,8 +123,10 @@ export class GinkgoCompare {
         if (!(component instanceof HTMLComponent)
             && !(component instanceof TextComponent)
             && !GinkgoContainer.isBaseType(link.props)
-            && !(component instanceof FragmentComponent)
-            && !(component instanceof BindComponent)) {
+            && !(component instanceof FragmentComponent)) {
+            return true;
+        }
+        if (component instanceof BindComponent) {
             return true;
         }
         return false;
@@ -255,7 +264,8 @@ export class GinkgoCompare {
             link.shouldEl = parent.shouldEl;
         }
 
-        this.buildChildrenRef(link);
+        this.buildChildrenRef(link)
+
         return link;
     }
 
@@ -276,8 +286,10 @@ export class GinkgoCompare {
             if (GinkgoContainer.isBaseType(props)) {
                 if (compareProps != props && compareLink.status != "new") {
                     let newText = "" + props;
-                    compareLink.status = "remount";
                     compareLink.props = newText;
+                    if (compareLink.holder && compareLink.holder.dom) {
+                        (compareLink.holder.dom as Text).textContent = newText;
+                    }
                 }
             } else {
                 return false;
@@ -298,8 +310,6 @@ export class GinkgoCompare {
              */
             GinkgoContainer.setDefaultProps(component, component.props);
 
-            // 重新赋值引用获取组件对象
-            this.buildChildrenRef(compareLink);
             let isChildrenChanged = false;
             let newChild = props.children;
             let oldChild = oldProps.children;
@@ -349,9 +359,9 @@ export class GinkgoCompare {
             // 如果是Bind组件则调用组件更新获取最新的绑定元素
             // Bind组件的获取的元素作为content内容
             // Bind组件的更新分为跟随父元素更新和使用绑定数据更新
-            if (component instanceof BindComponent) {
-                component.forceRender();
-            }
+            // if (component instanceof BindComponent) {
+            //     component.forceRender();
+            // }
         } else {
             return false;
         }
@@ -398,8 +408,6 @@ export class GinkgoCompare {
         component = wrapper.component;
         component.parent = parentComponent;
 
-        props = this.beforeProcessProps(component, props);
-
         link = {
             component: component,
             holder: wrapper.holder,
@@ -413,16 +421,6 @@ export class GinkgoCompare {
         }
 
         return link;
-    }
-
-    private beforeProcessProps(component: GinkgoComponent, props: GinkgoElement | string) {
-        if (component instanceof BindComponent && !GinkgoContainer.isBaseType(props)) {
-            let p = props as BindComponentElement;
-            if (p.render) {
-                (props as GinkgoElement).children = [callBindRender(p)];
-            }
-        }
-        return props;
     }
 
     private clearPropsEmptyChildren(props: GinkgoElement | string) {
@@ -452,7 +450,6 @@ export class GinkgoCompare {
     private buildChildrenRef(link: ContextLink) {
         let props = link.props;
         let childComponent = link.component;
-        let root = link.root;
 
         if (props
             && typeof props == "object"
@@ -460,36 +457,8 @@ export class GinkgoCompare {
             if (typeof props.ref === "function") {
                 props.ref(childComponent);
             }
-            if (typeof props.ref === "string") {
-                if (root) {
-                    let c: any = root.component;
-                    c[props.ref] = childComponent;
-                }
-            }
             if (typeof props.ref === "object") {
                 props.ref.instance = childComponent;
-            }
-        }
-    }
-
-    //// 以下废弃
-    private setContentRoot(root: ContextLink, content: ContextLink) {
-        if (content && root) {
-            content.root = root;
-            if (content.children) {
-                for (let c of content.children) {
-                    this.setContentRoot(root, c);
-                }
-            }
-        }
-    }
-
-    private setContentVirtualParent(virtualParent: ContextLink, link: ContextLink) {
-        link.virtualParent = virtualParent;
-        let children = link.children;
-        if (children && children.length > 0) {
-            for (let c of children) {
-                this.setContentVirtualParent(link, c);
             }
         }
     }
