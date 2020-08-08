@@ -6,7 +6,8 @@ import Ginkgo, {CSSProperties} from "../carbon/Ginkgo";
 // import ViewN from "./ViewN";
 // import ViewFragment from "./ViewFragment";
 // import ViewBind from "./ViewBind";
-import ViewInsert from "./ViewInsert";
+// import ViewInsert from "./ViewInsert";
+import ViewMoving from "./ViewMoving";
 
 
 // Ginkgo.render(<App/>, document.body);
@@ -17,4 +18,5 @@ import ViewInsert from "./ViewInsert";
 // Ginkgo.render(<ViewBind/>, document.body);
 // Ginkgo.render(<ViewN/>, document.body);
 // Ginkgo.render(<ViewFragment/>, document.body);
-Ginkgo.render(<ViewInsert/>, document.body);
+// Ginkgo.render(<ViewInsert/>, document.body);
+Ginkgo.render(<ViewMoving/>, document.body);

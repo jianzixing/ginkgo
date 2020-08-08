@@ -218,7 +218,7 @@ export class GinkgoCompare {
             treeNodes[i] = treeNodes[i + 1];
         }
         treeNodes[lastIndex] = obj;
-        let previousSibling = lastIndex > 0 ? treeNodes[lastIndex - 1] : undefined;
+        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, lastIndex - 1);
         this.movingElement(parent, obj, previousSibling);
     }
 
@@ -239,7 +239,7 @@ export class GinkgoCompare {
                                treeNode: ContextLink,
                                newNode: GinkgoElement,
                                index) {
-        let previousSibling = index >= 1 ? treeNodes[index - 1] : undefined;
+        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, index - 1);
         let eq = this.compareComponentByLink(parent, treeNode, newNode, previousSibling);
         if (eq == false) {
             this.removeTreeNodes(parent, treeNodes, treeNode);
@@ -280,11 +280,17 @@ export class GinkgoCompare {
         return link;
     }
 
-    private movingElement(parent: ContextLink, current: ContextLink, previousSibling: ContextLink) {
-
+    private movingElement(parent: ContextLink, current: ContextLink, previousSibling) {
+        let doms = this.getComponentRealDom(current, 2);
+        if (doms && doms.length > 0) {
+            for (let dom of doms) {
+                (previousSibling.parentElement as any).insertBefore(dom, previousSibling.nextSibling);
+                previousSibling = dom;
+            }
+        }
     }
 
-    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement, previousSibling: ContextLink): boolean {
+    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement, previousSibling): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
 
@@ -495,10 +501,10 @@ export class GinkgoCompare {
     private getComponentRealDom(link: ContextLink, type: number) {
         if (link) {
             if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
-                return link.holder.dom;
+                return type == 2 ? [link.holder.dom] : link.holder.dom;
             } else {
                 if (link.content) {
-                    return this.getComponentRealDom(link, type);
+                    return this.getComponentRealDom(link.content, type);
                 } else if (link.children) {
                     let children = link.children;
                     if (type == 0) {
