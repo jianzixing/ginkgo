@@ -62,6 +62,24 @@ const ComponentNameMapping = {
 export class GinkgoContainer {
     private static readonly context: Array<ContextLink> = [];
 
+    public static getCountContext(): number {
+        let count = 0;
+
+        function foreach(list: Array<ContextLink>) {
+            if (list) {
+                for (let item of list) {
+                    count++;
+                    if (item.children) {
+                        foreach(item.children);
+                    }
+                }
+            }
+        }
+
+        foreach(this.context);
+        return count;
+    }
+
     /**
      * 创建一个元素包装用于作为容器的根
      * @param renderTo

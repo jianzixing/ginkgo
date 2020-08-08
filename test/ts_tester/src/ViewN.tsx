@@ -1,4 +1,4 @@
-import Ginkgo, {GinkgoElement, GinkgoNode} from "../carbon/Ginkgo";
+import Ginkgo, {GinkgoContainer, GinkgoElement, GinkgoNode} from "../carbon/Ginkgo";
 
 export interface ViewNProps extends GinkgoElement {
     text?: string;
@@ -26,6 +26,7 @@ export default class ViewN extends Ginkgo.Component<ViewNProps> {
                 let time = new Date().getTime();
                 this.setState({name: "2", style: {width: 80, marginLeft: 30, float: "left"}}, () => {
                     console.log(new Date().getTime() - time + "ms");
+                    console.log(GinkgoContainer.getCountContext());
                 })
             }}></div>
             {els}
