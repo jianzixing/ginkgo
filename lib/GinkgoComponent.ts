@@ -104,11 +104,11 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     componentChildChange?(children: Array<GinkgoElement>, old: Array<GinkgoElement>): void;
 
-    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S;
+    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S | void;
 
     componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
 
-    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S;
+    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S | void;
 
     componentCompareProps?(props: P, context?: ContextUpdate<P>): void;
 
