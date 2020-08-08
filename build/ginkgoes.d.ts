@@ -190,11 +190,20 @@ export declare class GinkgoCompare {
     private unbindComponent;
     private buildRealDom;
     private mountCreateFragmentLink;
-    private beforeProcessProps;
     private clearPropsEmptyChildren;
+    /**
+     * 给ref赋值
+     *
+     * @param link
+     */
     private buildChildrenRef;
-    private setContentRoot;
-    private setContentVirtualParent;
+    private getComponentRealDomWhenFind;
+    /**
+     * 获取自定义组件的第一个或者最后一个真实dom
+     * @param child
+     * @param type 0获取第一个  1获取最后一个 2获取第一层列表
+     */
+    private getComponentRealDom;
 }
 
 
@@ -322,6 +331,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      * @param state
      */
     componentRenderUpdate?(props?: P, state?: S): void;
+    shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素
@@ -358,9 +368,9 @@ export interface ContextLink {
      */
     shouldEl?: Element;
     /**
-     * 自定义组件中content元素及其子元素所在的当前组件
+     * 应该插入到哪个元素之后
      */
-    root?: ContextLink;
+    previousSibling?: Element;
     /**
      * 组建组件的属性值，如果是string类型表示当前组件属于text类型(TextComponent)
      */
@@ -369,18 +379,22 @@ export interface ContextLink {
      * 当前组件的状态
      * new      新建组件只创建了实例，如果自定义组件的子元素没有被content引用则永远是new状态
      * mount    已经被挂载到dom中，再成为mount时会开始组件的生命周期
-     * remount  已经被挂载到dom中，重新渲染后标记为当前状态并移动子元素真实dom
      *
      */
-    status?: "new" | "mount" | "remount";
+    status?: "new" | "mount";
     parent?: ContextLink;
     /**
-     * 如果当前元素是组件的子元素且被content元素引用成为content元素的子元素
-     * 则在content中的父元素就是virtualParent
+     * 自定义组件的组成元素
      */
-    virtualParent?: ContextLink;
     content?: ContextLink;
+    /**
+     * 自定义组件的子元素
+     */
     children?: Array<ContextLink>;
+    /**
+     * 排序的序号
+     */
+    mountIndex?: number;
 }
 export interface ComponentWrapper {
     component: GinkgoComponent;
@@ -390,6 +404,7 @@ export interface ComponentWrapper {
 }
 export declare class GinkgoContainer {
     private static readonly context;
+    static getCountContext(): number;
     /**
      * 创建一个元素包装用于作为容器的根
      * @param renderTo
