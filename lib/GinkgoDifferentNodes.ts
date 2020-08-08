@@ -6,9 +6,15 @@ export class GinkgoDifferentNodes {
     insertWork: (parent: ContextLink,
                  element: GinkgoElement,
                  previousSibling: ContextLink) => ContextLink;
-    moveWork: (parent: ContextLink, current: ContextLink, previousSibling: ContextLink) => void;
-    compareWork: (parent: ContextLink, current: ContextLink, newNode: GinkgoElement) => void;
-    removeWork: (parent: ContextLink, current: ContextLink) => void;
+    moveWork: (parent: ContextLink,
+               current: ContextLink,
+               previousSibling: ContextLink) => void;
+    compareWork: (parent: ContextLink,
+                  current: ContextLink,
+                  newNode: GinkgoElement,
+                  previousSibling: ContextLink) => boolean;
+    removeWork: (parent: ContextLink,
+                 current: ContextLink) => void;
 
     public compare(parent: ContextLink, elements: GinkgoElement[]) {
         let isContent = this.isComponentContent(parent);
@@ -26,13 +32,16 @@ export class GinkgoDifferentNodes {
         children = children || [];
         this.compareSibling(parent, children, elements);
         if (children && children.length > 0) {
+            let index = 1;
             for (let ch of children) {
                 // ch.props 是上一次对比后的新的props
                 // 所以也包含需要对比的新的子元素列表
+                ch.mountIndex = index;
                 let props = ch.props;
                 if (typeof props !== "string") {
                     this.compare(ch, props.children);
                 }
+                index++;
             }
         }
         if (isContent) {
@@ -64,20 +73,20 @@ export class GinkgoDifferentNodes {
     private compareSibling(parent: ContextLink,
                            treeNodes: Array<ContextLink>,
                            newNodes: Array<GinkgoElement>) {
-        if (newNodes == null) {
+        if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
                 for (let treeNode of treeNodes) {
                     this.removeTreeNodes(parent, treeNodes, treeNode);
                 }
             }
         } else {
-            let lastIndex = 0;
+            let lastIndex = 0, i = 1;
             for (let newNode of newNodes) {
-                let index = this.elementIndexTreeNodes(treeNodes, newNode);
+                let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
                     // 需要排除新建的组件
-                    this.compareComponent(parent, treeNode, newNode);
+                    this.compareComponent(parent, treeNodes, treeNode, newNode, index);
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
                         this.moveTreeNodes(parent, treeNodes, index, lastIndex);
@@ -88,6 +97,7 @@ export class GinkgoDifferentNodes {
                     this.insertTreeNodes(parent, treeNodes, lastIndex, newNode);
                     lastIndex = lastIndex + 1;
                 }
+                i++;
             }
 
             let copyTreeNodes = [...treeNodes];
@@ -95,19 +105,24 @@ export class GinkgoDifferentNodes {
                 let index = this.checkTreeNodeRemove(newNodes, treeNode);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
-                    // this.removeTreeNodes(parent, treeNodes, treeNode);
+                    this.removeTreeNodes(parent, treeNodes, treeNode);
                 }
             }
         }
     }
 
-    private elementIndexTreeNodes(treeNodes: Array<ContextLink>, element: GinkgoElement) {
+    private elementIndexTreeNodes(treeNodes: Array<ContextLink>, element: GinkgoElement, index) {
         for (let i = 0; i < treeNodes.length; i++) {
-            if (treeNodes[i]
-                && element.key
-                && treeNodes[i].props
-                && treeNodes[i].props['key'] === element.key) {
-                return i;
+            let props = treeNodes[i].props as GinkgoElement;
+            if (element.key == null && props.key == null) {
+                if (index === treeNodes[i].mountIndex) {
+                    return i;
+                }
+            }
+            if (element.key != null && props.key != null) {
+                if (element.key === props.key) {
+                    return i;
+                }
             }
         }
         return -1
@@ -117,12 +132,18 @@ export class GinkgoDifferentNodes {
         if (link.status == "new") {
             return 0;
         }
+        let props = link.props as GinkgoElement;
         for (let i = 0; i < newNodes.length; i++) {
-            if (link
-                && link.props
-                && newNodes[i].key
-                && link.props['key'] === newNodes[i].key) {
-                return i;
+            let newNode = newNodes[i];
+            if (newNode.key == null && props.key == null) {
+                if ((i + 1) === link.mountIndex) {
+                    return i;
+                }
+            }
+            if (newNode.key != null && props.key != null) {
+                if (newNode.key === props.key) {
+                    return i;
+                }
             }
         }
         return -1;
@@ -157,9 +178,18 @@ export class GinkgoDifferentNodes {
         }
     }
 
-    protected compareComponent(parent: ContextLink, treeNode: ContextLink, newNode: GinkgoElement) {
+    protected compareComponent(parent: ContextLink,
+                               treeNodes: Array<ContextLink>,
+                               treeNode: ContextLink,
+                               newNode: GinkgoElement,
+                               index) {
         if (this.compareWork) {
-            this.compareWork(parent, treeNode, newNode);
+            let previousSibling = index >= 1 ? treeNodes[index - 1] : undefined;
+            let eq = this.compareWork(parent, treeNode, newNode, previousSibling);
+            if (eq == false) {
+                this.removeTreeNodes(parent, treeNodes, treeNode);
+                this.insertTreeNodes(parent, treeNodes, index - 1, newNode);
+            }
         }
     }
 }

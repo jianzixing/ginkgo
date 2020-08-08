@@ -48,13 +48,13 @@ export class GinkgoCompare {
      * 重新渲染一个组件的content内容
      */
     rerender(): Array<ContextLink> {
-        debugger
         let diff = new GinkgoDifferentNodes();
         diff.insertWork = this.createElement.bind(this);
         diff.moveWork = this.movingElement.bind(this);
         diff.compareWork = this.compareComponent.bind(this);
         diff.removeWork = this.unbindComponent.bind(this);
         let time = new Date().getTime();
+        debugger
         diff.compare(this.parent, this.elements);
         console.log(new Date().getTime() - time)
 
@@ -117,7 +117,7 @@ export class GinkgoCompare {
 
     }
 
-    private compareComponent(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement) {
+    private compareComponent(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
 
@@ -133,10 +133,8 @@ export class GinkgoCompare {
                     compareLink.status = "remount";
                     compareLink.props = newText;
                 }
-                return compareLink;
             } else {
-                GinkgoContainer.unmountComponentByLink(compareLink);
-                return this.mountCreateFragment(parent, props);
+                return false;
             }
         } else if (compareProps
             && typeof compareProps == "object"
@@ -153,36 +151,6 @@ export class GinkgoCompare {
              * 处理之前先将默认值重新赋值
              */
             GinkgoContainer.setDefaultProps(component, component.props);
-
-
-            if (!(component instanceof BindComponent)) {
-                let childProps = props.children;
-                if (childProps && childProps.length > 0) {
-                    let children = [], childComponents: Array<GinkgoComponent> = [];
-
-                    let compareChildLinks = compareLink.children;
-                    let aligns = this.alignNewOldPropsChildren(compareChildLinks, childProps);
-                    if (aligns.del) {
-                        for (let del of aligns.del) {
-                            GinkgoContainer.unmountComponentByLink(del);
-                        }
-                    }
-
-                    for (let align of aligns.news) {
-                        let cp = align.child;
-                        let compareChildLink = align.old;
-                        let childLink = this.mountDiffFragment(compareLink, cp, compareChildLink);
-                        children.push(childLink);
-                        if (childLink.component) childComponents.push(childLink.component);
-                    }
-
-                    compareLink.children = children;
-                    if (compareLink.props) compareLink.props.children = childProps;
-                    component.children = childComponents;
-                } else {
-                    GinkgoContainer.unmountComponentByLinkChildren(compareLink);
-                }
-            }
 
             // 重新赋值引用获取组件对象
             this.buildChildrenRef(compareLink);
@@ -238,12 +206,10 @@ export class GinkgoCompare {
             if (component instanceof BindComponent) {
                 component.forceRender();
             }
-
-            return compareLink;
         } else {
-            GinkgoContainer.unmountComponentByLink(compareLink);
-            return this.mountCreateFragment(parent, props);
+            return false;
         }
+        return true;
     }
 
     private unbindComponent(parent: ContextLink, current: ContextLink) {
@@ -696,7 +662,6 @@ export class GinkgoCompare {
 
         // 如果有key这通过key判断，如果没有key则挨个替换
         if (newChildren && newChildren.length > 0) {
-
             let hasKey = false;
             for (let m = 0; m < newChildren.length; m++) {
                 if (newChildren[m]['key'] != null) {

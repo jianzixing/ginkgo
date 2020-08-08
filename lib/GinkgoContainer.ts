@@ -52,6 +52,11 @@ export interface ContextLink {
      * 自定义组件的子元素
      */
     children?: Array<ContextLink>;
+
+    /**
+     * 排序的序号
+     */
+    mountIndex?: number;
 }
 
 export interface ComponentWrapper {
