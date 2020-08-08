@@ -159,6 +159,8 @@ export class GinkgoComponent<P = {}, S = {}> {
      */
     componentRenderUpdate?(props?: P, state?: S): void;
 
+    shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
+
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {
             props = {...this.props, ...props};

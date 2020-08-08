@@ -1,6 +1,5 @@
 import {GinkgoContainer, ContextLink, ComponentWrapper} from "./GinkgoContainer";
 import {FragmentComponent, GinkgoElement, HTMLComponent} from "./Ginkgo";
-import {GinkgoComponent} from "./GinkgoComponent";
 import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
 
@@ -43,7 +42,7 @@ export class GinkgoCompare {
      */
     rerender(): Array<ContextLink> {
         let time = new Date().getTime();
-        this.compare(this.parent, this.elements);
+        this.compare(this.parent, this.elements, this.parent);
         console.log((new Date().getTime() - time) + "ms");
 
         return this.context;
@@ -70,44 +69,54 @@ export class GinkgoCompare {
 
     /************* 算法开始 ******************/
 
-    private compare(parent: ContextLink, elements: GinkgoElement[]) {
+    private compare(parent: ContextLink, elements: GinkgoElement[], forceUpdate?: ContextLink) {
         let isContent = this.isComponentContent(parent);
         let component = parent.component;
-        if (isContent && component != null) {
-            let el = component.render ? component.render() : undefined;
-            if (component instanceof BindComponent && parent.props && (parent.props as any).render) {
-                el = callBindRender(parent.props as BindComponentElement);
-            }
-            if (el && typeof el != "string") {
-                elements = [el];
-            }
+        let shouldComponentUpdate = true;
+        if (parent.status == "mount"
+            && component
+            && component.shouldComponentUpdate
+            && parent !== forceUpdate) {
+            shouldComponentUpdate = component.shouldComponentUpdate(parent.props, component.state);
         }
 
-
-        let children = isContent ? (parent.content ? [parent.content] : []) : parent.children;
-        children = children || [];
-        this.compareSibling(parent, children, elements);
-
-        if (children && children.length > 0) {
-            let index = 1;
-            for (let ch of children) {
-                // ch.props 是上一次对比后的新的props
-                // 所以也包含需要对比的新的子元素列表
-                ch.mountIndex = index;
-                let props = ch.props;
-                if (typeof props !== "string") {
-                    this.compare(ch, props.children);
-                } else {
-                    ch.status = "mount";
+        if (shouldComponentUpdate) {
+            if (isContent && component != null) {
+                let el = component.render ? component.render() : undefined;
+                if (component instanceof BindComponent && parent.props && (parent.props as any).render) {
+                    el = callBindRender(parent.props as BindComponentElement);
                 }
-
-                index++;
+                if (el && typeof el != "string") {
+                    elements = [el];
+                }
             }
-        }
-        if (isContent) {
-            parent.content = children[0];
-        } else {
-            parent.children = children;
+
+
+            let children = isContent ? (parent.content ? [parent.content] : []) : parent.children;
+            children = children || [];
+            this.compareSibling(parent, children, elements);
+
+            if (children && children.length > 0) {
+                let index = 1;
+                for (let ch of children) {
+                    // ch.props 是上一次对比后的新的props
+                    // 所以也包含需要对比的新的子元素列表
+                    ch.mountIndex = index;
+                    let props = ch.props;
+                    if (typeof props !== "string") {
+                        this.compare(ch, props.children);
+                    } else {
+                        ch.status = "mount";
+                    }
+
+                    index++;
+                }
+            }
+            if (isContent) {
+                parent.content = children[0];
+            } else {
+                parent.children = children;
+            }
         }
 
         component.componentReceiveProps && component.componentReceiveProps(parent.props, {
@@ -147,8 +156,9 @@ export class GinkgoCompare {
                 let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
-                    // 需要排除新建的组件
-                    this.compareComponent(parent, treeNodes, treeNode, newNode, index);
+                    if (this.skips == null || this.skips.indexOf(treeNode) == -1) {
+                        this.compareComponent(parent, treeNodes, treeNode, newNode, index);
+                    }
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
                         this.moveTreeNodes(parent, treeNodes, index, lastIndex);
