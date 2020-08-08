@@ -147,30 +147,8 @@ declare namespace anime {
 declare function removeTargets(targets: any): void;
 export declare const GinkgoAnimation: typeof anime;
 
-/** GinkgoMountElement.d.ts* */
-export declare class GinkgoMountElement {
-    private goAfterDomLife;
-    syncVirtualDom(mountLink: ContextLink, skips: any): void;
-    private mountElementChildren;
-    /**
-     * componentReceiveProps 和 componentDidMount 后发执行,顺序改为先添加好所有dom然后再走生命周期
-     * 这样就可以避免componentReceiveProps内重新绘制时样式或者一些其他问题,所以参数lifecycleComponents
-     * 用来存放这些组件
-     *
-     * @param mountLink
-     * @param shouldEl
-     * @param isShouldLife
-     */
-    private mountElements2Dom;
-    private setChildDomSort;
-    private isChildrenRemountOrder;
-    private isChildrenOrderIndex;
-    private getComponentFirstRealDom;
-}
-
 /** GinkgoCompare.d.ts **/
 export declare class GinkgoCompare {
-    private readonly mountElement;
     private readonly context;
     private readonly parent;
     private elements?;
@@ -195,48 +173,28 @@ export declare class GinkgoCompare {
      */
     force(): Array<ContextLink>;
     setSkipCompare(elements: ContextLink[]): void;
-    private mountDiffElements;
-    /**
-     *
-     * @param parent
-     * @param props         new element
-     * @param compareLink   old element
-     */
-    private mountDiffFragment;
-    private mountCreateElements;
-    private mountCreateFragment;
-    private setContentRoot;
+    /************* 算法开始 ******************/
+    private compare;
+    private isComponentContent;
+    private compareSibling;
+    private elementIndexTreeNodes;
+    private checkTreeNodeRemove;
+    private moveTreeNodes;
+    private insertTreeNodes;
+    private removeTreeNodes;
+    protected compareComponent(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink, newNode: GinkgoElement, index: any): void;
+    /************* 算法结束 ******************/
+    private createElement;
+    private movingElement;
+    private compareComponentByLink;
+    private unbindComponent;
+    private buildRealDom;
     private mountCreateFragmentLink;
-    private setContentVirtualParent;
-    private buildChildrenRef;
     private beforeProcessProps;
     private clearPropsEmptyChildren;
-    /**
-     * 假如有一个全局对象 c = <span></span>
-     * <div>
-     *     <div>
-     *         位置A
-     *     </div>
-     *     <div>
-     *         位置B {c}
-     *     </div>
-     * </div>
-     * 第一种情况
-     * 如果全局对象c从位置B变到位置A，则先diff位置A这时发现c已经存在
-     * 第二种情况
-     * 如果全局对象c从位置A变到位置B，则先diff位置A没有问题，在diff位置
-     * B这是发现已经存在c组件
-     *
-     * @param links
-     */
-    private resetContextLinkStatus;
-    /**
-     * 对比新旧对象将最相近的对象放在一起
-     *
-     * @param compareChildLinks
-     * @param newChildren
-     */
-    private alignNewOldPropsChildren;
+    private buildChildrenRef;
+    private setContentRoot;
+    private setContentVirtualParent;
 }
 
 
