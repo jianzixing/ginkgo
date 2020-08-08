@@ -1,5 +1,6 @@
 import Ginkgo, {CSSProperties} from "../carbon/Ginkgo";
-import ViewLifecycle from "./ViewLifecycle";
+import ViewChild from "./ViewChild";
+// import ViewLifecycle from "./ViewLifecycle";
 // import "./index.scss";
 // import GinkgoT2View from "./GinkgoT2View";
 // import ViewA from "./ViewA";
@@ -23,4 +24,5 @@ import ViewLifecycle from "./ViewLifecycle";
 // Ginkgo.render(<ViewInsert/>, document.body);
 // Ginkgo.render(<ViewMoving/>, document.body);
 // Ginkgo.render(<ViewUnauto/>, document.body);
-Ginkgo.render(<ViewLifecycle/>, document.body);
+// Ginkgo.render(<ViewLifecycle/>, document.body);
+Ginkgo.render(<ViewChild/>, document.body);

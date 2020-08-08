@@ -70,6 +70,9 @@ export class GinkgoCompare {
     /************* 算法开始 ******************/
 
     private compare(parent: ContextLink, elements: GinkgoElement[], forceUpdate?: ContextLink) {
+        // todo:GinkgoElement 结构要改变，为了实现component的children
+        // todo:需要先将parent的props.children初始化
+        // todo:props.children == elements
         let isContent = this.isComponentContent(parent);
         let component = parent.component;
         let shouldComponentUpdate = true;
