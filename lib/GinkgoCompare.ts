@@ -1,8 +1,8 @@
-import {ContextLink, GinkgoContainer} from "./GinkgoContainer";
+import {GinkgoContainer, ContextLink} from "./GinkgoContainer";
 import {FragmentComponent, GinkgoComponent, GinkgoElement, HTMLComponent} from "./Ginkgo";
 import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
-let total = 0;
+
 export class GinkgoCompare {
     private readonly context: Array<ContextLink>;
     private readonly parent: ContextLink;
@@ -40,7 +40,7 @@ export class GinkgoCompare {
      */
     rerender(isCallUpdate?: boolean): Array<ContextLink> {
         this.compare(this.parent, this.elements, this.parent, isCallUpdate);
-        console.log("total",total)
+
         return this.context;
     }
 
@@ -95,6 +95,22 @@ export class GinkgoCompare {
             this.compareSibling(parentLink, children, elements);
 
             if (children && children.length > 0) {
+                let index = 1;
+                for (let ch of children) {
+                    // ch.props 是上一次对比后的新的props
+                    // 所以也包含需要对比的新的子元素列表
+                    ch.mountIndex = index;
+                    let props = ch.props;
+                    if (typeof props !== "string") {
+                        this.compare(ch, props.children);
+                    } else {
+                        ch.status = "mount";
+                    }
+
+                    index++;
+                }
+            }
+            if (children && children.length > 0) {
                 if (isContent) {
                     parentLink.content = children[0];
                     if (parentLink.component) parentLink.component.content = children[0].component;
@@ -114,47 +130,29 @@ export class GinkgoCompare {
                 parentLink.component.children = directChildren;
             }
 
-            let oldProps = {};
-            if (parentLink.status === "compare") {
-                oldProps = parentLink.oldProps;
-                parentLink.oldProps = undefined;
-            }
-            component.componentReceiveProps && component.componentReceiveProps(parentLink.props as any, {
-                oldProps: oldProps,
-                type: parentLink.status == "new" ? "new" : "mounted"
-            });
-            if (parentLink.status === "compare") {
-                component.componentCompareProps && component.componentCompareProps(parentLink.props as any, {
-                    oldProps: oldProps
-                });
-            }
-
-            if (children && children.length > 0) {
-                let index = 1;
-                for (let ch of children) {
-                    // ch.props 是上一次对比后的新的props
-                    // 所以也包含需要对比的新的子元素列表
-                    ch.mountIndex = index;
-                    let props = ch.props;
-                    if (typeof props !== "string") {
-                        this.compare(ch, props.children);
-                    } else {
-                        ch.status = "mount";
-                    }
-
-                    index++;
-                }
-            }
-
             if (isCallUpdate != false && parentLink.status != "new") {
                 component.componentDidUpdate && component.componentDidUpdate(parentLink.props as any, component.state);
                 component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, component.state);
             }
+        }
 
-            if (parentLink.status === "new") {
-                component.componentDidMount && component.componentDidMount();
-                component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, parentLink.component.state);
-            }
+        let oldProps = {};
+        if (parentLink.status === "compare") {
+            oldProps = parentLink.oldProps;
+            parentLink.oldProps = undefined;
+        }
+        component.componentReceiveProps && component.componentReceiveProps(parentLink.props as any, {
+            oldProps: oldProps,
+            type: parentLink.status == "new" ? "new" : "mounted"
+        });
+        if (parentLink.status === "compare") {
+            component.componentCompareProps && component.componentCompareProps(parentLink.props as any, {
+                oldProps: oldProps
+            });
+        }
+        if (parentLink.status === "new") {
+            component.componentDidMount && component.componentDidMount();
+            component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, parentLink.component.state);
         }
         parentLink.status = "mount";
     }
@@ -190,8 +188,6 @@ export class GinkgoCompare {
                     let treeNode = treeNodes[index];
                     if (this.skips == null || this.skips.indexOf(treeNode) == -1) {
                         this.compareComponent(parent, treeNodes, treeNode, newNode, index);
-                        treeNode.status = "compare";
-                        treeNode.compareProps = newNode;
                     }
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
@@ -200,8 +196,7 @@ export class GinkgoCompare {
                     lastIndex = index > lastIndex ? index : lastIndex;
                 } else {
                     // 在 treeNodes 中，创建 newNode 并将 newNode 插入到 lastIndex 位置后，相应元素后移一位
-                    let newInsert = this.insertTreeNodes(parent, treeNodes, lastIndex, newNode);
-                    if (newInsert) newInsert.status = "new";
+                    this.insertTreeNodes(parent, treeNodes, lastIndex, newNode);
                     lastIndex = lastIndex + 1;
                 }
                 i++;
@@ -215,37 +210,6 @@ export class GinkgoCompare {
                     this.removeTreeNodes(parent, treeNodes, treeNode);
                 }
             }
-
-            let time = new Date().getTime();
-            for (let j = 0; j < treeNodes.length; j++) {
-                let treeNode = treeNodes[j];
-                let nextSibling
-                if (treeNode.component instanceof HTMLComponent || treeNode.component instanceof TextComponent) {
-                    nextSibling = this.getComponentNextDomWhenFind(treeNodes, j + 1, true);
-                } else {
-                    nextSibling = this.getComponentNextDomWhenFind(treeNodes, j + 1, false);
-                }
-                if (treeNodes[j].status == "new") {
-                    this.mountDom2Document(parent, treeNodes[j], nextSibling);
-                } else if (treeNodes[j].status == "compare") {
-                    this.compareComponentByLink(parent, treeNode, treeNode.compareProps);
-                    let compareDoms = this.getComponentRealDom(treeNode, 2);
-                    if (compareDoms) {
-                        if (nextSibling == null) {
-                            for (let cd of compareDoms) {
-                                parent.shouldEl.append(cd);
-                            }
-                        } else {
-                            for (let cd of compareDoms) {
-                                (nextSibling as Element).parentElement.insertBefore(cd, nextSibling);
-                                nextSibling = cd;
-                            }
-                        }
-                    }
-                    treeNode.compareProps = undefined;
-                }
-            }
-            total += (new Date().getTime() - time);
         }
     }
 
@@ -294,12 +258,15 @@ export class GinkgoCompare {
             treeNodes[i] = treeNodes[i + 1];
         }
         treeNodes[lastIndex] = obj;
+        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, lastIndex - 1);
+        this.movingElement(parent, obj, previousSibling);
     }
 
-    private insertTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, lastIndex, element: GinkgoElement): ContextLink {
-        let newNode = this.createElement(parent, element);
+    private insertTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, lastIndex, element: GinkgoElement) {
+        let newNode;
+        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, lastIndex);
+        newNode = this.createElement(parent, element, previousSibling);
         treeNodes.splice(lastIndex + 1, 0, newNode);
-        return newNode;
     }
 
     private removeTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink) {
@@ -312,17 +279,9 @@ export class GinkgoCompare {
                                treeNode: ContextLink,
                                newNode: GinkgoElement,
                                index) {
-        let compareProps = treeNode.props;
-        let component = treeNode.component;
-        let recreate = false;
-        if (component instanceof TextComponent && !GinkgoContainer.isBaseType(newNode)) {
-            recreate = true;
-        }
-        if (typeof compareProps == "object" && newNode.module != compareProps.module) {
-            recreate = true;
-        }
-
-        if (recreate) {
+        // let previousSibling = this.getComponentRealDomWhenFind(treeNodes, index - 1);
+        let eq = this.compareComponentByLink(parent, treeNode, newNode);
+        if (eq == false) {
             this.removeTreeNodes(parent, treeNodes, treeNode);
             this.insertTreeNodes(parent, treeNodes, index - 1, newNode);
         }
@@ -330,7 +289,7 @@ export class GinkgoCompare {
 
     /************* 算法结束 ******************/
 
-    private createElement(parent: ContextLink, element: GinkgoElement): ContextLink {
+    private createElement(parent: ContextLink, element: GinkgoElement, previousSibling): ContextLink {
         if (element == null || element == undefined) return null; // 判断props不能为空否则遍历会取到body容器
 
         let link: ContextLink = this.mountCreateFragmentLink(parent, element),
@@ -339,29 +298,28 @@ export class GinkgoCompare {
         // 生命周期第一个
         if (typeof link.props == "object") link.props['component'] = component;
         component.componentWillMount && component.componentWillMount();
-        this.buildChildrenRef(link);
-        this.makeWillPropsLife(component, link.props, {}, "new", true);
-
-        return link;
-    }
-
-    private mountDom2Document(parent: ContextLink, link: ContextLink, nextSibling) {
         this.relevanceElementShould(link);
         if (link && link.holder && link.holder.dom && parent.shouldEl) {
-            if (nextSibling) {
-                (nextSibling.parentElement as any).insertBefore(link.holder.dom, nextSibling);
+            if (previousSibling) {
+                (previousSibling.parentElement as any).insertBefore(link.holder.dom, previousSibling.nextSibling);
             } else {
-                let pps = parent.nextSibling;
+                let pps = parent.previousSibling;
                 if (pps) {
-                    (pps.parentElement as any).insertBefore(link.holder.dom, pps);
+                    (pps.parentElement as any).insertBefore(link.holder.dom, pps.nextSibling);
+                    parent.previousSibling = undefined;
                 } else {
                     parent.shouldEl.append(link.holder.dom);
                 }
             }
         } else {
             link.shouldEl = parent.shouldEl;
-            link.nextSibling = nextSibling || parent.nextSibling;
+            link.previousSibling = previousSibling || parent.previousSibling;
         }
+
+        this.buildChildrenRef(link);
+        this.makeWillPropsLife(component, link.props, {}, "new", true);
+
+        return link;
     }
 
     private movingElement(parent: ContextLink, current: ContextLink, previousSibling) {
@@ -374,7 +332,7 @@ export class GinkgoCompare {
         }
     }
 
-    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement) {
+    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
         let oldProps = compareProps;
@@ -395,6 +353,8 @@ export class GinkgoCompare {
                     compareLink.status = "compare";
                     compareLink.oldProps = oldProps;
                 }
+            } else {
+                return false;
             }
         } else if (compareProps
             && typeof compareProps == "object"
@@ -446,7 +406,10 @@ export class GinkgoCompare {
 
             compareLink.status = "compare";
             compareLink.oldProps = oldProps;
+        } else {
+            return false;
         }
+        return true;
     }
 
     private unbindComponent(parent: ContextLink, current: ContextLink) {
@@ -486,6 +449,13 @@ export class GinkgoCompare {
         }
 
         return link;
+    }
+
+    private setLinkParent(parent: ContextLink, link: ContextLink) {
+        if (parent && link) {
+            link.parent = parent;
+            link.component.parent = parent.component;
+        }
     }
 
     private clearPropsEmptyChildren(props: GinkgoElement | string) {
@@ -533,11 +503,10 @@ export class GinkgoCompare {
         }
     }
 
-    private getComponentNextDomWhenFind(links: Array<ContextLink>, index: number, isMount: boolean = false) {
-        for (let i = index; i < links.length; i++) {
+    private getComponentRealDomWhenFind(links: Array<ContextLink>, index: number) {
+        for (let i = index; i >= 0; i--) {
             let link = links[i];
-            if (isMount && link.status == "new") continue;
-            let dom = this.getComponentRealDom(link, 0, isMount);
+            let dom = this.getComponentRealDom(link, 1);
             if (dom) return dom;
         }
     }
@@ -547,9 +516,8 @@ export class GinkgoCompare {
      * @param child
      * @param type 0获取第一个  1获取最后一个 2获取第一层列表
      */
-    private getComponentRealDom(link: ContextLink, type: number, isMount: boolean = false) {
+    private getComponentRealDom(link: ContextLink, type: number) {
         if (link) {
-            if (isMount && link.status == "new") return;
             if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
                 return type == 2 ? [link.holder.dom] : link.holder.dom;
             } else {

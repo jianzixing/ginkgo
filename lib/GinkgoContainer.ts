@@ -21,7 +21,7 @@ export interface ContextLink {
     /**
      * 应该插入到哪个元素之前
      */
-    nextSibling?: Element;
+    previousSibling?: Element;
 
     /**
      * 组建组件的属性值，如果是string类型表示当前组件属于text类型(TextComponent)
