@@ -67,7 +67,7 @@ type ElementType = keyof HTMLElementTagNameMap;
 
 type ComponentType<P extends GinkgoElement, T extends GinkgoComponent<P>> = (new (props: P) => T);
 
-type refObjectCall<C extends GinkgoComponent = any> = (instance: C) => void;
+export type refObjectCall<C extends GinkgoComponent = any> = (instance: C) => void;
 
 export type Bind = BindComponent;
 export type Request = GinkgoHttpRequest;
@@ -122,9 +122,6 @@ export default class Ginkgo {
 
             let childElements;
             if (children) {
-                children = children.filter(value => value);
-                // resolve <div>{this.props.children}<span></span></div>
-                // tsx compiled GinkgoElement : [[...],{}]
                 for (let item of children) {
                     if (!childElements) childElements = [];
                     if (item) {

@@ -1,4 +1,4 @@
-import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools} from "./Ginkgo";
+import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, RefObject, refObjectCall} from "./Ginkgo";
 import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
 
@@ -40,7 +40,7 @@ let didUpdateCall = function (c: GinkgoComponent) {
     }
 }
 
-export class GinkgoComponent<P = {}, S = {}> {
+export class GinkgoComponent<P = { key?: string | number, ref?: refObjectCall | RefObject<GinkgoComponent>, part?: string }, S = {}> {
 
     /**
      * current component parent

@@ -70,9 +70,6 @@ export class GinkgoCompare {
     /************* 算法开始 ******************/
 
     private compare(parent: ContextLink, elements: GinkgoElement[], forceUpdate?: ContextLink) {
-        // todo:GinkgoElement 结构要改变，为了实现component的children
-        // todo:需要先将parent的props.children初始化
-        // todo:props.children == elements
         let isContent = this.isComponentContent(parent);
         let component = parent.component;
         let shouldComponentUpdate = true;
@@ -80,7 +77,7 @@ export class GinkgoCompare {
             && component
             && component.shouldComponentUpdate
             && parent !== forceUpdate) {
-            shouldComponentUpdate = component.shouldComponentUpdate(parent.props, component.state);
+            shouldComponentUpdate = component.shouldComponentUpdate(parent.props as any, component.state);
         }
 
         if (shouldComponentUpdate) {
@@ -127,19 +124,19 @@ export class GinkgoCompare {
             oldProps = parent.oldProps;
             parent.oldProps = undefined;
         }
-        component.componentReceiveProps && component.componentReceiveProps(parent.props, {
+        component.componentReceiveProps && component.componentReceiveProps(parent.props as any, {
             oldProps: oldProps,
             type: parent.status == "new" ? "new" : "mounted"
         });
         if (parent.status === "compare") {
-            component.componentCompareProps && component.componentCompareProps(parent.props, {
+            component.componentCompareProps && component.componentCompareProps(parent.props as any, {
                 oldProps: oldProps
             });
         }
         if (parent.status === "new") {
             component.componentDidMount && component.componentDidMount();
         }
-        component.componentRenderUpdate && component.componentRenderUpdate(parent.props, parent.component.state);
+        component.componentRenderUpdate && component.componentRenderUpdate(parent.props as any, parent.component.state);
         parent.status = "mount";
     }
 
@@ -450,6 +447,13 @@ export class GinkgoCompare {
         }
 
         return link;
+    }
+
+    private setLinkParent(parent: ContextLink, link: ContextLink) {
+        if (parent && link) {
+            link.parent = parent;
+            link.component.parent = parent.component;
+        }
     }
 
     private clearPropsEmptyChildren(props: GinkgoElement | string) {

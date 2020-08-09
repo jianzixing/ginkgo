@@ -338,7 +338,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                                 dom['value'] = props[key];
                             }
                             if (key == "src"
-                                && props.module == "img"
+                                && dom.tagName.toLowerCase() == "img"
                                 && props['src'] == dom.getAttribute("src")) {
                             } else {
                                 dom.setAttribute(key.toLowerCase(), (props as any)[key]);

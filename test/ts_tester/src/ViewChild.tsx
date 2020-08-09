@@ -2,17 +2,27 @@ import Ginkgo, {GinkgoElement, GinkgoNode} from "../carbon/Ginkgo";
 
 export default class ViewChild extends Ginkgo.Component {
 
+    state = {
+        type: 0
+    }
+
     render(): GinkgoNode {
-        return <ViewChild1>
-            <ViewChild2/>
-            <ViewChild3/>
-        </ViewChild1>
+        return <div onClick={e => {
+            this.setState({type: this.state.type + 1})
+        }}>
+            <ViewChild1>
+                <ViewChild2 key={"1"}/>
+                <ViewChild3/>
+                {this.state.type > 1 ? <ViewChild4/> : undefined}
+            </ViewChild1>
+        </div>
     }
 }
 
 
 class ViewChild1 extends Ginkgo.Component {
     render(): GinkgoNode {
+        console.log("children", this.children);
         return <div>{this.props.children}</div>;
     }
 }
@@ -26,5 +36,11 @@ class ViewChild2 extends Ginkgo.Component {
 class ViewChild3 extends Ginkgo.Component {
     render(): GinkgoNode {
         return <span>3</span>;
+    }
+}
+
+class ViewChild4 extends Ginkgo.Component {
+    render(): GinkgoNode {
+        return <span>4</span>;
     }
 }
