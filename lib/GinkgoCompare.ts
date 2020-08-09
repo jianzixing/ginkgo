@@ -25,9 +25,7 @@ export class GinkgoCompare {
     mount(): Array<ContextLink> {
         if (this.elements) {
             this.elements = this.elements.filter(value => value != null && value != undefined);
-            let time = new Date().getTime();
             this.compare(this.parent, this.elements);
-            console.log((new Date().getTime() - time) + "ms");
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);
         }
@@ -41,9 +39,7 @@ export class GinkgoCompare {
      * 重新渲染一个组件的content内容
      */
     rerender(isCallUpdate?: boolean): Array<ContextLink> {
-        let time = new Date().getTime();
         this.compare(this.parent, this.elements, this.parent, isCallUpdate);
-        console.log((new Date().getTime() - time) + "ms");
 
         return this.context;
     }
@@ -55,9 +51,7 @@ export class GinkgoCompare {
      */
     force(): Array<ContextLink> {
         if (this.parent && this.parent.component instanceof BindComponent) {
-            let time = new Date().getTime();
             this.compare(this.parent, this.elements);
-            console.log((new Date().getTime() - time) + "ms");
         }
 
         return this.context;
@@ -118,7 +112,7 @@ export class GinkgoCompare {
             }
             if (children && children.length > 0) {
                 if (isContent) {
-                    parentLink.content = children[0 ];
+                    parentLink.content = children[0];
                     if (parentLink.component) parentLink.component.content = children[0].component;
                 } else {
                     parentLink.children = children;
@@ -371,6 +365,7 @@ export class GinkgoCompare {
             (component as any).props = props;
 
             this.clearPropsEmptyChildren(props);
+            this.buildChildrenRef(compareLink);
 
             /**
              * 处理之前先将默认值重新赋值
