@@ -80,8 +80,6 @@ export class GinkgoCompare {
             shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, component.state);
         }
 
-        // this.previewComponentChildren(parentLink, elements);
-
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
                 component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, component.state);
@@ -373,9 +371,7 @@ export class GinkgoCompare {
                         || (oldChild == null && newChild != null)
                         || newChild.length != oldChild.length)) {
                     changed = true;
-                }
-
-                if (newChild && oldChild && newChild.length == oldChild.length) {
+                } else if (newChild && oldChild && newChild.length == oldChild.length) {
                     let i = 0;
                     for (let c of newChild) {
                         if (c.module != oldChild[i].module) {

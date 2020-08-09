@@ -254,10 +254,6 @@ export declare class GinkgoComponent<P = any | {
     defaultProps?: P | any;
     state?: Readonly<S>;
     /**
-     * current component children elements
-     */
-    children?: Array<GinkgoComponent>;
-    /**
      * assemble component elements
      */
     content?: GinkgoComponent;
@@ -316,7 +312,6 @@ export declare class GinkgoComponent<P = any | {
      */
     componentRenderUpdate?(props?: P, state?: S): void;
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
-    shouldComponentChildren?(): boolean;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素

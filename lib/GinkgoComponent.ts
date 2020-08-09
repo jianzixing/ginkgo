@@ -58,12 +58,7 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
     defaultProps?: P | any;
 
     state?: Readonly<S>;
-
-    /**
-     * current component children elements
-     */
-    children?: Array<GinkgoComponent>;
-
+    
     /**
      * assemble component elements
      */
