@@ -19,9 +19,9 @@ export interface ContextLink {
     shouldEl?: Element;
 
     /**
-     * 应该插入到哪个元素之后
+     * 应该插入到哪个元素之前
      */
-    previousSibling?: Element;
+    nextSibling?: Element;
 
     /**
      * 组建组件的属性值，如果是string类型表示当前组件属于text类型(TextComponent)
@@ -57,6 +57,7 @@ export interface ContextLink {
      * 用于临时存储使用，使用后立即清除
      */
     oldProps?: any;
+    compareProps?: any;
 }
 
 const ComponentNameMapping = {

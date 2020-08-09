@@ -122,6 +122,7 @@ export default class Ginkgo {
 
             let childElements;
             if (children) {
+                let keys = [];
                 for (let item of children) {
                     if (!childElements) childElements = [];
                     if (item) {
@@ -129,6 +130,14 @@ export default class Ginkgo {
                             item.map(value => {
                                 if (value) {
                                     childElements.push(value);
+                                    if (item.key) {
+                                        if (keys.indexOf(item.key) >= 0) {
+                                            item.key = undefined;
+                                            console.error("Warning: element key duplicate");
+                                        } else {
+                                            keys.push(item.key);
+                                        }
+                                    }
                                     if (value.key == null && !this.isWarn) {
                                         console.warn("Warning: Each child in an array or iterator should have a unique " +
                                             "\"key\" prop. Check the elements");
@@ -138,6 +147,14 @@ export default class Ginkgo {
                             });
                         } else {
                             childElements.push(item);
+                            if (item.key) {
+                                if (keys.indexOf(item.key) >= 0) {
+                                    item.key = undefined;
+                                    console.error("Warning: element key duplicate");
+                                } else {
+                                    keys.push(item.key);
+                                }
+                            }
                         }
                     }
                 }

@@ -10,11 +10,16 @@ export default class ViewChild extends Ginkgo.Component {
         return <div onClick={e => {
             this.setState({type: this.state.type + 1})
         }}>
-            <ViewChild1>
-                <ViewChild2 key={"1"}/>
-                <ViewChild3/>
-                {this.state.type > 1 ? <ViewChild4/> : undefined}
-            </ViewChild1>
+            <ViewChild3 key={1}/>
+            <ViewChild4 key={5}/>
+            <span key={2}>(2)</span>
+            <span key={3}>(3)</span>
+            <ViewChild4 key={5}/>
+            {/*<ViewChild1>*/}
+            {/*    <ViewChild2 key={"1"}/>*/}
+            {/*    <ViewChild3/>*/}
+            {/*    {this.state.type > 1 ? <ViewChild4/> : undefined}*/}
+            {/*</ViewChild1>*/}
         </div>
     }
 }
@@ -39,12 +44,26 @@ class ViewChild2 extends Ginkgo.Component {
 
 class ViewChild3 extends Ginkgo.Component {
     render(): GinkgoNode {
-        return <span>3</span>;
+        return <Ginkgo.Fragment>
+            <span>
+                <span>(3.1)</span>
+                <span>(3.2)</span>
+            </span>
+            <span>(3.5)</span>
+            <span>(3.6)</span>
+        </Ginkgo.Fragment>;
     }
 }
 
 class ViewChild4 extends Ginkgo.Component {
     render(): GinkgoNode {
-        return <span>4</span>;
+        return <Ginkgo.Fragment>
+            <span>
+                <span>(4.1)</span>
+                <span>(4.2)</span>
+            </span>
+            <span>(4.5)</span>
+            <span>(4.6)</span>
+        </Ginkgo.Fragment>;
     }
 }
