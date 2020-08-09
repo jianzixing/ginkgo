@@ -1,4 +1,4 @@
-import {GinkgoContainer, ContextLink, ComponentWrapper} from "./GinkgoContainer";
+import {GinkgoContainer, ContextLink} from "./GinkgoContainer";
 import {FragmentComponent, GinkgoComponent, GinkgoElement, HTMLComponent} from "./Ginkgo";
 import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
@@ -80,6 +80,7 @@ export class GinkgoCompare {
             shouldComponentUpdate = component.shouldComponentUpdate(parent.props as any, component.state);
         }
 
+        let directChildren;
         if (shouldComponentUpdate) {
             if (isContent && component != null) {
                 let el = component.render ? component.render() : undefined;
@@ -280,7 +281,7 @@ export class GinkgoCompare {
 
         // 生命周期第一个
         component.componentWillMount && component.componentWillMount();
-        this.buildRealDom(link);
+        this.relevanceElementShould(link);
         if (link && link.holder && link.holder.dom && parent.shouldEl) {
             if (previousSibling) {
                 (previousSibling.parentElement as any).insertBefore(link.holder.dom, previousSibling.nextSibling);
@@ -398,27 +399,11 @@ export class GinkgoCompare {
         GinkgoContainer.unmountComponentByLink(current);
     }
 
-    private buildRealDom(link: ContextLink) {
+    private relevanceElementShould(link: ContextLink) {
         let component = link.component;
         let props = link.props;
         if (component instanceof HTMLComponent && typeof props === "object") {
-            let type = props.module;
-            if (typeof type == "string") {
-                let el = document.createElement(type);
-                link.holder.dom = el;
-                link.shouldEl = el;
-            } else {
-                throw Error("not support html tag " + type + ".");
-            }
-        }
-
-        if (component instanceof TextComponent && GinkgoContainer.isBaseType(props)) {
-            let text = document.createTextNode("" + component.text);
-            if (link && link.holder) {
-                link.holder.dom = text;
-            } else if (link) {
-                link.holder = {dom: text};
-            }
+            link.shouldEl = link.holder.dom as any;
         }
     }
 
@@ -426,17 +411,17 @@ export class GinkgoCompare {
     private mountCreateFragmentLink(parent: ContextLink, props: GinkgoElement | string): ContextLink {
         let component,
             link: ContextLink,
-            parentComponent = parent ? parent.component : undefined,
-            wrapper: ComponentWrapper;
+            parentComponent = parent ? parent.component : undefined;
 
         this.clearPropsEmptyChildren(props);
-        wrapper = GinkgoContainer.parseComponentByElement(props);
-        component = wrapper.component;
+        component = GinkgoContainer.parseComponentByElement(props);
         component.parent = parentComponent;
 
+        let holder;
+        if (component instanceof HTMLComponent || component instanceof TextComponent) holder = {dom: component.dom};
         link = {
             component: component,
-            holder: wrapper.holder,
+            holder: holder,
             props: props,
             parent: parent,
             status: "new"

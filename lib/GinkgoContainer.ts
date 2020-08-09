@@ -59,11 +59,6 @@ export interface ContextLink {
     oldProps?: any;
 }
 
-export interface ComponentWrapper {
-    component: GinkgoComponent;
-    holder?: { dom: Element };
-}
-
 const ComponentNameMapping = {
     input: InputComponent,
     bind: BindComponent
@@ -100,9 +95,9 @@ export class GinkgoContainer {
             return items[0];
         } else {
             let props = {module: renderTo.tagName};
-            let wrapper = this.parseComponentByElement(props);
+            let component = this.parseComponentByElement(props, renderTo);
             let link: ContextLink = {
-                component: wrapper.component,
+                component: component,
                 shouldEl: renderTo,
                 holder: {dom: renderTo},
                 /**
@@ -110,9 +105,6 @@ export class GinkgoContainer {
                  */
                 status: "mount"
             };
-            if (wrapper.component instanceof HTMLComponent) {
-                wrapper.holder.dom = renderTo;
-            }
             this.context.push(link);
             return link;
         }
@@ -150,18 +142,32 @@ export class GinkgoContainer {
      * 通过元素配置创建组件
      * @param element
      */
-    public static parseComponentByElement<E extends GinkgoElement>(element: E | string): ComponentWrapper {
+    public static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element): GinkgoComponent {
         let component: GinkgoComponent,
             module: any = typeof element === "object" ? element.module : undefined,
             holder;
 
         if (GinkgoContainer.isBaseType(element)) {
             if (!module && GinkgoContainer.isBaseType(element)) {
-                component = new TextComponent(undefined, GinkgoContainer.getBaseTypeText(element));
+                let text = GinkgoContainer.getBaseTypeText(element);
+                holder = {};
+                if (dom) {
+                    holder.dom = dom;
+                } else {
+                    let dom = document.createTextNode("" + text);
+                    holder.dom = dom;
+                }
+                component = new TextComponent(text as any, holder);
             }
         } else {
             if (typeof module == "string") {
                 holder = {};
+                if (dom) {
+                    holder.dom = dom;
+                } else {
+                    let dom = document.createElement(module);
+                    holder.dom = dom;
+                }
                 if (ComponentNameMapping[module]) {
                     component = new ComponentNameMapping[module](element, holder);
                 } else {
@@ -182,7 +188,7 @@ export class GinkgoContainer {
         // set default props values
         GinkgoContainer.setDefaultProps(component, element);
 
-        return {component, holder};
+        return component;
     }
 
     public static isBaseType(props: any) {
@@ -278,10 +284,12 @@ export class GinkgoContainer {
             (link.component as any).props = props;
             if (link.status == "mount") {
                 link.component.componentReceiveProps && link.component.componentReceiveProps(props, {
-                    oldProps: oldProps,
+                    oldProps: oldProps as any,
                     type: "mounted"
                 });
-                link.component.componentCompareProps && link.component.componentCompareProps(props, {oldProps: oldProps});
+                link.component.componentCompareProps && link.component.componentCompareProps(props, {
+                    oldProps: oldProps as any
+                });
             }
         }
     }
