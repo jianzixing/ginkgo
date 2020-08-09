@@ -142,7 +142,7 @@ export class GinkgoContainer {
      * 通过元素配置创建组件
      * @param element
      */
-    public static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element): GinkgoComponent {
+    public static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element | boolean): GinkgoComponent {
         let component: GinkgoComponent,
             module: any = typeof element === "object" ? element.module : undefined,
             holder;
@@ -151,22 +151,26 @@ export class GinkgoContainer {
             if (!module && GinkgoContainer.isBaseType(element)) {
                 let text = GinkgoContainer.getBaseTypeText(element);
                 holder = {};
-                if (dom) {
-                    holder.dom = dom;
-                } else {
-                    let dom = document.createTextNode("" + text);
-                    holder.dom = dom;
+                if (dom != false) {
+                    if (dom) {
+                        holder.dom = dom;
+                    } else {
+                        let dom = document.createTextNode("" + text);
+                        holder.dom = dom;
+                    }
                 }
                 component = new TextComponent(text as any, holder);
             }
         } else {
             if (typeof module == "string") {
                 holder = {};
-                if (dom) {
-                    holder.dom = dom;
-                } else {
-                    let dom = document.createElement(module);
-                    holder.dom = dom;
+                if (dom != false) {
+                    if (dom) {
+                        holder.dom = dom;
+                    } else {
+                        let dom = document.createElement(module);
+                        holder.dom = dom;
+                    }
                 }
                 if (ComponentNameMapping[module]) {
                     component = new ComponentNameMapping[module](element, holder);

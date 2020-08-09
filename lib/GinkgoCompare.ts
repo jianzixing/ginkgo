@@ -116,10 +116,24 @@ export class GinkgoCompare {
                     index++;
                 }
             }
-            if (isContent) {
-                parentLink.content = children[0];
-            } else {
-                parentLink.children = children;
+            if (children && children.length > 0) {
+                if (isContent) {
+                    parentLink.content = children[0 ];
+                    if (parentLink.component) parentLink.component.content = children[0].component;
+                } else {
+                    parentLink.children = children;
+                }
+            }
+
+            let directChildren;
+            if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
+                for (let child of parentLink.props.children) {
+                    if (typeof child == "object" && child['component']) {
+                        if (directChildren == null) directChildren = [];
+                        directChildren.push(child['component']);
+                    }
+                }
+                parentLink.component.children = directChildren;
             }
 
             if (isCallUpdate != false && parentLink.status != "new") {
@@ -271,8 +285,8 @@ export class GinkgoCompare {
                                treeNode: ContextLink,
                                newNode: GinkgoElement,
                                index) {
-        let previousSibling = this.getComponentRealDomWhenFind(treeNodes, index - 1);
-        let eq = this.compareComponentByLink(parent, treeNode, newNode, previousSibling);
+        // let previousSibling = this.getComponentRealDomWhenFind(treeNodes, index - 1);
+        let eq = this.compareComponentByLink(parent, treeNode, newNode);
         if (eq == false) {
             this.removeTreeNodes(parent, treeNodes, treeNode);
             this.insertTreeNodes(parent, treeNodes, index - 1, newNode);
@@ -288,6 +302,7 @@ export class GinkgoCompare {
             component = link.component;
 
         // 生命周期第一个
+        if (typeof link.props == "object") link.props['component'] = component;
         component.componentWillMount && component.componentWillMount();
         this.relevanceElementShould(link);
         if (link && link.holder && link.holder.dom && parent.shouldEl) {
@@ -323,7 +338,7 @@ export class GinkgoCompare {
         }
     }
 
-    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement, previousSibling): boolean {
+    private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
         let oldProps = compareProps;
@@ -351,6 +366,7 @@ export class GinkgoCompare {
             && typeof compareProps == "object"
             && component
             && props.module == compareProps.module) {
+            props['component'] = component;
             compareLink.props = props;
             (component as any).props = props;
 

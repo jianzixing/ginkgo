@@ -27,11 +27,7 @@ class ViewChild1 extends Ginkgo.Component {
     }
 
     componentRenderUpdate(props?: any, state?: {}) {
-        console.log("children", this.children);
-    }
-
-    shouldComponentChildren() {
-        return true;
+        console.log("children", this.children, this);
     }
 }
 

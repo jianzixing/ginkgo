@@ -322,6 +322,14 @@ export default class Ginkgo {
         }
     }
 
+    public static instanceofComponent(props: GinkgoElement, fn) {
+        let component = GinkgoContainer.parseComponentByElement(props, false);
+        if (component instanceof fn) {
+            return true;
+        }
+        return false;
+    }
+
     public static get(url: string, data?: { [key: string]: any } | FormData, config?: HttpConfig): Promise<any> {
         return GinkgoHttpRequest.get(url, data, config);
     }

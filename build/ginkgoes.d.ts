@@ -254,6 +254,10 @@ export declare class GinkgoComponent<P = any | {
     defaultProps?: P | any;
     state?: Readonly<S>;
     /**
+     * current component children elements
+     */
+    children?: Array<GinkgoComponent>;
+    /**
      * assemble component elements
      */
     content?: GinkgoComponent;
@@ -1187,6 +1191,7 @@ export default class Ginkgo {
     static forEachChildren(fn: (component: GinkgoComponent) => boolean | any, component: GinkgoComponent, breakComponent?: any): void;
     private static forEachContentByLink;
     private static forEachChildrenByLink;
+    static instanceofComponent(props: GinkgoElement, fn: any): boolean;
     static get(url: string, data?: {
         [key: string]: any;
     } | FormData, config?: HttpConfig): Promise<any>;
