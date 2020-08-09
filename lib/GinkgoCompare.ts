@@ -40,9 +40,9 @@ export class GinkgoCompare {
      *
      * 重新渲染一个组件的content内容
      */
-    rerender(): Array<ContextLink> {
+    rerender(isCallUpdate?: boolean): Array<ContextLink> {
         let time = new Date().getTime();
-        this.compare(this.parent, this.elements, this.parent);
+        this.compare(this.parent, this.elements, this.parent, isCallUpdate);
         console.log((new Date().getTime() - time) + "ms");
 
         return this.context;
@@ -69,23 +69,26 @@ export class GinkgoCompare {
 
     /************* 算法开始 ******************/
 
-    private compare(parent: ContextLink, elements: GinkgoElement[], forceUpdate?: ContextLink) {
-        let isContent = this.isComponentContent(parent);
-        let component = parent.component;
+    private compare(parentLink: ContextLink, elements: GinkgoElement[], forceUpdate?: ContextLink, isCallUpdate = true) {
+        let isContent = this.isComponentContent(parentLink);
+        let component = parentLink.component;
         let shouldComponentUpdate = true;
-        if (parent.status == "mount"
+        if (parentLink.status == "mount"
             && component
             && component.shouldComponentUpdate
-            && parent !== forceUpdate) {
-            shouldComponentUpdate = component.shouldComponentUpdate(parent.props as any, component.state);
+            && parentLink !== forceUpdate) {
+            shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, component.state);
         }
 
-        let directChildren;
         if (shouldComponentUpdate) {
+            if (isCallUpdate != false && parentLink.status != "new") {
+                component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, component.state);
+            }
+
             if (isContent && component != null) {
                 let el = component.render ? component.render() : undefined;
-                if (component instanceof BindComponent && parent.props && (parent.props as any).render) {
-                    el = callBindRender(parent.props as BindComponentElement);
+                if (component instanceof BindComponent && parentLink.props && (parentLink.props as any).render) {
+                    el = callBindRender(parentLink.props as BindComponentElement);
                 }
                 if (el && typeof el != "string") {
                     elements = [el];
@@ -93,9 +96,9 @@ export class GinkgoCompare {
             }
 
 
-            let children = isContent ? (parent.content ? [parent.content] : []) : parent.children;
+            let children = isContent ? (parentLink.content ? [parentLink.content] : []) : parentLink.children;
             children = children || [];
-            this.compareSibling(parent, children, elements);
+            this.compareSibling(parentLink, children, elements);
 
             if (children && children.length > 0) {
                 let index = 1;
@@ -114,31 +117,67 @@ export class GinkgoCompare {
                 }
             }
             if (isContent) {
-                parent.content = children[0];
+                parentLink.content = children[0];
             } else {
-                parent.children = children;
+                parentLink.children = children;
+            }
+
+            if (isContent
+                && component.shouldComponentChildren
+                && component.shouldComponentChildren()
+                && typeof parentLink.props != "string") {
+                let result = [];
+                this.forEachChildren(parentLink, parentLink.props.children, result);
+                parentLink.component.children = result;
+            }
+
+            if (isCallUpdate != false && parentLink.status != "new") {
+                component.componentDidUpdate && component.componentDidUpdate(parentLink.props as any, component.state);
+                component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, component.state);
             }
         }
 
         let oldProps = {};
-        if (parent.status === "compare") {
-            oldProps = parent.oldProps;
-            parent.oldProps = undefined;
+        if (parentLink.status === "compare") {
+            oldProps = parentLink.oldProps;
+            parentLink.oldProps = undefined;
         }
-        component.componentReceiveProps && component.componentReceiveProps(parent.props as any, {
+        component.componentReceiveProps && component.componentReceiveProps(parentLink.props as any, {
             oldProps: oldProps,
-            type: parent.status == "new" ? "new" : "mounted"
+            type: parentLink.status == "new" ? "new" : "mounted"
         });
-        if (parent.status === "compare") {
-            component.componentCompareProps && component.componentCompareProps(parent.props as any, {
+        if (parentLink.status === "compare") {
+            component.componentCompareProps && component.componentCompareProps(parentLink.props as any, {
                 oldProps: oldProps
             });
         }
-        if (parent.status === "new") {
+        if (parentLink.status === "new") {
             component.componentDidMount && component.componentDidMount();
+            component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, parentLink.component.state);
         }
-        component.componentRenderUpdate && component.componentRenderUpdate(parent.props as any, parent.component.state);
-        parent.status = "mount";
+        parentLink.status = "mount";
+    }
+
+    private forEachChildren(link: ContextLink, props: GinkgoElement[], result: ContextLink[]) {
+        if (link && props && result) {
+            if (props.indexOf(link.props as any) >= 0) {
+                result.push(link.component);
+                if (result.length == props.length) {
+                    return;
+                }
+            }
+            if (link.content) {
+                this.forEachChildren(link.content, props, result);
+            } else {
+                let children = link.children;
+                if (children) {
+                    for (let child of children) {
+                        if (result.length == props.length) return;
+                        this.forEachChildren(child, props, result);
+                    }
+                }
+            }
+        }
     }
 
     private isComponentContent(link: ContextLink) {

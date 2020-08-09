@@ -40,7 +40,7 @@ let didUpdateCall = function (c: GinkgoComponent) {
     }
 }
 
-export class GinkgoComponent<P = { key?: string | number, ref?: refObjectCall | RefObject<GinkgoComponent>, part?: string }, S = {}> {
+export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectCall | RefObject<GinkgoComponent>, part?: string }, S = {}> {
 
     /**
      * current component parent
@@ -140,6 +140,8 @@ export class GinkgoComponent<P = { key?: string | number, ref?: refObjectCall | 
 
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
 
+    shouldComponentChildren?(): boolean;
+
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {
             props = {...this.props, ...props};
@@ -221,9 +223,7 @@ export class GinkgoComponent<P = { key?: string | number, ref?: refObjectCall | 
         if (this['_disableSetStateCall'] === true) {
             return;
         }
-        if (isCallUpdate !== false) willUpdateCall(this);
-        GinkgoContainer.rerenderComponentByComponent(this);
-        if (isCallUpdate !== false) didUpdateCall(this);
+        GinkgoContainer.rerenderComponentByComponent(this, isCallUpdate);
     }
 
     setState(state?: { [key: string]: any },
@@ -266,12 +266,10 @@ export class GinkgoComponent<P = { key?: string | number, ref?: refObjectCall | 
                         }
                     });
 
-                    if (fn !== false && isCallUpdate !== false) willUpdateCall(this);
                     for (let stateKey in replaceData) {
                         this.state[stateKey] = replaceData[stateKey];
                     }
-                    this.forceRender(false);
-                    if (fn !== false && isCallUpdate !== false) didUpdateCall(this);
+                    this.forceRender(isCallUpdate);
 
                     queue.forEach(v => {
                         if (v && v.callback) {

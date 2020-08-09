@@ -308,12 +308,13 @@ export class GinkgoContainer {
      * 重新渲染component的内容
      * @param component
      */
-    public static rerenderComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent) {
+    public static rerenderComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent,
+                                                                        isCallUpdate?: boolean) {
         let items = this.context.filter(value => value.component === component);
         if (items && items.length > 0) {
             items.filter(value => {
                 let compare = new GinkgoCompare(this.context, value);
-                compare.rerender();
+                compare.rerender(isCallUpdate);
             })
         }
     }

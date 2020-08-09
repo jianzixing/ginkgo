@@ -20,6 +20,10 @@ export default class ViewLifecycle extends Ginkgo.Component {
     componentDidUpdate?(props?, state?): void {
         console.log("parent did update", props, state);
     }
+
+    componentRenderUpdate?(props?, state?): void {
+        console.log("parent render update", props, state);
+    }
 }
 
 class ViewLifecycle2 extends Ginkgo.Component<{ text: string }> {
