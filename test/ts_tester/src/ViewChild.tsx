@@ -22,6 +22,7 @@ export default class ViewChild extends Ginkgo.Component {
 
 class ViewChild1 extends Ginkgo.Component {
     render(): GinkgoNode {
+        console.log("children2", this.children);
         return <div>{this.props.children}</div>;
     }
 

@@ -140,8 +140,6 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
 
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
 
-    shouldComponentChildren?(): boolean;
-
     set(props: P | string, propsValue?: any) {
         if (typeof props === "object") {
             props = {...this.props, ...props};
@@ -232,6 +230,7 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
         if (this['_disableSetStateCall'] === true) {
             return;
         }
+        if (fn == false && isCallUpdate == null) isCallUpdate = false;
         if (state == null) state = {};
         let task: QTks;
         for (let queue of queueTasks) {
