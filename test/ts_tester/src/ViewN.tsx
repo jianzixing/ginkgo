@@ -13,7 +13,7 @@ export default class ViewN extends Ginkgo.Component<ViewNProps> {
 
     render(): GinkgoNode {
         let els = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 1000; i++) {
             if (i <= 1) {
                 els.push(<span style={this.state.style} key={"" + i}>{i + ""}</span>);
             } else {

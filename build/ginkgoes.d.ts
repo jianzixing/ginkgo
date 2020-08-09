@@ -165,7 +165,7 @@ export declare class GinkgoCompare {
      *
      * 重新渲染一个组件的content内容
      */
-    rerender(): Array<ContextLink>;
+    rerender(isCallUpdate?: boolean): Array<ContextLink>;
     /**
      * important!
      *
@@ -175,6 +175,7 @@ export declare class GinkgoCompare {
     setSkipCompare(elements: ContextLink[]): void;
     /************* 算法开始 ******************/
     private compare;
+    private forEachChildren;
     private isComponentContent;
     private compareSibling;
     private elementIndexTreeNodes;
@@ -188,8 +189,9 @@ export declare class GinkgoCompare {
     private movingElement;
     private compareComponentByLink;
     private unbindComponent;
-    private buildRealDom;
+    private relevanceElementShould;
     private mountCreateFragmentLink;
+    private setLinkParent;
     private clearPropsEmptyChildren;
     /**
      * 给ref赋值
@@ -231,7 +233,11 @@ export declare type ContextReceive<P> = {
     oldProps: P;
     type: "new" | "mounted";
 };
-export declare class GinkgoComponent<P = {}, S = {}> {
+export declare class GinkgoComponent<P = any | {
+    key?: string | number;
+    ref?: refObjectCall | RefObject<GinkgoComponent>;
+    part?: string;
+}, S = {}> {
     /**
      * current component parent
      */
@@ -310,6 +316,7 @@ export declare class GinkgoComponent<P = {}, S = {}> {
      */
     componentRenderUpdate?(props?: P, state?: S): void;
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
+    shouldComponentChildren?(): boolean;
     set(props: P | string, propsValue?: any): void;
     /**
      * 添加元素到子元素
@@ -359,7 +366,7 @@ export interface ContextLink {
      * mount    已经被挂载到dom中，再成为mount时会开始组件的生命周期
      *
      */
-    status?: "new" | "mount";
+    status?: "new" | "mount" | "compare";
     parent?: ContextLink;
     /**
      * 自定义组件的组成元素
@@ -373,12 +380,10 @@ export interface ContextLink {
      * 排序的序号
      */
     mountIndex?: number;
-}
-export interface ComponentWrapper {
-    component: GinkgoComponent;
-    holder?: {
-        dom: Element;
-    };
+    /**
+     * 用于临时存储使用，使用后立即清除
+     */
+    oldProps?: any;
 }
 export declare class GinkgoContainer {
     private static readonly context;
@@ -399,7 +404,7 @@ export declare class GinkgoContainer {
      * 通过元素配置创建组件
      * @param element
      */
-    static parseComponentByElement<E extends GinkgoElement>(element: E | string): ComponentWrapper;
+    static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element): GinkgoComponent;
     static isBaseType(props: any): boolean;
     static getBaseTypeText(props: any): string;
     static setDefaultProps(component: GinkgoComponent, element: GinkgoElement | string): void;
@@ -444,7 +449,7 @@ export declare class GinkgoContainer {
      * 重新渲染component的内容
      * @param component
      */
-    static rerenderComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent): void;
+    static rerenderComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent, isCallUpdate?: boolean): void;
     /**
      * 卸载link的其子元素(不包括link本身)
      * @param link
