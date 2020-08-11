@@ -255,6 +255,10 @@ export default class Ginkgo {
         GinkgoContainer.unmountComponentByLink(link);
     }
 
+    public static unmountByElement(element: GinkgoElement, renderTo: Element): void {
+        GinkgoContainer.unmountComponentByElement(element, renderTo);
+    }
+
     public static forEachContent(fn: (component: GinkgoComponent) => boolean | any,
                                  component: GinkgoComponent,
                                  breakComponent?: any) {
@@ -336,6 +340,9 @@ export default class Ginkgo {
     }
 
     public static instanceofComponent(props: GinkgoElement, fn) {
+        if (props.module === fn) {
+            return true;
+        }
         let component = GinkgoContainer.parseComponentByElement(props, false);
         if (component instanceof fn) {
             return true;
