@@ -354,7 +354,7 @@ export interface ContextLink {
      */
     shouldEl?: Element;
     /**
-     * 应该插入到哪个元素之后
+     * 应该插入到哪个元素之前
      */
     previousSibling?: Element;
     /**
@@ -385,10 +385,13 @@ export interface ContextLink {
      * 用于临时存储使用，使用后立即清除
      */
     oldProps?: any;
+    nextSibling?: ContextLink;
+    nextDomSibling?: ContextLink;
 }
 export declare class GinkgoContainer {
     private static readonly context;
     static getCountContext(): number;
+    private static getContentLink;
     /**
      * 创建一个元素包装用于作为容器的根
      * @param renderTo
@@ -405,7 +408,7 @@ export declare class GinkgoContainer {
      * 通过元素配置创建组件
      * @param element
      */
-    static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element): GinkgoComponent;
+    static parseComponentByElement<E extends GinkgoElement>(element: E | string, dom?: Element | boolean): GinkgoComponent;
     static isBaseType(props: any): boolean;
     static getBaseTypeText(props: any): string;
     static setDefaultProps(component: GinkgoComponent, element: GinkgoElement | string): void;
@@ -445,7 +448,7 @@ export declare class GinkgoContainer {
      * @param component
      * @param elements
      */
-    static mountComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent, elements?: E[]): void;
+    static mountComponentByComponent<E extends GinkgoElement>(link: ContextLink, elements?: E[]): void;
     /**
      * 重新渲染component的内容
      * @param component
@@ -1187,8 +1190,8 @@ export default class Ginkgo {
     static getComponentByProps(props: GinkgoElement): GinkgoComponent;
     static getComponentByDom(dom: Node): GinkgoComponent;
     static unmount(renderTo: Element): void;
-    static unmountByElement(element: GinkgoElement, renderTo: Element): void;
     static unmountByComponent(component: GinkgoComponent): void;
+    static unmountByElement(element: GinkgoElement, renderTo: Element): void;
     static forEachContent(fn: (component: GinkgoComponent) => boolean | any, component: GinkgoComponent, breakComponent?: any): void;
     static forEachChildren(fn: (component: GinkgoComponent) => boolean | any, component: GinkgoComponent, breakComponent?: any): void;
     private static forEachContentByLink;
