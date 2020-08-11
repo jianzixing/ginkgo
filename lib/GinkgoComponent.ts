@@ -140,14 +140,14 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
 
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
 
-    set(props: P | string, propsValue?: any) {
+    set(props: P | string, propsValue?: any | boolean, dontForceRender?: boolean) {
         if (typeof props === "object") {
             props = {...this.props, ...props};
-            GinkgoContainer.updateComponentProps(this, props);
+            GinkgoContainer.updateComponentProps(this, props, propsValue === true);
         } else if (typeof props === "string") {
             let newProps: { [key: string]: any } = {...this.props};
             newProps[props] = propsValue;
-            GinkgoContainer.updateComponentProps(this, newProps);
+            GinkgoContainer.updateComponentProps(this, newProps, dontForceRender === true);
         }
     }
 

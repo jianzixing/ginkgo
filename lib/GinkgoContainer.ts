@@ -320,20 +320,59 @@ export class GinkgoContainer {
      * @param component
      * @param props
      */
-    public static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P) {
+    public static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P, dontForceRender: boolean = false) {
         let link = this.getLinkByComponent(component);
         if (link) {
             let oldProps = link.props;
             link.props = props;
             (link.component as any).props = props;
             if (link.status == "mount") {
-                link.component.componentReceiveProps && link.component.componentReceiveProps(props, {
-                    oldProps: oldProps as any,
-                    type: "mounted"
-                });
-                link.component.componentCompareProps && link.component.componentCompareProps(props, {
-                    oldProps: oldProps as any
-                });
+                let component = link.component;
+                component['_disableSetStateCall'] = true;
+                try {
+                    let state1 = link.component.componentWillReceiveProps && link.component.componentWillReceiveProps(props, {
+                        oldProps: oldProps as any,
+                        type: "mounted"
+                    });
+                    if (state1) {
+                        let oldState = component.state;
+                        if (oldState == null) oldState = {};
+                        for (let key in state1) {
+                            oldState[key] = state1[key];
+                        }
+                        component.state = oldState;
+                    }
+                    let state2 = link.component.componentWillCompareProps && link.component.componentWillCompareProps(props, {
+                        oldProps: oldProps as any
+                    });
+                    if (state2) {
+                        let oldState = component.state;
+                        if (oldState == null) oldState = {};
+                        for (let key in state2) {
+                            oldState[key] = state1[key];
+                        }
+                        component.state = oldState;
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+                component['_disableSetStateCall'] = false;
+
+                if (dontForceRender !== true) {
+                    component.forceRender();
+                }
+
+                try {
+                    link.component.componentReceiveProps && link.component.componentReceiveProps(props, {
+                        oldProps: oldProps as any,
+                        type: "mounted"
+                    });
+                    link.component.componentCompareProps && link.component.componentCompareProps(props, {
+                        oldProps: oldProps as any
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
             }
         }
     }
