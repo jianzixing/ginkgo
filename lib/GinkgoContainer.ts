@@ -57,7 +57,8 @@ export interface ContextLink {
      * 用于临时存储使用，使用后立即清除
      */
     oldProps?: any;
-    compareProps?: any;
+    nextSibling?: ContextLink;
+    nextDomSibling?: ContextLink;
 }
 
 const ComponentNameMapping = {
