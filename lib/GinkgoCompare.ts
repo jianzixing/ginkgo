@@ -98,6 +98,15 @@ export class GinkgoCompare {
             this.compareSibling(parentLink, children, elements);
 
             if (children && children.length > 0) {
+                if (isContent) {
+                    parentLink.content = children[0];
+                    if (parentLink.component) parentLink.component.content = children[0].component;
+                } else {
+                    parentLink.children = children;
+                }
+            }
+
+            if (children && children.length > 0) {
                 for (let index = 0; index < children.length; index++) {
                     let ch = children[index];
                     let nextCh = index < children.length ? children[index + 1] : undefined;
@@ -117,15 +126,8 @@ export class GinkgoCompare {
                     }
                 }
             }
-            if (children && children.length > 0) {
-                if (isContent) {
-                    parentLink.content = children[0];
-                    if (parentLink.component) parentLink.component.content = children[0].component;
-                } else {
-                    parentLink.children = children;
-                }
-            }
 
+            // 获取自定义组件的子列表
             let directChildren;
             if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
                 for (let child of parentLink.props.children) {
@@ -485,11 +487,6 @@ export class GinkgoCompare {
             parent: parent,
             status: "new"
         };
-
-        if (component && !(component instanceof TextComponent)) {
-            this.context.push(link);
-        }
-
         return link;
     }
 

@@ -157,13 +157,15 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      */
     append(props: GinkgoElement | GinkgoElement[] | string): void {
         try {
-            willUpdateCall(this);
             let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
-            let newPropsChildren = GinkgoTools.componentAppendProps(link.props as GinkgoElement, props);
-            if (newPropsChildren) {
-                GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
+            if (link && link.props) {
+                willUpdateCall(this);
+                let newPropsChildren = GinkgoTools.componentAppendProps(link.props as GinkgoElement, props);
+                if (newPropsChildren) {
+                    GinkgoContainer.mountComponentByComponent(link, newPropsChildren);
+                }
+                didUpdateCall(this);
             }
-            didUpdateCall(this);
         } catch (e) {
             console.error(e);
         }
@@ -175,14 +177,17 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      */
     overlap<E extends GinkgoElement>(props?: E | E[] | string | null | undefined): void {
         try {
-            willUpdateCall(this);
-            let newPropsChildren = GinkgoTools.componentOverlayProps(props);
-            if (newPropsChildren) {
-                GinkgoContainer.mountComponentByComponent(this, newPropsChildren);
-            } else {
-                GinkgoContainer.unmountComponentByLinkChildren(GinkgoContainer.getLinkByComponent(this));
+            let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
+            if (link && link.props) {
+                willUpdateCall(this);
+                let newPropsChildren = GinkgoTools.componentOverlayProps(props);
+                if (newPropsChildren) {
+                    GinkgoContainer.mountComponentByComponent(link, newPropsChildren);
+                } else {
+                    GinkgoContainer.unmountComponentByLinkChildren(link);
+                }
+                didUpdateCall(this);
             }
-            didUpdateCall(this);
         } catch (e) {
             console.error(e);
         }
@@ -190,30 +195,32 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
 
     remove(props: GinkgoElement | GinkgoElement[]): void {
         if (props) {
-            willUpdateCall(this);
             let link: ContextLink = GinkgoContainer.getLinkByComponent(this);
-            let children = link.children;
-            let rms = [];
-            if (children && children.length > 0) {
-                for (let c of children) {
-                    if (props instanceof Array) {
-                        for (let fromP of props) {
-                            if (fromP == c.props) {
+            if (link) {
+                willUpdateCall(this);
+                let children = link.children;
+                let rms = [];
+                if (children && children.length > 0) {
+                    for (let c of children) {
+                        if (props instanceof Array) {
+                            for (let fromP of props) {
+                                if (fromP == c.props) {
+                                    rms.push(c);
+                                }
+                            }
+                        } else {
+                            if (c.props == props) {
                                 rms.push(c);
                             }
                         }
-                    } else {
-                        if (c.props == props) {
-                            rms.push(c);
-                        }
                     }
                 }
-            }
 
-            for (let c of rms) {
-                GinkgoContainer.unmountComponentByLink(c);
+                for (let c of rms) {
+                    GinkgoContainer.unmountComponentByLink(c);
+                }
+                didUpdateCall(this);
             }
-            didUpdateCall(this);
         }
     }
 
