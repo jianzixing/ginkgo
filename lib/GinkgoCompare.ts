@@ -112,14 +112,19 @@ export class GinkgoCompare {
                     let nextCh = index < children.length ? children[index + 1] : undefined;
                     // ch.props 是上一次对比后的新的props
                     // 所以也包含需要对比的新的子元素列表
-                    ch.mountIndex = index;
+                    let mountIndex = index + 1;
+                    ch.mountIndex = mountIndex;
                     ch.nextSibling = nextCh;
 
+                    if (ch.status == "compare") {
+                        this.compareComponentByLink(parentLink, ch, ch.compareProps);
+                    }
                     // 渲染到dom上
                     this.mountRealDom2Document(parentLink, ch, nextCh, index);
 
                     let props = ch.props;
                     if (typeof props !== "string") {
+                        if (this.skips && this.skips.indexOf(ch) >= 0) continue;
                         this.compare(ch, props.children);
                     } else {
                         ch.status = "mount";
@@ -195,9 +200,7 @@ export class GinkgoCompare {
                 let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
-                    if (this.skips == null || this.skips.indexOf(treeNode) == -1) {
-                        this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index);
-                    }
+                    this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index);
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
                         this.diffMoveTreeNodes(parent, treeNodes, index, lastIndex);
@@ -290,6 +293,7 @@ export class GinkgoCompare {
             this.diffInsertTreeNodes(parent, treeNodes, index - 1, newNode);
         } else {
             treeNode.status = "compare";
+            treeNode.compareProps = newNode;
         }
     }
 

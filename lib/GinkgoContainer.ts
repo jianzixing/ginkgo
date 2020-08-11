@@ -57,6 +57,7 @@ export interface ContextLink {
      * 用于临时存储使用，使用后立即清除
      */
     oldProps?: any;
+    compareProps?: any;
     nextSibling?: ContextLink;
     nextDomSibling?: ContextLink;
 }
@@ -106,10 +107,10 @@ export class GinkgoContainer {
                     if (all) all.push(item); else return item;
                 }
                 if (item.content) {
-                    let match = this.getContentLink(item.content, checkObj, type);
+                    let match = this.getContentLink(item.content, checkObj, type, all);
                     if (match && all == null) return match;
                 } else if (item.children) {
-                    let match = this.getContentLink(item.children, checkObj, type);
+                    let match = this.getContentLink(item.children, checkObj, type, all);
                     if (match && all == null) return match;
                 }
             }
@@ -127,10 +128,10 @@ export class GinkgoContainer {
                 if (all) all.push(links); else return links;
             }
             if (links.content) {
-                let match = this.getContentLink(links.content, checkObj, type);
+                let match = this.getContentLink(links.content, checkObj, type, all);
                 if (match && all == null) return match;
             } else if (links.children) {
-                let match = this.getContentLink(links.children, checkObj, type);
+                let match = this.getContentLink(links.children, checkObj, type, all);
                 if (match && all == null) return match;
             }
         }
@@ -279,7 +280,7 @@ export class GinkgoContainer {
 
         newElements.push(element);
         let compare = new GinkgoCompare(this.context, parent, newElements);
-        compare.setSkipCompare(children);
+        if (children && children.length > 0) compare.setSkipCompare([...children]);
         compare.mount();
     }
 
