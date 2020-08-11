@@ -179,18 +179,21 @@ export declare class GinkgoCompare {
     private compareSibling;
     private elementIndexTreeNodes;
     private checkTreeNodeRemove;
-    private moveTreeNodes;
-    private insertTreeNodes;
-    private removeTreeNodes;
-    protected compareComponent(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink, newNode: GinkgoElement, index: any): void;
+    private diffMoveTreeNodes;
+    private diffInsertTreeNodes;
+    private diffRemoveTreeNodes;
+    protected diffCompareComponent(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink, newNode: GinkgoElement, index: any): void;
     /************* 算法结束 ******************/
     private createElement;
-    private mountDom2Document;
+    private mountRealDom2Document;
+    private findNextSibling;
     private movingElement;
+    private compareComponentIsRebuild;
     private compareComponentByLink;
     private unbindComponent;
     private relevanceElementShould;
     private mountCreateFragmentLink;
+    private setLinkParent;
     private clearPropsEmptyChildren;
     /**
      * 给ref赋值
@@ -198,7 +201,6 @@ export declare class GinkgoCompare {
      * @param link
      */
     private buildChildrenRef;
-    private getComponentNextDomWhenFind;
     /**
      * 获取自定义组件的第一个或者最后一个真实dom
      * @param child
@@ -207,6 +209,7 @@ export declare class GinkgoCompare {
     private getComponentRealDom;
     private makeWillPropsLife;
 }
+
 
 
 /**QuerySelector.d.ts**/

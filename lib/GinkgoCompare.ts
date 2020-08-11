@@ -313,7 +313,7 @@ export class GinkgoCompare {
     private mountRealDom2Document(parent: ContextLink, link: ContextLink, next: ContextLink, index) {
         let component = link.component;
         let nextDomSibling = parent.nextDomSibling;
-        let nextSibling = this.findNextSibling(nextDomSibling);
+        let nextSibling = this.findNextSibling(parent, nextDomSibling);
 
         if (component instanceof HTMLComponent || component instanceof TextComponent) {
             if (parent && parent.shouldEl) {
@@ -328,8 +328,8 @@ export class GinkgoCompare {
         }
     }
 
-    private findNextSibling(nextDomSibling: ContextLink) {
-        if (nextDomSibling) {
+    private findNextSibling(parent: ContextLink, nextDomSibling: ContextLink) {
+        if (nextDomSibling && (nextDomSibling.holder == null || nextDomSibling.holder.dom != nextDomSibling.shouldEl)) {
             let nextDomSiblingCache = nextDomSibling;
             let nextSibling;
             while (true) {
@@ -341,7 +341,7 @@ export class GinkgoCompare {
             if (nextSibling) {
                 return nextSibling;
             } else {
-                return this.findNextSibling(nextDomSibling.parent);
+                return this.findNextSibling(parent, nextDomSibling.parent);
             }
         }
     }

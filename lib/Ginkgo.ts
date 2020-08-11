@@ -250,10 +250,6 @@ export default class Ginkgo {
         GinkgoContainer.unmountComponentByLink(link);
     }
 
-    public static unmountByElement(element: GinkgoElement, renderTo: Element): void {
-        GinkgoContainer.unmountComponentByElement(element, renderTo);
-    }
-
     public static unmountByComponent(component: GinkgoComponent) {
         let link = GinkgoContainer.getLinkByComponent(component);
         GinkgoContainer.unmountComponentByLink(link);

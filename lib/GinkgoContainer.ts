@@ -87,6 +87,26 @@ export class GinkgoContainer {
         return count;
     }
 
+    private static getContentLink(links: Array<ContextLink>, checkObj: any, type: number): ContextLink {
+        for (let item of links) {
+            if (type == 0 && item == checkObj) {
+                return item;
+            }
+            if (type == 1 && item.props == checkObj) {
+                return item;
+            }
+            if (type == 2 && item.holder && item.holder.dom == checkObj) {
+                return item;
+            }
+            if (type == 3 && item.component == checkObj) {
+                return item;
+            }
+            if (item.children) {
+                return this.getContentLink(item.children, checkObj, type);
+            }
+        }
+    }
+
     /**
      * 创建一个元素包装用于作为容器的根
      * @param renderTo
@@ -117,27 +137,15 @@ export class GinkgoContainer {
      * @param component
      */
     public static getLinkByComponent(component: GinkgoComponent): ContextLink {
-        let items = this.context.filter(value => value.component === component);
-        if (items && items.length > 0) {
-            return items[0];
-        }
-        return null;
+        return this.getContentLink(this.context, component, 3);
     }
 
     public static getLinkByElement(element: Node): ContextLink {
-        let items = this.context.filter(value => value.holder && value.holder.dom && value.holder.dom === element);
-        if (items && items.length > 0) {
-            return items[0];
-        }
-        return null;
+        return this.getContentLink(this.context, element, 2);
     }
 
     public static getLinkByProps(props: GinkgoElement): ContextLink {
-        let items = this.context.filter(value => value.props && value.props === props);
-        if (items && items.length > 0) {
-            return items[0];
-        }
-        return null;
+        return this.getContentLink(this.context, props, 1);
     }
 
     /**
@@ -306,8 +314,8 @@ export class GinkgoContainer {
      * @param elements
      */
     public static mountComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent, elements?: E[]) {
-        let items = this.context.filter(value => value.component === component);
-        if (items && items.length > 0) this.mountComponentArray(items[0], elements);
+        let item = this.getLinkByComponent(component);
+        if (item) this.mountComponentArray(item, elements);
     }
 
     /**
@@ -316,12 +324,10 @@ export class GinkgoContainer {
      */
     public static rerenderComponentByComponent<E extends GinkgoElement>(component: GinkgoComponent,
                                                                         isCallUpdate?: boolean) {
-        let items = this.context.filter(value => value.component === component);
-        if (items && items.length > 0) {
-            items.filter(value => {
-                let compare = new GinkgoCompare(this.context, value);
-                compare.rerender(isCallUpdate);
-            })
+        let item = this.getLinkByComponent(component);
+        if (item) {
+            let compare = new GinkgoCompare(this.context, item);
+            compare.rerender(isCallUpdate);
         }
     }
 
@@ -381,33 +387,6 @@ export class GinkgoContainer {
             if (link.holder && link.holder.dom) {
                 if (link.holder.dom.parentElement) {
                     link.holder.dom.parentElement.removeChild(link.holder.dom)
-                }
-            }
-        }
-    }
-
-    /**
-     * 通过element卸载组件
-     * @param props
-     * @param renderTo
-     */
-    public static unmountComponentByElement(props: GinkgoElement, renderTo: Element) {
-        if (props && renderTo) {
-            let rootLink = this.buildRenderLink(renderTo);
-            let items = this.context.filter(value => value.props === props);
-            if (items && items.length > 0) {
-                // 防止unmountComponentByLink移除时数组遍历跳出
-                let copyItems = [...items];
-                for (let item of copyItems) {
-                    if (!item.holder || !item.holder.dom || item.holder.dom != document.body) {
-                        this.unmountComponentByLink(item);
-                    }
-                }
-
-                if (rootLink && (!rootLink.children || rootLink.children.length == 0)) {
-                    if (!rootLink.holder || !rootLink.holder.dom || rootLink.holder.dom != document.body) {
-                        this.unmountComponentByLink(rootLink);
-                    }
                 }
             }
         }
