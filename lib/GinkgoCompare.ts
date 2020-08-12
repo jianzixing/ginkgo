@@ -131,7 +131,9 @@ export class GinkgoCompare {
                     }
                 }
             }
+        }
 
+        if (shouldComponentUpdate) {
             // 获取自定义组件的子列表
             let directChildren;
             if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
@@ -142,11 +144,6 @@ export class GinkgoCompare {
                     }
                 }
                 parentLink.component.children = directChildren;
-            }
-
-            if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentDidUpdate && component.componentDidUpdate(parentLink.props as any, component.state);
-                component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, component.state);
             }
         }
 
@@ -164,6 +161,14 @@ export class GinkgoCompare {
                 oldProps: oldProps
             });
         }
+
+        if (shouldComponentUpdate) {
+            if (isCallUpdate != false && parentLink.status != "new") {
+                component.componentDidUpdate && component.componentDidUpdate(parentLink.props as any, component.state);
+                component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, component.state);
+            }
+        }
+
         if (parentLink.status === "new") {
             component.componentDidMount && component.componentDidMount();
             component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, parentLink.component.state);

@@ -359,7 +359,7 @@ export class GinkgoContainer {
                 component['_disableSetStateCall'] = false;
 
                 if (dontForceRender !== true) {
-                    component.forceRender();
+                    component.forceRender(false);
                 }
 
                 try {

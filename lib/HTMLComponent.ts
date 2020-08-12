@@ -260,7 +260,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         }
     }
 
-    componentReceiveProps(props: P, context?): void {
+    componentWillReceiveProps(props: P, context?): void {
         if (props && this.holder && this.holder.dom) {
             let dom = this.holder.dom;
 
