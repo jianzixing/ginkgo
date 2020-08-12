@@ -299,7 +299,7 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
 
     query<C extends GinkgoComponent>(...selector: any): C {
         let qs = new QuerySelector(this, selector);
-        let arr = qs.selector();
+        let arr = qs.selector(true);
         if (arr && arr.length > 0) {
             return arr[0] as C;
         }

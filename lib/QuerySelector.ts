@@ -32,24 +32,30 @@ export class QuerySelector {
         }
     }
 
-    selector<C extends GinkgoComponent>(): Array<C> {
+    selector<C extends GinkgoComponent>(onlyOne?: boolean): Array<C> {
         if (this.condition && this.condition.length > 0) {
             let link = GinkgoContainer.getLinkByComponent(this.component);
             if (link) {
                 let content = link.content;
                 if (content) {
-                    this.matchForEach(content);
+                    this.matchForEach(content, onlyOne);
                 }
                 let arr = [];
                 this.matches.map(value => arr.push(value.component));
+                this.matches = [];
                 return arr;
             }
         }
         return [];
     }
 
-    private matchForEach(link: ContextLink) {
+    private matchForEach(link: ContextLink, onlyOne?: boolean) {
         if (this.condition && this.condition.length > 0) {
+
+            if (onlyOne == true && this.matches.length >= 1) {
+                return;
+            }
+            
             let match = false;
             for (let cnd of this.condition) {
                 if (this.isMatch(link, cnd)) {
