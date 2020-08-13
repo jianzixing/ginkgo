@@ -1192,9 +1192,7 @@ export default class Ginkgo {
     static unmount(renderTo: Element): void;
     static unmountByComponent(component: GinkgoComponent): void;
     static unmountByElement(element: GinkgoElement, renderTo: Element): void;
-    static forEachContent(fn: (component: GinkgoComponent) => boolean | any, component: GinkgoComponent, breakComponent?: any): void;
     static forEachChildren(fn: (component: GinkgoComponent) => boolean | any, component: GinkgoComponent, breakComponent?: any): void;
-    private static forEachContentByLink;
     private static forEachChildrenByLink;
     static instanceofComponent(props: GinkgoElement, fn: any): boolean;
     static get(url: string, data?: {

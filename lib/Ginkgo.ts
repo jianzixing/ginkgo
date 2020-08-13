@@ -259,57 +259,20 @@ export default class Ginkgo {
         GinkgoContainer.unmountComponentByElement(element, renderTo);
     }
 
-    public static forEachContent(fn: (component: GinkgoComponent) => boolean | any,
-                                 component: GinkgoComponent,
-                                 breakComponent?: any) {
-        if (fn && component) {
-            let link = GinkgoContainer.getLinkByComponent(component);
-            if (link) {
-                this.forEachContentByLink(fn, link, breakComponent);
-            }
-        }
-    }
-
     public static forEachChildren(fn: (component: GinkgoComponent) => boolean | any,
                                   component: GinkgoComponent,
                                   breakComponent?: any) {
         if (fn && component) {
             let link = GinkgoContainer.getLinkByComponent(component);
-            if (link && link.content && typeof link.props == "object") {
-                let propsChild = link.props.children;
-                this.forEachChildrenByLink(fn, [link.content], propsChild, breakComponent)
-            }
-        }
-    }
-
-    private static forEachContentByLink(fn: (component: GinkgoComponent) => boolean,
-                                        link: ContextLink,
-                                        breakComponent?: any) {
-        let children = link.children,
-            content = link.content;
-
-        // 只循环被挂载的组件
-        // 所以如果有content表示是自定义组件或者Bind组件
-        if (content) {
-            if (breakComponent && content.component instanceof breakComponent) {
-                let bool = fn(content.component);
-                if (bool == false) return;
-            } else {
-                let bool = fn(content.component);
-                if (bool == false) return;
-                this.forEachContentByLink(fn, content, breakComponent);
-            }
-        } else if (children) {
-            for (let child of children) {
-                if (child) {
-                    if (breakComponent && child.component instanceof breakComponent) {
-                        let bool = fn(child.component);
-                        if (bool == false) return;
-                    } else {
-                        let bool = fn(child.component);
-                        if (bool == false) return;
-                        this.forEachContentByLink(fn, child, breakComponent);
-                    }
+            if (link) {
+                let children;
+                if (link.content) {
+                    children = [link.content];
+                } else {
+                    children = link.children;
+                }
+                if (link && link.content && typeof link.props == "object") {
+                    this.forEachChildrenByLink(fn, children, {component: breakComponent, find: false})
                 }
             }
         }
@@ -317,20 +280,30 @@ export default class Ginkgo {
 
     private static forEachChildrenByLink(fn: (component: GinkgoComponent) => boolean,
                                          children: Array<ContextLink>,
-                                         skips: Array<GinkgoElement> = [],
-                                         breakComponent?: any) {
+                                         breakComponent?: { component: GinkgoComponent, find: boolean }) {
+        if (breakComponent && breakComponent.find == true) return;
         if (children) {
             for (let c of children) {
                 if (c) {
-                    if (breakComponent && c.component instanceof breakComponent) {
+                    if (breakComponent
+                        && breakComponent.component
+                        && c.component instanceof (breakComponent.component as any)) {
                         let bool = fn(c.component);
-                        if (bool == false) return;
+                        if (bool == false) {
+                            breakComponent.find = true;
+                            return;
+                        }
                     } else {
                         let bool = fn(c.component);
-                        if (bool == false) return;
+                        if (bool == false) {
+                            if (breakComponent) breakComponent.find = true;
+                            return;
+                        }
                         if (typeof c.props == "object") {
-                            if (skips.indexOf(c.props) == -1) {
-                                this.forEachChildrenByLink(fn, c.children, skips, breakComponent);
+                            if (c.content) {
+                                this.forEachChildrenByLink(fn, [c.content], breakComponent);
+                            } else {
+                                this.forEachChildrenByLink(fn, c.children, breakComponent);
                             }
                         }
                     }

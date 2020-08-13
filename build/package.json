@@ -1,6 +1,6 @@
 {
   "name": "ginkgoes",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "description": "",
   "main": "./ginkgoes.js",
   "types": "./ginkgoes.d.ts",
