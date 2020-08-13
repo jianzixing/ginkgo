@@ -113,10 +113,14 @@ export class GinkgoCompare {
                     // ch.props 是上一次对比后的新的props
                     // 所以也包含需要对比的新的子元素列表
                     let mountIndex = index + 1;
+                    let isSkip = false;
                     ch.mountIndex = mountIndex;
                     ch.nextSibling = nextCh;
+                    if (this.skips && this.skips.indexOf(ch) >= 0) {
+                        isSkip = true;
+                    }
 
-                    if (ch.status == "compare") {
+                    if (ch.status == "compare" && isSkip === false) {
                         this.compareComponentByLink(parentLink, ch, ch.compareProps);
                     }
                     // 渲染到dom上
@@ -124,7 +128,7 @@ export class GinkgoCompare {
 
                     let props = ch.props;
                     if (typeof props !== "string") {
-                        if (this.skips && this.skips.indexOf(ch) >= 0) continue;
+                        if (isSkip) continue;
                         this.compare(ch, props.children);
                     } else {
                         ch.status = "mount";
@@ -328,7 +332,7 @@ export class GinkgoCompare {
 
         if (component instanceof HTMLComponent || component instanceof TextComponent) {
             if (parent && parent.shouldEl) {
-                if (nextSibling) {
+                if (nextSibling && nextSibling != link.holder.dom) {
                     parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
                 } else {
                     parent.shouldEl.append(link.holder.dom);
@@ -344,6 +348,14 @@ export class GinkgoCompare {
             let nextDomSiblingCache = nextDomSibling;
             let nextSibling;
             while (true) {
+                if (nextDomSiblingCache && nextDomSiblingCache.status && nextDomSiblingCache.status == "new") {
+                    nextDomSiblingCache = nextDomSiblingCache.nextSibling;
+                    if (nextDomSiblingCache == null) {
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
                 nextSibling = this.getComponentRealDom(nextDomSiblingCache, 0);
                 if (nextSibling != null) break;
                 nextDomSiblingCache = nextDomSiblingCache.nextSibling;
