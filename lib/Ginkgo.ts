@@ -271,7 +271,7 @@ export default class Ginkgo {
                 } else {
                     children = link.children;
                 }
-                if (link && link.content && typeof link.props == "object") {
+                if (link && children && typeof link.props == "object") {
                     this.forEachChildrenByLink(fn, children, {component: breakComponent, find: false})
                 }
             }
