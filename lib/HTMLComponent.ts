@@ -394,7 +394,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         let oldStyle = oldProps.style;
         let style = newProps.style;
         if (typeof style == "function") {
-            change.setStyle = style != oldStyle;
+            change.setStyle = true;
         } else {
             let r1 = this.isSameObject(oldStyle, style);
             change.setStyle = !r1;
