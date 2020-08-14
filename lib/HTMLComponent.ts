@@ -234,8 +234,7 @@ const NonAttrName = [
     "style",
     "className",
     "part",
-    "component",
-    "serialNumber"
+    "_owner"
 ]
 
 export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoComponent<P> {

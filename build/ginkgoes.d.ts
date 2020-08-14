@@ -149,16 +149,10 @@ export declare const GinkgoAnimation: typeof anime;
 
 /** GinkgoCompare.d.ts **/
 export declare class GinkgoCompare {
-    private readonly linkRefs;
-    private readonly serialNumber;
     private readonly parent;
     private elements?;
     private skips?;
-    constructor(linkRefs: {
-        [key: number]: ContextLink;
-    }, serialNumber: {
-        count: number;
-    }, parent: ContextLink, elements?: GinkgoElement[] | undefined);
+    constructor(parent: ContextLink, elements?: GinkgoElement[] | undefined);
     /**
      * important!
      *
@@ -192,7 +186,6 @@ export declare class GinkgoCompare {
     private createElement;
     private mountRealDom2Document;
     private findNextSibling;
-    private movingElement;
     private compareComponentIsRebuild;
     private compareComponentByLink;
     private unbindComponent;
@@ -391,18 +384,12 @@ export interface ContextLink {
      */
     oldProps?: any;
     compareProps?: any;
-    serialNumber?: number;
     nextSibling?: ContextLink;
     nextDomSibling?: ContextLink;
 }
 export declare class GinkgoContainer {
     private static readonly context;
-    private static readonly linkRefs;
-    private static readonly serialNumber;
-    static getCountContext(): {
-        tree: number;
-        list: number;
-    };
+    static getCountContext(): number;
     private static getContentLink;
     /**
      * 创建一个元素包装用于作为容器的根

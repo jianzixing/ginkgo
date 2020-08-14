@@ -160,11 +160,19 @@ export default class Ginkgo {
                 }
             }
 
+            if (attrs == null) attrs = {};
             let props = {
-                ...attrs,
+                // ...attrs,
+                attrs: attrs,
                 module: tag,
                 children: childElements
             };
+            if (attrs) {
+                if (attrs['key']) props['key'] = attrs['key'];
+                if (attrs['part']) props['part'] = attrs['part'];
+                if (attrs['ref']) props['ref'] = attrs['ref'];
+                attrs['children'] = childElements;
+            }
 
             if (props && Ginkgo.checkTakeParts(props)) {
                 return props;

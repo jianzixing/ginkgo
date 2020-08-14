@@ -16,7 +16,7 @@ export default class ViewChild extends Ginkgo.Component {
             <span key={3}>(3)</span>
             <ViewChild4 key={6}/>
             <ViewChild1>
-                <ViewChild2 key={"1"}/>
+                <ViewChild2 key={"1"} {...this.props}/>
                 <ViewChild3/>
                 {this.state.type > 1 ? <ViewChild4/> : undefined}
             </ViewChild1>
@@ -38,7 +38,8 @@ class ViewChild1 extends Ginkgo.Component {
 
 class ViewChild2 extends Ginkgo.Component {
     render(): GinkgoNode {
-        return <span>2</span>;
+        debugger
+        return <span {...this.props}>2</span>;
     }
 }
 

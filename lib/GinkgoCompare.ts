@@ -4,18 +4,12 @@ import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
 
 export class GinkgoCompare {
-    private readonly linkRefs: { [key: number]: ContextLink };
-    private readonly serialNumber: { count: number };
     private readonly parent: ContextLink;
     private elements?: GinkgoElement[];
     private skips?: ContextLink[];
 
-    constructor(linkRefs: { [key: number]: ContextLink },
-                serialNumber: { count: number },
-                parent: ContextLink,
+    constructor(parent: ContextLink,
                 elements?: GinkgoElement[] | undefined) {
-        this.linkRefs = linkRefs;
-        this.serialNumber = serialNumber;
         this.parent = parent;
         this.elements = elements;
     }
@@ -74,7 +68,10 @@ export class GinkgoCompare {
             shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, component.state);
         }
 
-        if (isContent && typeof parentLink.props === "object") {
+        if (isContent
+            && typeof parentLink.props === "object"
+            && parentLink.props.children
+            && parentLink.props.children.length > 0) {
             let directLinkChildren = parentLink.children || [];
             this.compareSibling(null, directLinkChildren, parentLink.props.children);
             parentLink.children = directLinkChildren;
@@ -94,7 +91,10 @@ export class GinkgoCompare {
 
             if (isContent && component != null) {
                 let el = component.render ? component.render() : undefined;
-                if (component instanceof BindComponent && parentLink.props && (parentLink.props as any).render) {
+                if (component instanceof BindComponent
+                    && parentLink.props
+                    && parentLink.props['attrs']
+                    && (parentLink.props as any)['attrs'].render) {
                     el = callBindRender(parentLink.props as BindComponentElement);
                 }
                 if (el && typeof el != "string") {
@@ -120,7 +120,7 @@ export class GinkgoCompare {
         }
 
         // 获取自定义组件的子列表
-        // 已经由serialNumber做法代替
+        // 已经由_owner做法代替
         // if (shouldComponentUpdate) {
         //     let directChildren;
         //     if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
@@ -181,25 +181,25 @@ export class GinkgoCompare {
             parentLink.oldProps = undefined;
         }
         component.componentReceiveProps && component.componentReceiveProps(parentLink.props as any, {
-            oldProps: oldProps,
+            oldProps: oldProps['attrs'],
             type: parentLink.status == "new" ? "new" : "mounted"
         });
         if (parentLink.status === "compare") {
             component.componentCompareProps && component.componentCompareProps(parentLink.props as any, {
-                oldProps: oldProps
+                oldProps: oldProps['attrs'] || {}
             });
         }
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentDidUpdate && component.componentDidUpdate(parentLink.props as any, component.state);
-                component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, component.state);
+                component.componentDidUpdate && component.componentDidUpdate((parentLink.props as any)['attrs'], component.state);
+                component.componentRenderUpdate && component.componentRenderUpdate((parentLink.props as any)['attrs'], component.state);
             }
         }
 
         if (parentLink.status === "new") {
             component.componentDidMount && component.componentDidMount();
-            component.componentRenderUpdate && component.componentRenderUpdate(parentLink.props as any, parentLink.component.state);
+            component.componentRenderUpdate && component.componentRenderUpdate((parentLink.props as any)['attrs'], parentLink.component.state);
         }
         parentLink.status = "mount";
     }
@@ -336,10 +336,9 @@ export class GinkgoCompare {
         if (element == null || element == undefined) return null; // 判断props不能为空否则遍历会取到body容器
 
         let link: ContextLink, isExist = false;
-        if (element['serialNumber']) {
-            link = this.linkRefs[element['serialNumber']];
+        if (element['_owner']) {
+            link = element['_owner'];
             if (link) {
-                isExist = true;
                 this.setLinkParent(parent, link);
             }
         } else {
@@ -350,16 +349,7 @@ export class GinkgoCompare {
         // 生命周期第一个
         if (typeof link.props == "object") {
             link.props['component'] = component;
-
-            if (isExist == false) {
-                let serialNumber = this.serialNumber.count + 1;
-                this.serialNumber.count = serialNumber;
-                if (this.linkRefs) {
-                    element['serialNumber'] = serialNumber;
-                    this.linkRefs[serialNumber] = link;
-                    link.serialNumber = serialNumber;
-                }
-            }
+            element['_owner'] = link;
         }
 
         if (parent) {
@@ -413,16 +403,6 @@ export class GinkgoCompare {
                 return nextSibling;
             } else {
                 return this.findNextSibling(parent, nextDomSibling.parent);
-            }
-        }
-    }
-
-    private movingElement(parent: ContextLink, current: ContextLink, previousSibling) {
-        let doms = this.getComponentRealDom(current, 2);
-        if (doms && doms.length > 0) {
-            for (let dom of doms) {
-                (previousSibling.parentElement as any).insertBefore(dom, previousSibling.nextSibling);
-                previousSibling = dom;
             }
         }
     }
@@ -660,12 +640,12 @@ export class GinkgoCompare {
         let state;
         component['_disableSetStateCall'] = true;
         if (isReceive) {
-            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props, {
-                oldProps: oldProps, type: type
+            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props['attrs'], {
+                oldProps: oldProps['attrs'], type: type
             });
         } else {
-            state = component.componentWillCompareProps && component.componentWillCompareProps(props, {
-                oldProps
+            state = component.componentWillCompareProps && component.componentWillCompareProps(props['attrs'], {
+                oldProps: oldProps['attrs']
             })
         }
         component['_disableSetStateCall'] = false;
