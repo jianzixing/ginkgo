@@ -149,29 +149,34 @@ export declare const GinkgoAnimation: typeof anime;
 
 /** GinkgoCompare.d.ts **/
 export declare class GinkgoCompare {
-    private readonly context;
+    private readonly linkRefs;
+    private readonly serialNumber;
     private readonly parent;
     private elements?;
     private skips?;
-    constructor(context: Array<ContextLink>, parent: ContextLink, elements?: GinkgoElement[] | undefined);
+    constructor(linkRefs: {
+        [key: number]: ContextLink;
+    }, serialNumber: {
+        count: number;
+    }, parent: ContextLink, elements?: GinkgoElement[] | undefined);
     /**
      * important!
      *
      * 将一组元素实例并挂载到parent中去
      */
-    mount(): Array<ContextLink>;
+    mount(): void;
     /**
      * important!
      *
      * 重新渲染一个组件的content内容
      */
-    rerender(isCallUpdate?: boolean): Array<ContextLink>;
+    rerender(isCallUpdate?: boolean): void;
     /**
      * important!
      *
      * 触发重新渲染BindComponent的子元素
      */
-    force(): Array<ContextLink>;
+    force(): void;
     setSkipCompare(elements: ContextLink[]): void;
     /************* 算法开始 ******************/
     private compare;
@@ -385,12 +390,19 @@ export interface ContextLink {
      * 用于临时存储使用，使用后立即清除
      */
     oldProps?: any;
+    compareProps?: any;
+    serialNumber?: number;
     nextSibling?: ContextLink;
     nextDomSibling?: ContextLink;
 }
 export declare class GinkgoContainer {
     private static readonly context;
-    static getCountContext(): number;
+    private static readonly linkRefs;
+    private static readonly serialNumber;
+    static getCountContext(): {
+        tree: number;
+        list: number;
+    };
     private static getContentLink;
     /**
      * 创建一个元素包装用于作为容器的根
@@ -442,7 +454,7 @@ export declare class GinkgoContainer {
      * @param component
      * @param props
      */
-    static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P): void;
+    static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P, dontForceRender?: boolean): void;
     /**
      * 通过组件找到link并且将elements添加到link的子元素中
      * @param component
@@ -716,13 +728,32 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
     });
     get dom(): Element;
     animation(param: AnimationParams): any;
-    componentReceiveProps(props: P, context?: {
-        oldProps: P;
-        type: "new" | "mounted";
-    }): void;
+    componentWillReceiveProps(props: P, context?: any): void;
     private comparePropsVersion;
     private getFinalClassName;
     private isSameObject;
+    /**
+     *  private isSameClassName(c1: string, c2: string): boolean {
+     *     if (c1 == null && c2 != null) return false;
+     *     if (c1 != null && c2 == null) return false;
+     *     if (c1 == null && c2 == null) return true;
+     *
+     *     let a1 = c1.split(" ");
+     *     let a2 = c2.split(" ");
+     *     if (a1.length != a2.length) return false;
+     *     for (let i1 of a1) {
+     *         let is = false;
+     *         for (let i2 of a2) {
+     *             if (i1.trim() == i2.trim()) {
+     *                 is = true;
+     *                 break;
+     *             }
+     *         }
+     *         if (!is) return false;
+     *     }
+     *     return true;
+     * }
+     **/
     private clearNullDomStyle;
     private isEventProps;
     private bindDomEvent;
@@ -746,7 +777,6 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
     bind(name: string, callback: any, options?: any): void;
     unbind(name: string, callback?: any, options?: any): void;
 }
-export {};
 
 
 /**HTMLDefinedAttribute.d.ts**/

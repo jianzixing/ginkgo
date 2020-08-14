@@ -58,6 +58,7 @@ export interface ContextLink {
      */
     oldProps?: any;
     compareProps?: any;
+    serialNumber?: number;
     nextSibling?: ContextLink;
     nextDomSibling?: ContextLink;
 }
@@ -69,8 +70,10 @@ const ComponentNameMapping = {
 
 export class GinkgoContainer {
     private static readonly context: Array<ContextLink> = [];
+    private static readonly linkRefs: { [key: number]: ContextLink } = {};
+    private static readonly serialNumber: { count: number } = {count: 0};
 
-    public static getCountContext(): number {
+    public static getCountContext(): { tree: number, list: number } {
         let count = 0;
 
         function foreach(list: Array<ContextLink>) {
@@ -85,7 +88,11 @@ export class GinkgoContainer {
         }
 
         foreach(this.context);
-        return count;
+        let countRef = 0;
+        for (let serialNumber in this.linkRefs) {
+            countRef++;
+        }
+        return {tree: count, list: countRef};
     }
 
     private static getContentLink(links: Array<ContextLink> | ContextLink,
@@ -158,6 +165,9 @@ export class GinkgoContainer {
                 status: "mount"
             };
             this.context.push(link);
+            let serialNumber = this.serialNumber.count + 1;
+            this.serialNumber.count = serialNumber;
+            this.linkRefs[serialNumber] = link;
             return link;
         }
     }
@@ -279,7 +289,7 @@ export class GinkgoContainer {
         }
 
         newElements.push(element);
-        let compare = new GinkgoCompare(this.context, parent, newElements);
+        let compare = new GinkgoCompare(this.linkRefs, this.serialNumber, parent, newElements);
         if (children && children.length > 0) compare.setSkipCompare([...children]);
         compare.mount();
     }
@@ -299,7 +309,7 @@ export class GinkgoContainer {
      * @param elements
      */
     public static mountComponentArray<E extends GinkgoElement>(parent: ContextLink, elements?: E[]) {
-        let compare = new GinkgoCompare(this.context, parent, elements);
+        let compare = new GinkgoCompare(this.linkRefs, this.serialNumber, parent, elements);
         compare.mount();
     }
 
@@ -310,7 +320,7 @@ export class GinkgoContainer {
     public static forceComponent(link: ContextLink) {
         let component = link.component;
         if (component instanceof BindComponent) {
-            let compare = new GinkgoCompare(this.context, link);
+            let compare = new GinkgoCompare(this.linkRefs, this.serialNumber, link);
             compare.force();
         }
     }
@@ -394,7 +404,7 @@ export class GinkgoContainer {
                                                                         isCallUpdate?: boolean) {
         let item = this.getLinkByComponent(component);
         if (item) {
-            let compare = new GinkgoCompare(this.context, item);
+            let compare = new GinkgoCompare(this.linkRefs, this.serialNumber, item);
             compare.rerender(isCallUpdate);
         }
     }
@@ -448,9 +458,12 @@ export class GinkgoContainer {
             }
 
             let index = this.context.indexOf(link);
+            let serialNumber = link['serialNumber'];
             if (index >= 0) {
                 this.context.splice(index, 1);
             }
+            this.linkRefs[serialNumber] = undefined;
+            delete this.linkRefs[serialNumber];
 
             if (link.holder && link.holder.dom) {
                 if (link.holder.dom.parentElement) {

@@ -4,15 +4,18 @@ import {TextComponent} from "./TextComponent";
 import {BindComponent, BindComponentElement, callBindRender} from "./BindComponent";
 
 export class GinkgoCompare {
-    private readonly context: Array<ContextLink>;
+    private readonly linkRefs: { [key: number]: ContextLink };
+    private readonly serialNumber: { count: number };
     private readonly parent: ContextLink;
     private elements?: GinkgoElement[];
     private skips?: ContextLink[];
 
-    constructor(context: Array<ContextLink>,
+    constructor(linkRefs: { [key: number]: ContextLink },
+                serialNumber: { count: number },
                 parent: ContextLink,
                 elements?: GinkgoElement[] | undefined) {
-        this.context = context;
+        this.linkRefs = linkRefs;
+        this.serialNumber = serialNumber;
         this.parent = parent;
         this.elements = elements;
     }
@@ -22,15 +25,13 @@ export class GinkgoCompare {
      *
      * 将一组元素实例并挂载到parent中去
      */
-    mount(): Array<ContextLink> {
+    mount(): void {
         if (this.elements) {
             this.elements = this.elements.filter(value => value != null && value != undefined);
             this.compare(this.parent, this.elements);
         } else {
             GinkgoContainer.unmountComponentByLinkChildren(this.parent);
         }
-
-        return this.context;
     }
 
     /**
@@ -38,10 +39,8 @@ export class GinkgoCompare {
      *
      * 重新渲染一个组件的content内容
      */
-    rerender(isCallUpdate?: boolean): Array<ContextLink> {
+    rerender(isCallUpdate?: boolean): void {
         this.compare(this.parent, this.elements, this.parent, isCallUpdate);
-
-        return this.context;
     }
 
     /**
@@ -49,12 +48,10 @@ export class GinkgoCompare {
      *
      * 触发重新渲染BindComponent的子元素
      */
-    force(): Array<ContextLink> {
+    force(): void {
         if (this.parent && this.parent.component instanceof BindComponent) {
             this.compare(this.parent, this.elements);
         }
-
-        return this.context;
     }
 
     setSkipCompare(elements: ContextLink[]) {
@@ -77,6 +74,19 @@ export class GinkgoCompare {
             shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, component.state);
         }
 
+        if (isContent && typeof parentLink.props === "object") {
+            let directLinkChildren = parentLink.children || [];
+            this.compareSibling(null, directLinkChildren, parentLink.props.children);
+            parentLink.children = directLinkChildren;
+
+            let directChildren;
+            for (let child of parentLink.children) {
+                if (directChildren == null) directChildren = [];
+                directChildren.push(child.component);
+            }
+            parentLink.component.children = directChildren;
+        }
+
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
                 component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, component.state);
@@ -91,9 +101,11 @@ export class GinkgoCompare {
                     elements = [el];
                 }
             }
+        }
 
-
-            let children = isContent ? (parentLink.content ? [parentLink.content] : []) : parentLink.children;
+        let children;
+        if (shouldComponentUpdate) {
+            children = isContent ? (parentLink.content ? [parentLink.content] : []) : parentLink.children;
             children = children || [];
             this.compareSibling(parentLink, children, elements);
 
@@ -105,7 +117,33 @@ export class GinkgoCompare {
                     parentLink.children = children;
                 }
             }
+        }
 
+        // 获取自定义组件的子列表
+        // 已经由serialNumber做法代替
+        // if (shouldComponentUpdate) {
+        //     let directChildren;
+        //     if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
+        //         for (let child of parentLink.props.children) {
+        //             if (typeof child == "object" && child['component']) {
+        //                 if (directChildren == null) directChildren = [];
+        //                 directChildren.push(child['component']);
+        //             }
+        //         }
+        //         parentLink.component.children = directChildren;
+        //     }
+        // }
+
+        if (!isContent && parentLink && parentLink.children && parentLink.children.length > 0) {
+            let directChildren;
+            for (let child of parentLink.children) {
+                if (directChildren == null) directChildren = [];
+                directChildren.push(child.component);
+            }
+            parentLink.component.children = directChildren;
+        }
+
+        if (shouldComponentUpdate) {
             if (children && children.length > 0) {
                 for (let index = 0; index < children.length; index++) {
                     let ch = children[index];
@@ -134,20 +172,6 @@ export class GinkgoCompare {
                         ch.status = "mount";
                     }
                 }
-            }
-        }
-
-        if (shouldComponentUpdate) {
-            // 获取自定义组件的子列表
-            let directChildren;
-            if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
-                for (let child of parentLink.props.children) {
-                    if (typeof child == "object" && child['component']) {
-                        if (directChildren == null) directChildren = [];
-                        directChildren.push(child['component']);
-                    }
-                }
-                parentLink.component.children = directChildren;
             }
         }
 
@@ -200,7 +224,7 @@ export class GinkgoCompare {
         if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
                 for (let treeNode of treeNodes) {
-                    this.diffRemoveTreeNodes(parent, treeNodes, treeNode);
+                    this.diffRemoveTreeNodes(treeNodes, treeNode);
                 }
             }
         } else {
@@ -212,7 +236,7 @@ export class GinkgoCompare {
                     this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index);
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
-                        this.diffMoveTreeNodes(parent, treeNodes, index, lastIndex);
+                        this.diffMoveTreeNodes(treeNodes, index, lastIndex);
                     }
                     lastIndex = index > lastIndex ? index : lastIndex;
                 } else {
@@ -228,7 +252,7 @@ export class GinkgoCompare {
                 let index = this.checkTreeNodeRemove(newNodes, treeNode);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
-                    this.diffRemoveTreeNodes(parent, treeNodes, treeNode);
+                    this.diffRemoveTreeNodes(treeNodes, treeNode);
                 }
             }
         }
@@ -273,7 +297,7 @@ export class GinkgoCompare {
     }
 
 
-    private diffMoveTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, index, lastIndex) {
+    private diffMoveTreeNodes(treeNodes: Array<ContextLink>, index, lastIndex) {
         let obj = treeNodes[index];
         for (let i = index; i < lastIndex; i++) {
             treeNodes[i] = treeNodes[i + 1];
@@ -286,9 +310,9 @@ export class GinkgoCompare {
         treeNodes.splice(lastIndex + 1, 0, newNode);
     }
 
-    private diffRemoveTreeNodes(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink) {
+    private diffRemoveTreeNodes(treeNodes: Array<ContextLink>, treeNode: ContextLink) {
         treeNodes.splice(treeNodes.indexOf(treeNode), 1);
-        this.unbindComponent(parent, treeNode);
+        this.unbindComponent(treeNode);
     }
 
     protected diffCompareComponent(parent: ContextLink,
@@ -298,7 +322,7 @@ export class GinkgoCompare {
                                    index) {
         let rebuild = this.compareComponentIsRebuild(treeNode, newNode);
         if (rebuild) {
-            this.diffRemoveTreeNodes(parent, treeNodes, treeNode);
+            this.diffRemoveTreeNodes(treeNodes, treeNode);
             this.diffInsertTreeNodes(parent, treeNodes, index - 1, newNode);
         } else {
             treeNode.status = "compare";
@@ -311,16 +335,40 @@ export class GinkgoCompare {
     private createElement(parent: ContextLink, element: GinkgoElement): ContextLink {
         if (element == null || element == undefined) return null; // 判断props不能为空否则遍历会取到body容器
 
-        let link: ContextLink = this.mountCreateFragmentLink(parent, element),
-            component = link.component;
+        let link: ContextLink, isExist = false;
+        if (element['serialNumber']) {
+            link = this.linkRefs[element['serialNumber']];
+            if (link) {
+                isExist = true;
+                this.setLinkParent(parent, link);
+            }
+        } else {
+            link = this.mountCreateFragmentLink(parent, element);
+        }
+        let component = link.component;
 
         // 生命周期第一个
-        if (typeof link.props == "object") link.props['component'] = component;
-        component.componentWillMount && component.componentWillMount();
-        this.relevanceElementShould(parent, link);
+        if (typeof link.props == "object") {
+            link.props['component'] = component;
 
-        this.buildChildrenRef(link);
-        this.makeWillPropsLife(component, link.props, {}, "new", true);
+            if (isExist == false) {
+                let serialNumber = this.serialNumber.count + 1;
+                this.serialNumber.count = serialNumber;
+                if (this.linkRefs) {
+                    element['serialNumber'] = serialNumber;
+                    this.linkRefs[serialNumber] = link;
+                    link.serialNumber = serialNumber;
+                }
+            }
+        }
+
+        if (parent) {
+            component.componentWillMount && component.componentWillMount();
+            this.relevanceElementShould(parent, link);
+
+            this.buildChildrenRef(link);
+            this.makeWillPropsLife(component, link.props, {}, "new", true);
+        }
 
         return link;
     }
@@ -475,7 +523,7 @@ export class GinkgoCompare {
         return true;
     }
 
-    private unbindComponent(parent: ContextLink, current: ContextLink) {
+    private unbindComponent(current: ContextLink) {
         GinkgoContainer.unmountComponentByLink(current);
     }
 

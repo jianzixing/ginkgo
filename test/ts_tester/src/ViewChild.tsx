@@ -15,11 +15,11 @@ export default class ViewChild extends Ginkgo.Component {
             <span key={2}>(2)</span>
             <span key={3}>(3)</span>
             <ViewChild4 key={6}/>
-            {/*<ViewChild1>*/}
-            {/*    <ViewChild2 key={"1"}/>*/}
-            {/*    <ViewChild3/>*/}
-            {/*    {this.state.type > 1 ? <ViewChild4/> : undefined}*/}
-            {/*</ViewChild1>*/}
+            <ViewChild1>
+                <ViewChild2 key={"1"}/>
+                <ViewChild3/>
+                {this.state.type > 1 ? <ViewChild4/> : undefined}
+            </ViewChild1>
         </div>
     }
 }
