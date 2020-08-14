@@ -38,7 +38,6 @@ class ViewChild1 extends Ginkgo.Component {
 
 class ViewChild2 extends Ginkgo.Component {
     render(): GinkgoNode {
-        debugger
         return <span {...this.props}>2</span>;
     }
 }

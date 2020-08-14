@@ -91,10 +91,7 @@ export class GinkgoCompare {
 
             if (isContent && component != null) {
                 let el = component.render ? component.render() : undefined;
-                if (component instanceof BindComponent
-                    && parentLink.props
-                    && parentLink.props['attrs']
-                    && (parentLink.props as any)['attrs'].render) {
+                if (component instanceof BindComponent && parentLink.props && (parentLink.props as any).render) {
                     el = callBindRender(parentLink.props as BindComponentElement);
                 }
                 if (el && typeof el != "string") {
@@ -118,21 +115,6 @@ export class GinkgoCompare {
                 }
             }
         }
-
-        // 获取自定义组件的子列表
-        // 已经由_owner做法代替
-        // if (shouldComponentUpdate) {
-        //     let directChildren;
-        //     if (parentLink.props && typeof parentLink.props != "string" && parentLink.props.children) {
-        //         for (let child of parentLink.props.children) {
-        //             if (typeof child == "object" && child['component']) {
-        //                 if (directChildren == null) directChildren = [];
-        //                 directChildren.push(child['component']);
-        //             }
-        //         }
-        //         parentLink.component.children = directChildren;
-        //     }
-        // }
 
         if (!isContent && parentLink && parentLink.children && parentLink.children.length > 0) {
             let directChildren;
@@ -180,26 +162,26 @@ export class GinkgoCompare {
             oldProps = parentLink.oldProps;
             parentLink.oldProps = undefined;
         }
-        component.componentReceiveProps && component.componentReceiveProps(parentLink.props as any, {
-            oldProps: oldProps['attrs'],
+        component.componentReceiveProps && component.componentReceiveProps(component.props, {
+            oldProps: oldProps,
             type: parentLink.status == "new" ? "new" : "mounted"
         });
         if (parentLink.status === "compare") {
-            component.componentCompareProps && component.componentCompareProps(parentLink.props as any, {
-                oldProps: oldProps['attrs'] || {}
+            component.componentCompareProps && component.componentCompareProps(component.props, {
+                oldProps: oldProps
             });
         }
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentDidUpdate && component.componentDidUpdate((parentLink.props as any)['attrs'], component.state);
-                component.componentRenderUpdate && component.componentRenderUpdate((parentLink.props as any)['attrs'], component.state);
+                component.componentDidUpdate && component.componentDidUpdate(component.props, component.state);
+                component.componentRenderUpdate && component.componentRenderUpdate(component.props, component.state);
             }
         }
 
         if (parentLink.status === "new") {
             component.componentDidMount && component.componentDidMount();
-            component.componentRenderUpdate && component.componentRenderUpdate((parentLink.props as any)['attrs'], parentLink.component.state);
+            component.componentRenderUpdate && component.componentRenderUpdate(component.props, parentLink.component.state);
         }
         parentLink.status = "mount";
     }
@@ -335,7 +317,7 @@ export class GinkgoCompare {
     private createElement(parent: ContextLink, element: GinkgoElement): ContextLink {
         if (element == null || element == undefined) return null; // 判断props不能为空否则遍历会取到body容器
 
-        let link: ContextLink, isExist = false;
+        let link: ContextLink;
         if (element['_owner']) {
             link = element['_owner'];
             if (link) {
@@ -348,8 +330,8 @@ export class GinkgoCompare {
 
         // 生命周期第一个
         if (typeof link.props == "object") {
-            link.props['component'] = component;
             element['_owner'] = link;
+            (component as any).props = this.buildComponentProps(link.props);
         }
 
         if (parent) {
@@ -357,7 +339,7 @@ export class GinkgoCompare {
             this.relevanceElementShould(parent, link);
 
             this.buildChildrenRef(link);
-            this.makeWillPropsLife(component, link.props, {}, "new", true);
+            this.makeWillPropsLife(component, component.props, {}, "new", true);
         }
 
         return link;
@@ -426,7 +408,7 @@ export class GinkgoCompare {
     private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
         let component = compareLink.component;
-        let oldProps = compareProps;
+        let oldProps = component.props;
 
         if (compareProps && component && component instanceof TextComponent) {
             /**
@@ -451,9 +433,8 @@ export class GinkgoCompare {
             && typeof compareProps == "object"
             && component
             && props.module == compareProps.module) {
-            props['component'] = component;
             compareLink.props = props;
-            (component as any).props = props;
+            (component as any).props = this.buildComponentProps(props);
 
             this.clearPropsEmptyChildren(props);
             this.buildChildrenRef(compareLink);
@@ -488,8 +469,8 @@ export class GinkgoCompare {
                     isChildrenChanged = true;
                 }
             }
-            this.makeWillPropsLife(component, props, oldProps, "mounted", true);
-            this.makeWillPropsLife(component, props, oldProps, "mounted", false);
+            this.makeWillPropsLife(component, component.props, oldProps, "mounted", true);
+            this.makeWillPropsLife(component, component.props, oldProps, "mounted", false);
 
             if (isChildrenChanged) {
                 component.componentChildChange(newChild, oldChild);
@@ -640,12 +621,12 @@ export class GinkgoCompare {
         let state;
         component['_disableSetStateCall'] = true;
         if (isReceive) {
-            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props['attrs'], {
-                oldProps: oldProps['attrs'], type: type
+            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props, {
+                oldProps: oldProps, type: type
             });
         } else {
-            state = component.componentWillCompareProps && component.componentWillCompareProps(props['attrs'], {
-                oldProps: oldProps['attrs']
+            state = component.componentWillCompareProps && component.componentWillCompareProps(props, {
+                oldProps: oldProps
             })
         }
         component['_disableSetStateCall'] = false;
@@ -657,5 +638,12 @@ export class GinkgoCompare {
             }
             component.state = oldState;
         }
+    }
+
+    private buildComponentProps(props: GinkgoElement): GinkgoElement {
+        let copy = {...props};
+        delete copy['_owner'];
+        delete copy['module'];
+        return copy;
     }
 }

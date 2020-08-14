@@ -202,7 +202,6 @@ export class GinkgoContainer {
                 component = new TextComponent(text as any, holder);
             }
         } else {
-            let attrs = element['attrs'];
             if (typeof module == "string") {
                 holder = {};
                 if (dom != false) {
@@ -214,24 +213,31 @@ export class GinkgoContainer {
                     }
                 }
                 if (ComponentNameMapping[module]) {
-                    component = new ComponentNameMapping[module](attrs, holder);
+                    component = new ComponentNameMapping[module](element, holder);
                 } else {
-                    component = new HTMLComponent(attrs, holder);
+                    component = new HTMLComponent(element as E, holder);
                 }
             } else /*if (typeof module == "function")*/ {
                 if (element instanceof GinkgoComponent) {
                     throw new Error("jsx must by Element , but current is Ginkgo.Component");
                 }
                 if (!module) {
-                    throw new Error("can't create component by " + JSON.stringify(attrs) + " module " + module);
+                    let copy
+                    if (typeof element === "object") {
+                        copy = {...element};
+                        delete copy['_owner'];
+                    } else {
+                        copy = element;
+                    }
+                    throw new Error("can't create component by " + JSON.stringify(copy) + " module " + module);
                 } else {
-                    component = new module(attrs);
+                    component = new module(element);
                 }
             }
         }
 
         // set default props values
-        GinkgoContainer.setDefaultProps(component, typeof element === "object" ? element['attrs'] : undefined);
+        GinkgoContainer.setDefaultProps(component, element);
 
         return component;
     }

@@ -206,6 +206,7 @@ export declare class GinkgoCompare {
      */
     private getComponentRealDom;
     private makeWillPropsLife;
+    private buildComponentProps;
 }
 
 

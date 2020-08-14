@@ -3,11 +3,11 @@ import {GinkgoComponent} from "./GinkgoComponent";
 import {GinkgoContainer} from "./GinkgoContainer";
 
 export function callBindRender(props: BindComponentElement) {
-    if (props && props['attrs']) {
-        let render = props['attrs'].render;
+    if (props && props.render) {
+        let render = props.render;
         if (props.component && props['isBindThis'] != true) {
             render = render.bind(props.component);
-            props['attrs'].render = render;
+            props.render = render;
             props['isBindThis'] = true;
         }
         let result = render();
