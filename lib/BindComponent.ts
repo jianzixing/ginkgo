@@ -1,4 +1,4 @@
-import {GinkgoElement, GinkgoNode} from "./Ginkgo";
+import {GinkgoElement} from "./Ginkgo";
 import {GinkgoComponent} from "./GinkgoComponent";
 import {GinkgoContainer} from "./GinkgoContainer";
 
@@ -10,7 +10,12 @@ export function callBindRender(props: BindComponentElement) {
             props.render = render;
             props['isBindThis'] = true;
         }
-        let result = render();
+        let result;
+        if (props.params) {
+            result = render.apply(render, props.params);
+        } else {
+            result = render();
+        }
         return result;
     }
 }
@@ -18,6 +23,8 @@ export function callBindRender(props: BindComponentElement) {
 export interface BindComponentElement extends GinkgoElement {
     render: Function;
     component?: new () => any;
+    shouldUpdate?: boolean;
+    params?: Array<any>;
 }
 
 export class BindComponent<P extends BindComponentElement = any> extends GinkgoComponent<P> {
@@ -38,5 +45,10 @@ export class BindComponent<P extends BindComponentElement = any> extends GinkgoC
         if (link) {
             GinkgoContainer.forceComponent(link);
         }
+    }
+
+    shouldComponentUpdate(nextProps?: P, nextState?: {}): boolean {
+        if (this.props && this.props.shouldUpdate === false) return false;
+        return true;
     }
 }

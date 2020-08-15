@@ -653,7 +653,7 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
         }
     }
 
-    attribute(key?: string, value?: string): any {
+    attr(key?: string, value?: string): any {
         if (this.dom && key && value) {
             this.dom.setAttribute(key, value);
         }
@@ -667,6 +667,34 @@ export class HTMLComponent<P extends HTMLAttributes = any> extends GinkgoCompone
                 obj[k] = this.dom.getAttribute(k);
             }
             return obj;
+        }
+    }
+
+    addClass(cls: string) {
+        let className = this.dom.className;
+        let arr
+        if (className) {
+            arr = className.split(" ");
+        } else {
+            arr = [];
+        }
+        if (arr.indexOf(cls) == -1) {
+            arr.push(cls);
+            this.dom.className = arr.join(" ");
+        }
+    }
+
+    removeClass(cls: string) {
+        let className = this.dom.className;
+        let arr
+        if (className) {
+            arr = className.split(" ");
+            while (true) {
+                if (arr.indexOf(cls) >= 0) {
+                    arr.splice(arr.indexOf(cls), 1);
+                } else break;
+            }
+            this.dom.className = arr.join(" ");
         }
     }
 

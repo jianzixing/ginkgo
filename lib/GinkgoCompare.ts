@@ -61,7 +61,7 @@ export class GinkgoCompare {
         let isContent = this.isComponentContent(parentLink);
         let component = parentLink.component;
         let shouldComponentUpdate = true;
-        if (parentLink.status == "mount"
+        if ((parentLink.status == "mount" || parentLink.status == "compare")
             && component
             && component.shouldComponentUpdate
             && parentLink !== forceUpdate) {

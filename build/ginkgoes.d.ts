@@ -2,14 +2,16 @@
 export declare function callBindRender(props: BindComponentElement): any;
 export interface BindComponentElement extends GinkgoElement {
     render: Function;
-    bind?: string | string[];
     component?: new () => any;
+    shouldUpdate?: boolean;
+    params?: Array<any>;
 }
 export declare class BindComponent<P extends BindComponentElement = any> extends GinkgoComponent<P> {
     constructor(props?: P, holder?: {});
     append(props: GinkgoElement | GinkgoElement[] | string): void;
     overlap<E extends GinkgoElement>(props?: E[] | E | string | null | undefined): void;
     forceRender(): void;
+    shouldComponentUpdate(nextProps?: P, nextState?: {}): boolean;
 }
 
 /** CSSProperties.d.ts **/
@@ -761,7 +763,9 @@ export declare class HTMLComponent<P extends HTMLAttributes = any> extends Ginkg
     get style(): CSSStyleDeclaration;
     get className(): string;
     set className(name: string);
-    attribute(key?: string, value?: string): any;
+    attr(key?: string, value?: string): any;
+    addClass(cls: string): void;
+    removeClass(cls: string): void;
     html(html?: string): string;
     text(text?: string): string;
     bind(name: string, callback: any, options?: any): void;
