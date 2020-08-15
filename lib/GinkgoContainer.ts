@@ -330,8 +330,7 @@ export class GinkgoContainer {
      * @param component
      * @param props
      */
-    public static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P, dontForceRender: boolean = false) {
-        let link = this.getLinkByComponent(component);
+    public static updateComponentProps<P extends GinkgoElement>(link: ContextLink, props: P, dontForceRender: boolean = false) {
         if (link) {
             let oldProps = link.props;
             link.props = props;

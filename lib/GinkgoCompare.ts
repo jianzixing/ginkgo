@@ -549,7 +549,15 @@ export class GinkgoCompare {
             props: props,
             parent: parent,
             status: "new"
+            // 为了调试是谁修改了props
+            // set props(props) {
+            //     this._props = props;
+            // },
+            // get props() {
+            //     return this._props;
+            // }
         };
+        // link.props = props;
         return link;
     }
 

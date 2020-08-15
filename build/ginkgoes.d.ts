@@ -317,7 +317,7 @@ export declare class GinkgoComponent<P = any | {
      */
     componentRenderUpdate?(props?: P, state?: S): void;
     shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
-    set(props: P | string, propsValue?: any): void;
+    set(props: P | string, propsValue?: any | boolean, dontForceRender?: boolean): void;
     /**
      * 添加元素到子元素
      * @param props
@@ -444,7 +444,7 @@ export declare class GinkgoContainer {
      * @param component
      * @param props
      */
-    static updateComponentProps<P extends GinkgoElement>(component: GinkgoComponent<P>, props: P, dontForceRender?: boolean): void;
+    static updateComponentProps<P extends GinkgoElement>(link: ContextLink, props: P, dontForceRender?: boolean): void;
     /**
      * 通过组件找到link并且将elements添加到link的子元素中
      * @param component
