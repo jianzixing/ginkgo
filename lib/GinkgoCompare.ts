@@ -73,13 +73,16 @@ export class GinkgoCompare {
             && parentLink.props.children
             && parentLink.props.children.length > 0) {
             let directLinkChildren = parentLink.children || [];
-            this.compareSibling(null, directLinkChildren, parentLink.props.children);
+
+            this.compareSibling(null, directLinkChildren, parentLink.props.children, false);
             parentLink.children = directLinkChildren;
 
             let directChildren;
             for (let child of parentLink.children) {
-                if (directChildren == null) directChildren = [];
-                directChildren.push(child.component);
+                if (child) {
+                    if (directChildren == null) directChildren = [];
+                    directChildren.push(child.component);
+                }
             }
             parentLink.component.children = directChildren;
         }
@@ -140,7 +143,7 @@ export class GinkgoCompare {
                         isSkip = true;
                     }
 
-                    if (ch.status == "compare" && isSkip === false) {
+                    if ((ch.status == "compare" || ch.status == "retain") && isSkip === false) {
                         this.compareComponentByLink(parentLink, ch, ch.compareProps);
                     }
                     // 渲染到dom上
@@ -202,11 +205,12 @@ export class GinkgoCompare {
 
     private compareSibling(parent: ContextLink,
                            treeNodes: Array<ContextLink>,
-                           newNodes: Array<GinkgoElement>) {
+                           newNodes: Array<GinkgoElement>,
+                           doUnmount: boolean = true) {
         if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
                 for (let treeNode of treeNodes) {
-                    this.diffRemoveTreeNodes(treeNodes, treeNode);
+                    this.diffRemoveTreeNodes(treeNodes, treeNode, doUnmount);
                 }
             }
         } else {
@@ -234,7 +238,7 @@ export class GinkgoCompare {
                 let index = this.checkTreeNodeRemove(newNodes, treeNode);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
-                    this.diffRemoveTreeNodes(treeNodes, treeNode);
+                    this.diffRemoveTreeNodes(treeNodes, treeNode, doUnmount);
                 }
             }
         }
@@ -292,9 +296,13 @@ export class GinkgoCompare {
         treeNodes.splice(lastIndex + 1, 0, newNode);
     }
 
-    private diffRemoveTreeNodes(treeNodes: Array<ContextLink>, treeNode: ContextLink) {
+    private diffRemoveTreeNodes(treeNodes: Array<ContextLink>, treeNode: ContextLink, doUnmount: boolean = true) {
         treeNodes.splice(treeNodes.indexOf(treeNode), 1);
-        this.unbindComponent(treeNode);
+        if (doUnmount) {
+            this.unbindComponent(treeNode);
+        } else {
+            treeNode.status = "retain";
+        }
     }
 
     protected diffCompareComponent(parent: ContextLink,
@@ -307,6 +315,23 @@ export class GinkgoCompare {
             this.diffRemoveTreeNodes(treeNodes, treeNode);
             this.diffInsertTreeNodes(parent, treeNodes, index - 1, newNode);
         } else {
+            /**
+             * 如果是HTML的子自定义组件则会走compareSibling方法中的diffCompareComponent
+             * 比如
+             * <Custom>
+             *     <Custom2></Custom2>
+             * </Custom>
+             * 走的compareSibling中的diffInsertTreeNodes
+             * <div>
+             *     <Custom2></Custom2>
+             * </div>
+             * 走的compareSibling中的diffCompareComponent
+             * 所以这个时候需要重置一部分属性配置
+             */
+            if (treeNode.status == "retain") {
+                this.relevanceElementShould(parent, treeNode);
+                this.buildChildrenRef(treeNode);
+            }
             treeNode.status = "compare";
             treeNode.compareProps = newNode;
         }
@@ -322,6 +347,9 @@ export class GinkgoCompare {
             link = element['_owner'];
             if (link) {
                 this.setLinkParent(parent, link);
+                if (link.status == "retain") {
+                    link.compareProps = element;
+                }
             }
         } else {
             link = this.mountCreateFragmentLink(parent, element);
@@ -335,11 +363,14 @@ export class GinkgoCompare {
         }
 
         if (parent) {
-            component.componentWillMount && component.componentWillMount();
+            if (link.status === "new") {
+                component.componentWillMount && component.componentWillMount();
+            }
             this.relevanceElementShould(parent, link);
-
             this.buildChildrenRef(link);
-            this.makeWillPropsLife(component, component.props, {}, "new", true);
+            if (link.status === "new") {
+                this.makeWillPropsLife(component, component.props, {}, "new", true);
+            }
         }
 
         return link;
@@ -368,7 +399,9 @@ export class GinkgoCompare {
             let nextDomSiblingCache = nextDomSibling;
             let nextSibling;
             while (true) {
-                if (nextDomSiblingCache && nextDomSiblingCache.status && nextDomSiblingCache.status == "new") {
+                if (nextDomSiblingCache
+                    && nextDomSiblingCache.status
+                    && (nextDomSiblingCache.status == "new" || nextDomSiblingCache.status == "retain")) {
                     nextDomSiblingCache = nextDomSiblingCache.nextSibling;
                     if (nextDomSiblingCache == null) {
                         break;
@@ -494,7 +527,7 @@ export class GinkgoCompare {
         if (component instanceof HTMLComponent && typeof props === "object") {
             link.shouldEl = link.holder.dom as any;
         } else {
-            link.shouldEl = parent.shouldEl;
+            if (parent) link.shouldEl = parent.shouldEl;
         }
     }
 

@@ -32,9 +32,11 @@ export interface ContextLink {
      * 当前组件的状态
      * new      新建组件只创建了实例，如果自定义组件的子元素没有被content引用则永远是new状态
      * mount    已经被挂载到dom中，再成为mount时会开始组件的生命周期
+     * compare  当前组件需要对比属性
+     * retain   已被卸载但是还有可能被重新引用,重新引用需要compare
      *
      */
-    status?: "new" | "mount" | "compare";
+    status?: "new" | "mount" | "compare" | "retain";
 
     parent?: ContextLink;
 
@@ -225,6 +227,7 @@ export class GinkgoContainer {
                     let copy
                     if (typeof element === "object") {
                         copy = {...element};
+                        copy['_owner'] = undefined;
                         delete copy['_owner'];
                     } else {
                         copy = element;
@@ -464,6 +467,7 @@ export class GinkgoContainer {
                     link.holder.dom.parentElement.removeChild(link.holder.dom)
                 }
             }
+            link.status = "retain";
         }
     }
 
