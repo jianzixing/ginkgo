@@ -348,11 +348,11 @@ export class GinkgoCompare {
                  * 引用无效导致component对象不一致,并且将treeNode.props换成新的newNode之后
                  * 子组件引用newNode时才会有_owner属性
                  **/
-                treeNode.oldCompareProps = treeNode.props;
-                if (treeNode.props && treeNode.props['_owner']) {
+                if (treeNode.props && treeNode.props != newNode && treeNode.props['_owner']) {
+                    treeNode.oldCompareProps = treeNode.props;
                     newNode['_owner'] = treeNode.props['_owner'];
+                    treeNode.props = newNode;
                 }
-                treeNode.props = newNode;
             }
         }
     }
@@ -379,7 +379,11 @@ export class GinkgoCompare {
         // 生命周期第一个
         if (typeof link.props == "object") {
             element['_owner'] = link;
-            (component as any).props = this.buildComponentProps(link.props);
+            // retain状态需要判断新旧值所以buildComponentProps由compareComponentByLink
+            // 调用
+            if (link.status != "retain") {
+                (component as any).props = this.buildComponentProps(link.props);
+            }
         }
 
         if (parent) {
@@ -460,11 +464,12 @@ export class GinkgoCompare {
 
     private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
+        let component = compareLink.component;
+        let oldProps = component.props;
+
         if (compareProps === props && compareLink.oldCompareProps) {
             compareProps = compareLink.oldCompareProps;
         }
-        let component = compareLink.component;
-        let oldProps = component.props;
 
         if (compareProps && component && component instanceof TextComponent) {
             /**
