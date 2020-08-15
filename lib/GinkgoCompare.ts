@@ -219,7 +219,7 @@ export class GinkgoCompare {
                 let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
-                    this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index);
+                    this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index, doUnmount);
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
                         this.diffMoveTreeNodes(treeNodes, index, lastIndex);
@@ -309,7 +309,8 @@ export class GinkgoCompare {
                                    treeNodes: Array<ContextLink>,
                                    treeNode: ContextLink,
                                    newNode: GinkgoElement,
-                                   index) {
+                                   index,
+                                   doUnmount: boolean = true) {
         let rebuild = this.compareComponentIsRebuild(treeNode, newNode);
         if (rebuild) {
             this.diffRemoveTreeNodes(treeNodes, treeNode);
@@ -334,6 +335,25 @@ export class GinkgoCompare {
             }
             treeNode.status = "compare";
             treeNode.compareProps = newNode;
+
+            if (doUnmount == false && typeof newNode === "object") {
+                /**
+                 * 假如如下结构A组件被重新对比,在compare()方法第一次compareSibling时
+                 * 旧的props再对比之后变成新的props这时['_owner']属性丢失
+                 * <A>
+                 *     <B/>
+                 *     <C/>
+                 * </A>
+                 * 所以这时需要将旧的['_owner']属性转移到新的中去,否则自定义组件的children的
+                 * 引用无效导致component对象不一致,并且将treeNode.props换成新的newNode之后
+                 * 子组件引用newNode时才会有_owner属性
+                 **/
+                treeNode.oldCompareProps = treeNode.props;
+                if (treeNode.props && treeNode.props['_owner']) {
+                    newNode['_owner'] = treeNode.props['_owner'];
+                }
+                treeNode.props = newNode;
+            }
         }
     }
 
@@ -440,6 +460,9 @@ export class GinkgoCompare {
 
     private compareComponentByLink(parent: ContextLink, compareLink: ContextLink, props: GinkgoElement): boolean {
         let compareProps = compareLink.props;
+        if (compareProps === props && compareLink.oldCompareProps) {
+            compareProps = compareLink.oldCompareProps;
+        }
         let component = compareLink.component;
         let oldProps = component.props;
 
@@ -466,6 +489,9 @@ export class GinkgoCompare {
             && typeof compareProps == "object"
             && component
             && props.module == compareProps.module) {
+            if (compareProps && compareProps['_owner'] && compareProps['_owner'] != props['_owner']) {
+                props['_owner'] = compareLink;
+            }
             compareLink.props = props;
             (component as any).props = this.buildComponentProps(props);
 

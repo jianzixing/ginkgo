@@ -54,12 +54,10 @@ export interface ContextLink {
      * 排序的序号
      */
     mountIndex?: number;
-
-    /**
-     * 用于临时存储使用，使用后立即清除
-     */
+    
     oldProps?: any;
     compareProps?: any;
+    oldCompareProps?: any;
     nextSibling?: ContextLink;
     nextDomSibling?: ContextLink;
 }
