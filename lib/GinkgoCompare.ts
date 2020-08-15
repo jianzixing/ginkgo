@@ -302,6 +302,8 @@ export class GinkgoCompare {
             this.unbindComponent(treeNode);
         } else {
             treeNode.status = "retain";
+            treeNode.nextDomSibling = undefined;
+            treeNode.nextSibling = undefined;
         }
     }
 
@@ -352,6 +354,8 @@ export class GinkgoCompare {
                     treeNode.oldCompareProps = treeNode.props;
                     newNode['_owner'] = treeNode.props['_owner'];
                     treeNode.props = newNode;
+                    treeNode.nextDomSibling = undefined;
+                    treeNode.nextSibling = undefined;
                 }
             }
         }
