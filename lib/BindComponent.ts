@@ -1,5 +1,5 @@
 import {GinkgoElement} from "./Ginkgo";
-import {GinkgoComponent} from "./GinkgoComponent";
+import {ContextUpdate, GinkgoComponent} from "./GinkgoComponent";
 import {GinkgoContainer} from "./GinkgoContainer";
 
 export function callBindRender(props: BindComponentElement) {
@@ -47,7 +47,7 @@ export class BindComponent<P extends BindComponentElement = any> extends GinkgoC
         }
     }
 
-    shouldComponentUpdate(nextProps?: P, nextState?: {}): boolean {
+    shouldComponentUpdate(nextProps?: P, context?: ContextUpdate<P, any>): boolean {
         if (this.props && this.props.shouldUpdate === false) return false;
         return true;
     }

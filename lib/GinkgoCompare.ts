@@ -65,7 +65,10 @@ export class GinkgoCompare {
             && component
             && component.shouldComponentUpdate
             && parentLink !== forceUpdate) {
-            shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, component.state);
+            shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, {
+                oldProps: component.props,
+                state: component.state
+            });
         }
 
         if (isContent
@@ -89,7 +92,10 @@ export class GinkgoCompare {
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, component.state);
+                component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, {
+                    oldProps: component.props,
+                    state: component.state
+                });
             }
 
             if (isContent && component != null) {
@@ -177,14 +183,23 @@ export class GinkgoCompare {
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentDidUpdate && component.componentDidUpdate(component.props, component.state);
-                component.componentRenderUpdate && component.componentRenderUpdate(component.props, component.state);
+                component.componentDidUpdate && component.componentDidUpdate(component.props, {
+                    oldProps: oldProps,
+                    state: component.state
+                });
+                component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
+                    oldProps: oldProps,
+                    state: component.state
+                });
             }
         }
 
         if (parentLink.status === "new") {
             component.componentDidMount && component.componentDidMount();
-            component.componentRenderUpdate && component.componentRenderUpdate(component.props, parentLink.component.state);
+            component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
+                oldProps: oldProps,
+                state: parentLink.component.state
+            });
         }
         parentLink.status = "mount";
     }

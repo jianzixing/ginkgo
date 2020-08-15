@@ -229,12 +229,14 @@ export class QuerySelector {
 
 
 /**GinkgoComponent.d.ts**/
-export declare type ContextUpdate<P> = {
+export declare type ContextUpdate<P, S> = {
     oldProps: P;
+    state?: S;
 };
-export declare type ContextReceive<P> = {
+export declare type ContextReceive<P, S> = {
     oldProps: P;
     type: "new" | "mounted";
+    state?: S;
 };
 export declare class GinkgoComponent<P = any | {
     key?: string | number;
@@ -291,24 +293,24 @@ export declare class GinkgoComponent<P = any | {
      * @param old
      */
     componentChildChange?(children: Array<GinkgoElement>, old: Array<GinkgoElement>): void;
-    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S | void;
-    componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
-    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S | void;
-    componentCompareProps?(props: P, context?: ContextUpdate<P>): void;
+    componentWillReceiveProps?(props: P, context?: ContextReceive<P, S>): S | void;
+    componentReceiveProps?(props: P, context?: ContextReceive<P, S>): void;
+    componentWillCompareProps?(props: P, context?: ContextUpdate<P, S>): S | void;
+    componentCompareProps?(props: P, context?: ContextUpdate<P, S>): void;
     /**
      * 当前组件更新之前调用
      *
      * @param nextProps
      * @param nextState
      */
-    componentWillUpdate?(nextProps?: P, nextState?: S): void;
+    componentWillUpdate?(nextProps?: P, context?: ContextUpdate<P, S>): void;
     /**
      * 当前组件更新之后调用
      *
      * @param props
      * @param state
      */
-    componentDidUpdate?(props?: P, state?: S): void;
+    componentDidUpdate?(props?: P, context?: ContextUpdate<P, S>): void;
     /**
      * 和 componentDidUpdate 相同
      * 区别在于第一次渲染后也会调用这个方法
@@ -317,8 +319,8 @@ export declare class GinkgoComponent<P = any | {
      * @param props
      * @param state
      */
-    componentRenderUpdate?(props?: P, state?: S): void;
-    shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
+    componentRenderUpdate?(props?: P, context?: ContextUpdate<P, S>): void;
+    shouldComponentUpdate?(nextProps?: P, context?: ContextUpdate<P, S>): boolean;
     set(props: P | string, propsValue?: any | boolean, dontForceRender?: boolean): void;
     /**
      * 添加元素到子元素

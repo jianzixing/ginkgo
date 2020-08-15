@@ -2,13 +2,15 @@ import Ginkgo, {GinkgoElement, GinkgoNode, GinkgoContainer, GinkgoTools, RefObje
 import {ContextLink} from "./GinkgoContainer";
 import {QuerySelector} from "./QuerySelector";
 
-export type ContextUpdate<P> = {
-    oldProps: P
+export type ContextUpdate<P, S> = {
+    oldProps: P,
+    state?: S
 };
 
-export type ContextReceive<P> = {
+export type ContextReceive<P, S> = {
     oldProps: P,
-    type: "new" | "mounted"
+    type: "new" | "mounted",
+    state?: S
 }
 
 type QTks = {
@@ -21,7 +23,7 @@ let queueTasks: Array<QTks> = [];
 let willUpdateCall = function (c: GinkgoComponent) {
     try {
         if (c.componentWillUpdate) {
-            c.componentWillUpdate(c.props, c.state)
+            c.componentWillUpdate(c.props, {oldProps: c.props, state: c.state})
         }
     } catch (e) {
         console.error(e);
@@ -30,10 +32,10 @@ let willUpdateCall = function (c: GinkgoComponent) {
 let didUpdateCall = function (c: GinkgoComponent) {
     try {
         if (c.componentDidUpdate) {
-            c.componentDidUpdate(c.props, c.state)
+            c.componentDidUpdate(c.props, {oldProps: c.props, state: c.state})
         }
         if (c.componentRenderUpdate) {
-            c.componentRenderUpdate(c.props, c.state)
+            c.componentRenderUpdate(c.props, {oldProps: c.props, state: c.state})
         }
     } catch (e) {
         console.error(e);
@@ -104,13 +106,13 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      */
     componentChildChange?(children: Array<GinkgoElement>, old: Array<GinkgoElement>): void;
 
-    componentWillReceiveProps?(props: P, context?: ContextReceive<P>): S | void;
+    componentWillReceiveProps?(props: P, context?: ContextReceive<P, S>): S | void;
 
-    componentReceiveProps?(props: P, context?: ContextReceive<P>): void;
+    componentReceiveProps?(props: P, context?: ContextReceive<P, S>): void;
 
-    componentWillCompareProps?(props: P, context?: ContextUpdate<P>): S | void;
+    componentWillCompareProps?(props: P, context?: ContextUpdate<P, S>): S | void;
 
-    componentCompareProps?(props: P, context?: ContextUpdate<P>): void;
+    componentCompareProps?(props: P, context?: ContextUpdate<P, S>): void;
 
     /**
      * 当前组件更新之前调用
@@ -118,7 +120,7 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      * @param nextProps
      * @param nextState
      */
-    componentWillUpdate?(nextProps?: P, nextState?: S): void;
+    componentWillUpdate?(nextProps?: P, context?: ContextUpdate<P, S>): void;
 
     /**
      * 当前组件更新之后调用
@@ -126,7 +128,7 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      * @param props
      * @param state
      */
-    componentDidUpdate?(props?: P, state?: S): void;
+    componentDidUpdate?(props?: P, context?: ContextUpdate<P, S>): void;
 
     /**
      * 和 componentDidUpdate 相同
@@ -136,9 +138,9 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
      * @param props
      * @param state
      */
-    componentRenderUpdate?(props?: P, state?: S): void;
+    componentRenderUpdate?(props?: P, context?: ContextUpdate<P, S>): void;
 
-    shouldComponentUpdate?(nextProps?: P, nextState?: S): boolean;
+    shouldComponentUpdate?(nextProps?: P, context?: ContextUpdate<P, S>): boolean;
 
     set(props: P | string, propsValue?: any | boolean, dontForceRender?: boolean) {
         let link = GinkgoContainer.getLinkByComponent(this);
