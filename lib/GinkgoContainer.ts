@@ -54,7 +54,7 @@ export interface ContextLink {
      * 排序的序号
      */
     mountIndex?: number;
-    
+
     oldProps?: any;
     compareProps?: any;
     oldCompareProps?: any;
@@ -336,8 +336,9 @@ export class GinkgoContainer {
             if (link.status == "mount") {
                 let component = link.component;
                 component['_disableSetStateCall'] = true;
+                let state1, state2;
                 try {
-                    let state1 = link.component.componentWillReceiveProps && link.component.componentWillReceiveProps(props, {
+                    state1 = link.component.componentWillReceiveProps && link.component.componentWillReceiveProps(props, {
                         oldProps: oldProps as any,
                         type: "mounted"
                     });
@@ -349,7 +350,11 @@ export class GinkgoContainer {
                         }
                         component.state = oldState;
                     }
-                    let state2 = link.component.componentWillCompareProps && link.component.componentWillCompareProps(props, {
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
+                try {
+                    state2 = link.component.componentWillCompareProps && link.component.componentWillCompareProps(props, {
                         oldProps: oldProps as any
                     });
                     if (state2) {
@@ -361,7 +366,7 @@ export class GinkgoContainer {
                         component.state = oldState;
                     }
                 } catch (e) {
-                    console.error(e);
+                    if (console && console.error) console.error(e);
                 }
                 component['_disableSetStateCall'] = false;
 
@@ -374,11 +379,15 @@ export class GinkgoContainer {
                         oldProps: oldProps as any,
                         type: "mounted"
                     });
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
+                try {
                     link.component.componentCompareProps && link.component.componentCompareProps(props, {
                         oldProps: oldProps as any
                     });
                 } catch (e) {
-                    console.log(e);
+                    if (console && console.error) console.error(e);
                 }
             }
         }
@@ -431,7 +440,11 @@ export class GinkgoContainer {
         if (link) {
             let component = link.component;
             if (component && component.componentWillUnmount) {
-                component.componentWillUnmount();
+                try {
+                    component.componentWillUnmount();
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
             }
 
             let children = link.children;

@@ -65,10 +65,14 @@ export class GinkgoCompare {
             && component
             && component.shouldComponentUpdate
             && parentLink !== forceUpdate) {
-            shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, {
-                oldProps: component.props,
-                state: component.state
-            });
+            try {
+                shouldComponentUpdate = component.shouldComponentUpdate(parentLink.props as any, {
+                    oldProps: component.props,
+                    state: component.state
+                });
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
         }
 
         if (isContent
@@ -92,10 +96,14 @@ export class GinkgoCompare {
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, {
-                    oldProps: component.props,
-                    state: component.state
-                });
+                try {
+                    component.componentWillUpdate && component.componentWillUpdate(parentLink.props as any, {
+                        oldProps: component.props,
+                        state: component.state
+                    });
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
             }
 
             if (isContent && component != null) {
@@ -145,6 +153,7 @@ export class GinkgoCompare {
                     let isSkip = false;
                     ch.mountIndex = mountIndex;
                     ch.nextSibling = nextCh;
+
                     if (this.skips && this.skips.indexOf(ch) >= 0) {
                         isSkip = true;
                     }
@@ -171,35 +180,59 @@ export class GinkgoCompare {
             oldProps = parentLink.oldProps;
             parentLink.oldProps = undefined;
         }
-        component.componentReceiveProps && component.componentReceiveProps(component.props, {
-            oldProps: oldProps,
-            type: parentLink.status == "new" ? "new" : "mounted"
-        });
-        if (parentLink.status === "compare") {
-            component.componentCompareProps && component.componentCompareProps(component.props, {
-                oldProps: oldProps
+        try {
+            component.componentReceiveProps && component.componentReceiveProps(component.props, {
+                oldProps: oldProps,
+                type: parentLink.status == "new" ? "new" : "mounted"
             });
+        } catch (e) {
+            if (console && console.error) console.error(e);
+        }
+        if (parentLink.status === "compare") {
+            try {
+                component.componentCompareProps && component.componentCompareProps(component.props, {
+                    oldProps: oldProps
+                });
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
         }
 
         if (shouldComponentUpdate) {
             if (isCallUpdate != false && parentLink.status != "new") {
-                component.componentDidUpdate && component.componentDidUpdate(component.props, {
-                    oldProps: oldProps,
-                    state: component.state
-                });
-                component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
-                    oldProps: oldProps,
-                    state: component.state
-                });
+                try {
+                    component.componentDidUpdate && component.componentDidUpdate(component.props, {
+                        oldProps: oldProps,
+                        state: component.state
+                    });
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
+                try {
+                    component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
+                        oldProps: oldProps,
+                        state: component.state
+                    });
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
             }
         }
 
         if (parentLink.status === "new") {
-            component.componentDidMount && component.componentDidMount();
-            component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
-                oldProps: oldProps,
-                state: parentLink.component.state
-            });
+            try {
+                component.componentDidMount && component.componentDidMount();
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
+            try {
+                component.componentRenderUpdate && component.componentRenderUpdate(component.props, {
+                    oldProps: oldProps,
+                    state: parentLink.component.state
+                });
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
         }
         parentLink.status = "mount";
     }
@@ -221,11 +254,11 @@ export class GinkgoCompare {
     private compareSibling(parent: ContextLink,
                            treeNodes: Array<ContextLink>,
                            newNodes: Array<GinkgoElement>,
-                           doUnmount: boolean = true) {
+                           onlyDiff: boolean = true) {
         if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
                 for (let treeNode of treeNodes) {
-                    this.diffRemoveTreeNodes(treeNodes, treeNode, doUnmount);
+                    this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff);
                 }
             }
         } else {
@@ -234,7 +267,7 @@ export class GinkgoCompare {
                 let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
-                    this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index, doUnmount);
+                    this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index, onlyDiff);
                     if (index < lastIndex) {
                         // 将treeNode移动到treeNodes的lastIndex位置，lastIndex之前的元素前移
                         this.diffMoveTreeNodes(treeNodes, index, lastIndex);
@@ -253,7 +286,20 @@ export class GinkgoCompare {
                 let index = this.checkTreeNodeRemove(newNodes, treeNode);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
-                    this.diffRemoveTreeNodes(treeNodes, treeNode, doUnmount);
+                    if (parent && onlyDiff == true && treeNode.parent && treeNode.parent != parent) {
+                        // 此时不允许删除
+                        /**
+                         * 在使用this.props.children时由于children已经生成
+                         * <div><div id='1'>{c[0]}</div><div id='2'>{c[1]}{c[2]}</div></div>
+                         * 变为
+                         * <div><div id='1'>{c[0]}{c[1]}</div><div id='2'>{c[2]}</div></div>
+                         * 这时先对比 div=1 转移dom,再对比 div=2 这时会卸载c[1]
+                         * 导致 div=1 中的组件被卸载,所以这时不再卸载组件
+                         */
+                        this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff, false);
+                    } else {
+                        this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff);
+                    }
                 }
             }
         }
@@ -311,15 +357,18 @@ export class GinkgoCompare {
         treeNodes.splice(lastIndex + 1, 0, newNode);
     }
 
-    private diffRemoveTreeNodes(treeNodes: Array<ContextLink>, treeNode: ContextLink, doUnmount: boolean = true) {
+    private diffRemoveTreeNodes(treeNodes: Array<ContextLink>,
+                                treeNode: ContextLink,
+                                onlyDiff: boolean = true,
+                                unbindComponent: boolean = true) {
         treeNodes.splice(treeNodes.indexOf(treeNode), 1);
-        if (doUnmount) {
-            this.unbindComponent(treeNode);
+        if (onlyDiff) {
+            if (unbindComponent) this.unbindComponent(treeNode);
         } else {
             treeNode.status = "retain";
-            treeNode.nextDomSibling = undefined;
-            treeNode.nextSibling = undefined;
         }
+        treeNode.nextDomSibling = undefined;
+        treeNode.nextSibling = undefined;
     }
 
     protected diffCompareComponent(parent: ContextLink,
@@ -327,7 +376,7 @@ export class GinkgoCompare {
                                    treeNode: ContextLink,
                                    newNode: GinkgoElement,
                                    index,
-                                   doUnmount: boolean = true) {
+                                   onlyDiff: boolean = true) {
         let rebuild = this.compareComponentIsRebuild(treeNode, newNode);
         if (rebuild) {
             this.diffRemoveTreeNodes(treeNodes, treeNode);
@@ -353,7 +402,7 @@ export class GinkgoCompare {
             treeNode.status = "compare";
             treeNode.compareProps = newNode;
 
-            if (doUnmount == false && typeof newNode === "object") {
+            if (onlyDiff == false && typeof newNode === "object") {
                 /**
                  * 假如如下结构A组件被重新对比,在compare()方法第一次compareSibling时
                  * 旧的props再对比之后变成新的props这时['_owner']属性丢失
@@ -407,7 +456,11 @@ export class GinkgoCompare {
 
         if (parent) {
             if (link.status === "new") {
-                component.componentWillMount && component.componentWillMount();
+                try {
+                    component.componentWillMount && component.componentWillMount();
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
             }
             this.relevanceElementShould(parent, link);
             this.buildChildrenRef(link);
@@ -427,7 +480,11 @@ export class GinkgoCompare {
         if (component instanceof HTMLComponent || component instanceof TextComponent) {
             if (parent && parent.shouldEl) {
                 if (nextSibling && nextSibling != link.holder.dom) {
-                    parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
+                    try {
+                        parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
+                    } catch (e) {
+                        debugger
+                    }
                 } else {
                     parent.shouldEl.append(link.holder.dom);
                 }
@@ -556,7 +613,11 @@ export class GinkgoCompare {
             this.makeWillPropsLife(component, component.props, oldProps, "mounted", false);
 
             if (isChildrenChanged) {
-                component.componentChildChange(newChild, oldChild);
+                try {
+                    component.componentChildChange(newChild, oldChild);
+                } catch (e) {
+                    if (console && console.error) console.error(e);
+                }
             }
 
             compareLink.status = "compare";
@@ -712,13 +773,21 @@ export class GinkgoCompare {
         let state;
         component['_disableSetStateCall'] = true;
         if (isReceive) {
-            state = component.componentWillReceiveProps && component.componentWillReceiveProps(props, {
-                oldProps: oldProps, type: type
-            });
+            try {
+                state = component.componentWillReceiveProps && component.componentWillReceiveProps(props, {
+                    oldProps: oldProps, type: type
+                });
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
         } else {
-            state = component.componentWillCompareProps && component.componentWillCompareProps(props, {
-                oldProps: oldProps
-            })
+            try {
+                state = component.componentWillCompareProps && component.componentWillCompareProps(props, {
+                    oldProps: oldProps
+                })
+            } catch (e) {
+                if (console && console.error) console.error(e);
+            }
         }
         component['_disableSetStateCall'] = false;
         if (state) {
