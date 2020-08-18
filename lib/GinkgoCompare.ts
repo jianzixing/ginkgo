@@ -257,7 +257,8 @@ export class GinkgoCompare {
                            onlyDiff: boolean = true) {
         if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
-                for (let treeNode of treeNodes) {
+                let copyTreeNodes = [...treeNodes];
+                for (let treeNode of copyTreeNodes) {
                     this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff);
                 }
             }
