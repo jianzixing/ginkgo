@@ -162,7 +162,7 @@ export class GinkgoCompare {
                         this.compareComponentByLink(parentLink, ch, ch.compareProps);
                     }
                     // 渲染到dom上
-                    this.mountRealDom2Document(parentLink, ch, nextCh, index);
+                    this.mountRealDom2Document(parentLink, ch, nextCh, children, index);
 
                     let props = ch.props;
                     if (typeof props !== "string") {
@@ -473,21 +473,38 @@ export class GinkgoCompare {
         return link;
     }
 
-    private mountRealDom2Document(parent: ContextLink, link: ContextLink, next: ContextLink, index) {
+    private mountRealDom2Document(parent: ContextLink,
+                                  link: ContextLink,
+                                  next: ContextLink,
+                                  children: Array<ContextLink>,
+                                  index) {
         let component = link.component;
         let nextDomSibling = parent.nextDomSibling;
         let nextSibling = this.findNextSibling(parent, nextDomSibling);
+        if (nextDomSibling == null && next) {
+            nextDomSibling = this.findNextSiblingSingle(next);
+            if (nextDomSibling == null && children) {
+                for (let i = children.indexOf(next) + 1; i < children.length; i++) {
+                    if (i >= children.length) break;
+                    nextDomSibling = this.findNextSiblingSingle(children[i]);
+                    if (nextDomSibling != null) break;
+                }
+            }
+        }
 
         if (component instanceof HTMLComponent || component instanceof TextComponent) {
             if (parent && parent.shouldEl) {
                 if (nextSibling && nextSibling != link.holder.dom) {
-                    try {
-                        parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
-                    } catch (e) {
-                        debugger
-                    }
+                    // 判断是否需要重新insertBefore
+                    parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
                 } else {
-                    parent.shouldEl.append(link.holder.dom);
+                    // 判断是否需要重新append
+                    let holderDom = link.holder.dom;
+                    if (holderDom && holderDom.parentElement && holderDom.parentElement === parent.shouldEl) {
+                        // 不需要重新append
+                    } else {
+                        parent.shouldEl.append(link.holder.dom);
+                    }
                 }
             }
         } else {
@@ -521,6 +538,15 @@ export class GinkgoCompare {
                 return this.findNextSibling(parent, nextDomSibling.parent);
             }
         }
+    }
+
+    private findNextSiblingSingle(item: ContextLink) {
+        if (item
+            && item.status
+            && (item.status == "new" || item.status == "retain")) {
+            return null;
+        }
+        return this.getComponentRealDom(item, 0);
     }
 
     private compareComponentIsRebuild(compareLink: ContextLink, props: GinkgoElement) {
