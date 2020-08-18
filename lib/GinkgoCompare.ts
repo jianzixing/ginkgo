@@ -448,9 +448,9 @@ export class GinkgoCompare {
         // 生命周期第一个
         if (typeof link.props == "object") {
             element['_owner'] = link;
-            // retain状态需要判断新旧值所以buildComponentProps由compareComponentByLink
-            // 调用
-            if (link.status != "retain") {
+            // retain和compare状态需要判断新旧值所以buildComponentProps由compareComponentByLink调用
+            // 所有这里只允许new状态才会创建props
+            if (link.status == "new") {
                 (component as any).props = this.buildComponentProps(link.props);
             }
         }
