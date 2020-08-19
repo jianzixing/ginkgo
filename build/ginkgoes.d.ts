@@ -153,7 +153,7 @@ export declare const GinkgoAnimation: typeof anime;
 export declare class GinkgoCompare {
     private readonly parent;
     private elements?;
-    private skips?;
+    private renderMounts?;
     constructor(parent: ContextLink, elements?: GinkgoElement[] | undefined);
     /**
      * important!
@@ -173,7 +173,11 @@ export declare class GinkgoCompare {
      * 触发重新渲染BindComponent的子元素
      */
     force(): void;
-    setSkipCompare(elements: ContextLink[]): void;
+    setRenderCompare(elements: {
+        parent: ContextLink;
+        put?: GinkgoElement;
+        out?: GinkgoElement;
+    }): void;
     /************* 算法开始 ******************/
     private compare;
     private isComponentContent;
@@ -183,11 +187,12 @@ export declare class GinkgoCompare {
     private diffMoveTreeNodes;
     private diffInsertTreeNodes;
     private diffRemoveTreeNodes;
-    protected diffCompareComponent(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink, newNode: GinkgoElement, index: any): void;
+    protected diffCompareComponent(parent: ContextLink, treeNodes: Array<ContextLink>, treeNode: ContextLink, newNode: GinkgoElement, index: any, onlyDiff?: boolean): void;
     /************* 算法结束 ******************/
     private createElement;
     private mountRealDom2Document;
     private findNextSibling;
+    private findNextSiblingSingle;
     private compareComponentIsRebuild;
     private compareComponentByLink;
     private unbindComponent;

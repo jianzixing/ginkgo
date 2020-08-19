@@ -288,7 +288,7 @@ export class GinkgoContainer {
 
         newElements.push(element);
         let compare = new GinkgoCompare(parent, newElements);
-        if (children && children.length > 0) compare.setSkipCompare([...children]);
+        compare.setRenderCompare({parent: parent, put: element});
         compare.mount();
     }
 

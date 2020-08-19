@@ -6,7 +6,7 @@ import {BindComponent, BindComponentElement, callBindRender} from "./BindCompone
 export class GinkgoCompare {
     private readonly parent: ContextLink;
     private elements?: GinkgoElement[];
-    private skips?: ContextLink[];
+    private renderMounts?: { parent: ContextLink, put?: GinkgoElement, out?: GinkgoElement };
 
     constructor(parent: ContextLink,
                 elements?: GinkgoElement[] | undefined) {
@@ -48,8 +48,8 @@ export class GinkgoCompare {
         }
     }
 
-    setSkipCompare(elements: ContextLink[]) {
-        this.skips = elements;
+    setRenderCompare(elements: { parent: ContextLink, put?: GinkgoElement, out?: GinkgoElement }) {
+        this.renderMounts = elements;
     }
 
     /************* 算法开始 ******************/
@@ -150,15 +150,15 @@ export class GinkgoCompare {
                     // ch.props 是上一次对比后的新的props
                     // 所以也包含需要对比的新的子元素列表
                     let mountIndex = index + 1;
-                    let isSkip = false;
                     ch.mountIndex = mountIndex;
                     ch.nextSibling = nextCh;
 
-                    if (this.skips && this.skips.indexOf(ch) >= 0) {
-                        isSkip = true;
+                    let skipNext = false;
+                    if (this.renderMounts && this.renderMounts.parent == parentLink) {
+                        if (this.renderMounts.put != ch.props) skipNext = true;
                     }
 
-                    if ((ch.status == "compare" || ch.status == "retain") && isSkip === false) {
+                    if (skipNext == false && (ch.status == "compare" || ch.status == "retain")) {
                         this.compareComponentByLink(parentLink, ch, ch.compareProps);
                     }
                     // 渲染到dom上
@@ -166,8 +166,7 @@ export class GinkgoCompare {
 
                     let props = ch.props;
                     if (typeof props !== "string") {
-                        if (isSkip) continue;
-                        this.compare(ch, props.children);
+                        if (skipNext == false) this.compare(ch, props.children);
                     } else {
                         ch.status = "mount";
                     }
@@ -255,6 +254,16 @@ export class GinkgoCompare {
                            treeNodes: Array<ContextLink>,
                            newNodes: Array<GinkgoElement>,
                            onlyDiff: boolean = true) {
+        if (this.renderMounts && parent && this.renderMounts.parent == parent) {
+            // 如果需要跳过父则不再使用普通算法,这里只允许加或者减
+            if (this.renderMounts.put) {
+                this.diffInsertTreeNodes(parent, treeNodes, treeNodes.length - 1, this.renderMounts.put);
+            }
+            if (this.renderMounts.out) {
+                this.diffRemoveTreeNodes(treeNodes, this.renderMounts.out, onlyDiff);
+            }
+            return;
+        }
         if (newNodes == null || newNodes.length == 0) {
             if (treeNodes != null) {
                 let copyTreeNodes = [...treeNodes];
