@@ -19,7 +19,9 @@ export interface HttpConfig {
     withCredentials?: boolean;
     headers?: { [key: string]: string };
     timeout?: number;
-    onprogress?: (e: ProgressEvent) => void;
+    onProgress?: (e: ProgressEvent) => void;
+    onFinish?: (e: Event) => void;
+    onFail?: (e: Event, http?: XMLHttpRequest) => void;
 }
 
 function getValue2String(value: any) {
@@ -62,19 +64,26 @@ export class GinkgoHttpRequest {
                 }
             }
             if (config.timeout != null) http.timeout = config.timeout;
-            http.onreadystatechange = function () {
+            http.onreadystatechange = function (e) {
                 if (http.readyState == 4) {
                     if (http.status == 200) {
+
                         resolve(http.responseText);
+                        if (config.onFinish) {
+                            config.onFinish(e);
+                        }
                     } else {
                         reject({statusCode: http.status});
+                        if (config.onFail) {
+                            config.onFail(e, http);
+                        }
                     }
                 }
             };
 
-            if (config.onprogress) {
+            if (config.onProgress) {
                 http.onprogress = function (e) {
-                    config.onprogress(e);
+                    config.onProgress(e);
                 }
             }
 

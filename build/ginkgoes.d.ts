@@ -487,7 +487,7 @@ export declare class GinkgoContainer {
 /**GinkgoHttpRequest.d.ts**/
 export declare type DataType = {
     [key: string]: any;
-} | Blob | BufferSource | FormData | URLSearchParams | ReadableStream<Uint8Array> | string | Document;
+} | Blob | FormData | URLSearchParams | ReadableStream<Uint8Array> | string | Document;
 export interface HttpConfig {
     url?: string;
     method?: "GET" | "POST";
@@ -498,7 +498,9 @@ export interface HttpConfig {
         [key: string]: string;
     };
     timeout?: number;
-    onprogress?: (e: ProgressEvent) => void;
+    onProgress?: (e: ProgressEvent) => void;
+    onFinish?: (e: Event) => void;
+    onFail?: (e: Event, http?: XMLHttpRequest) => void;
 }
 export declare class GinkgoHttpRequest {
     static get(url: string, data?: {
