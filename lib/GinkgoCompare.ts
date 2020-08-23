@@ -295,7 +295,7 @@ export class GinkgoCompare {
 
             let copyTreeNodes = [...treeNodes];
             for (let treeNode of copyTreeNodes) {
-                let index = this.checkTreeNodeRemove(newNodes, treeNode);
+                let index = this.checkTreeNodeRemove(newNodes, treeNode, onlyDiff);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
                     if (parent && onlyDiff == true && treeNode.parent && treeNode.parent != parent) {
@@ -338,7 +338,9 @@ export class GinkgoCompare {
         return -1
     }
 
-    private checkTreeNodeRemove(newNodes: Array<GinkgoElement>, link: ContextLink) {
+    private checkTreeNodeRemove(newNodes: Array<GinkgoElement>,
+                                link: ContextLink,
+                                onlyDiff: boolean = true) {
         if (link.status == "new") {
             return 0;
         }
@@ -346,7 +348,8 @@ export class GinkgoCompare {
         for (let i = 0; i < newNodes.length; i++) {
             let newNode = newNodes[i];
             if (newNode.key == null && props.key == null) {
-                if ((i + 1) === link.mountIndex) {
+                let mountIndex = onlyDiff ? link.mountIndex : link.mountDirectIndex;
+                if ((i + 1) === mountIndex) {
                     return i;
                 }
             }
