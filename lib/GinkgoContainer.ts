@@ -54,6 +54,10 @@ export interface ContextLink {
      * 排序的序号
      */
     mountIndex?: number;
+    /**
+     * 自定义组件直接子类的排序序号
+     */
+    mountDirectIndex?: number;
 
     oldProps?: any;
     compareProps?: any;

@@ -84,12 +84,14 @@ export class GinkgoCompare {
             this.compareSibling(null, directLinkChildren, parentLink.props.children, false);
             parentLink.children = directLinkChildren;
 
-            let directChildren;
+            let directChildren, index = 1;
             for (let child of parentLink.children) {
+                child.mountDirectIndex = index;
                 if (child) {
                     if (directChildren == null) directChildren = [];
                     directChildren.push(child.component);
                 }
+                index++;
             }
             parentLink.component.children = directChildren;
         }
@@ -274,7 +276,7 @@ export class GinkgoCompare {
         } else {
             let lastIndex = 0, i = 1;
             for (let newNode of newNodes) {
-                let index = this.elementIndexTreeNodes(treeNodes, newNode, i);
+                let index = this.elementIndexTreeNodes(treeNodes, newNode, i, onlyDiff);
                 if (index >= 0) {
                     let treeNode = treeNodes[index];
                     this.diffCompareComponent(parent, treeNodes, treeNode, newNode, index, onlyDiff);
@@ -315,11 +317,15 @@ export class GinkgoCompare {
         }
     }
 
-    private elementIndexTreeNodes(treeNodes: Array<ContextLink>, element: GinkgoElement, index) {
+    private elementIndexTreeNodes(treeNodes: Array<ContextLink>,
+                                  element: GinkgoElement,
+                                  index,
+                                  onlyDiff: boolean = true) {
         for (let i = 0; i < treeNodes.length; i++) {
             let props = treeNodes[i].props as GinkgoElement;
             if (element.key == null && props.key == null) {
-                if (index === treeNodes[i].mountIndex) {
+                let mountIndex = onlyDiff ? treeNodes[i].mountIndex : treeNodes[i].mountDirectIndex;
+                if (index === mountIndex) {
                     return i;
                 }
             }
