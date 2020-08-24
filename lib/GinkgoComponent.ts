@@ -241,6 +241,12 @@ export class GinkgoComponent<P = any | { key?: string | number, ref?: refObjectC
         if (this['_disableSetStateCall'] === true) {
             return;
         }
+        if (this['_disableSetStateCallAndDo'] === true) {
+            for (let stateKey in state) {
+                this.state[stateKey] = state[stateKey];
+            }
+            return;
+        }
         if (fn == false && isCallUpdate == null) isCallUpdate = false;
         if (state == null) state = {};
         let task: QTks;

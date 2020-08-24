@@ -475,11 +475,13 @@ export class GinkgoCompare {
 
         if (parent) {
             if (link.status === "new") {
+                component['_disableSetStateCallAndDo'] = true;
                 try {
                     component.componentWillMount && component.componentWillMount();
                 } catch (e) {
                     if (console && console.error) console.error(e);
                 }
+                component['_disableSetStateCallAndDo'] = false;
             }
             this.relevanceElementShould(parent, link);
             this.buildChildrenRef(link);
