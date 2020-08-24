@@ -148,12 +148,12 @@ export class GinkgoCompare {
             if (children && children.length > 0) {
                 for (let index = 0; index < children.length; index++) {
                     let ch = children[index];
-                    let nextCh = index < children.length ? children[index + 1] : undefined;
+                    // let nextCh = index < children.length ? children[index + 1] : undefined;
                     // ch.props 是上一次对比后的新的props
                     // 所以也包含需要对比的新的子元素列表
                     let mountIndex = index + 1;
                     ch.mountIndex = mountIndex;
-                    ch.nextSibling = nextCh;
+                    // ch.nextSibling = nextCh;
 
                     let skipNext = false;
                     if (this.renderMounts && this.renderMounts.parent == parentLink) {
@@ -164,7 +164,7 @@ export class GinkgoCompare {
                         this.compareComponentByLink(parentLink, ch, ch.compareProps);
                     }
                     // 渲染到dom上
-                    this.mountRealDom2Document(parentLink, ch, nextCh, children, index);
+                    this.mountRealDom2Document(parentLink, ch, children, index);
 
                     let props = ch.props;
                     if (typeof props !== "string") {
@@ -294,11 +294,15 @@ export class GinkgoCompare {
             }
 
             let copyTreeNodes = [...treeNodes];
-            for (let treeNode of copyTreeNodes) {
-                let index = this.checkTreeNodeRemove(newNodes, treeNode, onlyDiff);
+            let removeIndex = 0, lastNextTreeNode: ContextLink;
+            while (true) {
+                if (copyTreeNodes.length <= removeIndex) break;
+
+                let nextTreeNode = copyTreeNodes[removeIndex];
+                let index = this.checkTreeNodeRemove(newNodes, nextTreeNode, onlyDiff);
                 if (index == -1) {
                     // 在 treeNodes 中，删除 treeNode
-                    if (parent && onlyDiff == true && treeNode.parent && treeNode.parent != parent) {
+                    if (parent && onlyDiff == true && nextTreeNode.parent && nextTreeNode.parent != parent) {
                         // 此时不允许删除
                         /**
                          * 在使用this.props.children时由于children已经生成
@@ -308,11 +312,18 @@ export class GinkgoCompare {
                          * 这时先对比 div=1 转移dom,再对比 div=2 这时会卸载c[1]
                          * 导致 div=1 中的组件被卸载,所以这时不再卸载组件
                          */
-                        this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff, false);
+                        this.diffRemoveTreeNodes(treeNodes, nextTreeNode, onlyDiff, false);
                     } else {
-                        this.diffRemoveTreeNodes(treeNodes, treeNode, onlyDiff);
+                        this.diffRemoveTreeNodes(treeNodes, nextTreeNode, onlyDiff);
+                    }
+                } else {
+                    // 设置好同级引用
+                    if (onlyDiff == true) {
+                        if (lastNextTreeNode) lastNextTreeNode.nextSibling = nextTreeNode;
+                        lastNextTreeNode = nextTreeNode;
                     }
                 }
+                removeIndex++;
             }
         }
     }
@@ -495,20 +506,19 @@ export class GinkgoCompare {
 
     private mountRealDom2Document(parent: ContextLink,
                                   link: ContextLink,
-                                  next: ContextLink,
                                   children: Array<ContextLink>,
                                   index) {
+        let next = link.nextSibling;
         let component = link.component;
         let nextDomSibling = parent.nextDomSibling;
         let nextSibling = this.findNextSibling(parent, nextDomSibling);
         if (nextDomSibling == null && next) {
-            nextDomSibling = this.findNextSiblingSingle(next);
-            if (nextDomSibling == null && children) {
-                for (let i = children.indexOf(next) + 1; i < children.length; i++) {
-                    if (i >= children.length) break;
-                    nextDomSibling = this.findNextSiblingSingle(children[i]);
-                    if (nextDomSibling != null) break;
-                }
+            let nextCache = next;
+            while (true) {
+                nextDomSibling = this.findNextSiblingSingle(nextCache);
+                if (nextDomSibling != null) break;
+                nextCache = nextCache.nextSibling;
+                if (nextCache == null) break;
             }
         }
 
@@ -516,7 +526,11 @@ export class GinkgoCompare {
             if (parent && parent.shouldEl) {
                 if (nextSibling && nextSibling != link.holder.dom) {
                     // 判断是否需要重新insertBefore
-                    parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
+                    try {
+                        parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
+                    } catch (e) {
+                        debugger
+                    }
                 } else {
                     // 判断是否需要重新append
                     let holderDom = link.holder.dom;
@@ -774,37 +788,43 @@ export class GinkgoCompare {
     /**
      * 获取自定义组件的第一个或者最后一个真实dom
      * @param child
-     * @param type 0获取第一个  1获取最后一个 2获取第一层列表
+     * @param type 0获取第一个  1获取最后一个 2获取第一层列表 3判断当前是否是dom元素
      */
     private getComponentRealDom(link: ContextLink, type: number) {
         if (link) {
-            if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
-                return type == 2 ? [link.holder.dom] : link.holder.dom;
+            if (type == 3) {
+                if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
+                    return link.holder.dom;
+                }
             } else {
-                if (link.content) {
-                    return this.getComponentRealDom(link.content, type);
-                } else if (link.children) {
-                    let children = link.children;
-                    if (type == 0) {
-                        for (let item of children) {
-                            let dom = this.getComponentRealDom(item, type);
-                            if (dom) return dom;
+                if (link.component instanceof HTMLComponent || link.component instanceof TextComponent) {
+                    return type == 2 ? [link.holder.dom] : link.holder.dom;
+                } else {
+                    if (link.content) {
+                        return this.getComponentRealDom(link.content, type);
+                    } else if (link.children) {
+                        let children = link.children;
+                        if (type == 0) {
+                            for (let item of children) {
+                                let dom = this.getComponentRealDom(item, type);
+                                if (dom) return dom;
+                            }
                         }
-                    }
-                    if (type == 1) {
-                        for (let i = children.length - 1; i >= 0; i--) {
-                            let item = children[i];
-                            let dom = this.getComponentRealDom(item, type);
-                            if (dom) return dom;
+                        if (type == 1) {
+                            for (let i = children.length - 1; i >= 0; i--) {
+                                let item = children[i];
+                                let dom = this.getComponentRealDom(item, type);
+                                if (dom) return dom;
+                            }
                         }
-                    }
-                    if (type == 2) {
-                        let arr = [];
-                        for (let item of children) {
-                            let dom = this.getComponentRealDom(item, type);
-                            if (dom) arr.push(dom);
+                        if (type == 2) {
+                            let arr = [];
+                            for (let item of children) {
+                                let dom = this.getComponentRealDom(item, type);
+                                if (dom) arr.push(dom);
+                            }
+                            return arr;
                         }
-                        return arr;
                     }
                 }
             }

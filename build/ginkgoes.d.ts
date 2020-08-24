@@ -209,7 +209,7 @@ export declare class GinkgoCompare {
     /**
      * 获取自定义组件的第一个或者最后一个真实dom
      * @param child
-     * @param type 0获取第一个  1获取最后一个 2获取第一层列表
+     * @param type 0获取第一个  1获取最后一个 2获取第一层列表 3判断当前是否是dom元素
      */
     private getComponentRealDom;
     private makeWillPropsLife;
