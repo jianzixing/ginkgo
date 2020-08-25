@@ -512,11 +512,11 @@ export class GinkgoCompare {
         let component = link.component;
         let nextDomSibling = parent.nextDomSibling;
         let nextSibling = this.findNextSibling(parent, nextDomSibling);
-        if (nextDomSibling == null && next) {
+        if (nextSibling == null && next) {
             let nextCache = next;
             while (true) {
-                nextDomSibling = this.findNextSiblingSingle(nextCache);
-                if (nextDomSibling != null) break;
+                nextSibling = this.findNextSiblingSingle(nextCache);
+                if (nextSibling != null) break;
                 nextCache = nextCache.nextSibling;
                 if (nextCache == null) break;
             }
@@ -526,11 +526,7 @@ export class GinkgoCompare {
             if (parent && parent.shouldEl) {
                 if (nextSibling && nextSibling != link.holder.dom) {
                     // 判断是否需要重新insertBefore
-                    try {
-                        parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
-                    } catch (e) {
-                        debugger
-                    }
+                    parent.shouldEl.insertBefore(link.holder.dom, nextSibling);
                 } else {
                     // 判断是否需要重新append
                     let holderDom = link.holder.dom;
