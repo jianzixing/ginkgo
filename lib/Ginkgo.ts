@@ -337,6 +337,6 @@ export default class Ginkgo {
     }
 }
 
-console.log("%c%c北京简子行科技有限公司%c https://www.jianzixing.com.cn", "line-height:20px;",
+console.log("%c%cYang Ankang provides technical support , Email yak1992@foxmail.com", "line-height:20px;",
     "line-height:20px;padding:4px 9px 4px 9px;background:#0B61A4;color:#fff;font-size:13px;margin-right:15px;border-radius:6px",
     "color:#333333;line-height:20px;font-size:13px;");
